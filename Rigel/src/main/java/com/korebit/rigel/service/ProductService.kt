@@ -1,7 +1,7 @@
 package com.korebit.rigel.service
 
-import com.korebit.rigel.dto.ProductDTO
-import com.korebit.rigel.dto.request.Response
+import com.korebit.rigel.request.ProductRequest
+import com.korebit.rigel.response.Response
 import com.korebit.rigel.model.Product
 import com.korebit.rigel.model.Supplier
 import com.korebit.rigel.model.extra.ProductSupplier
@@ -15,13 +15,13 @@ class ProductService(
     private val supplierRepository: SupplierRepository
 ) {
 
-    fun getAllProducts(): List<ProductDTO?>? {
+    fun getAllProducts(): List<ProductRequest?>? {
         val products = productRepository.findAll()
 
-        return products?.map { product -> ProductDTO.Companion.toDTO(product) }
+        return products?.map { product -> ProductRequest.Companion.toRequest(product) }
     }
 
-    fun saveProduct(product: ProductDTO, supplierName: String, supplierPrice: Double): Response {
+    fun saveProduct(product: ProductRequest, supplierName: String, supplierPrice: Double): Response {
         val supplier: Supplier = supplierRepository.findSupplierByName(supplierName) ?: return Response(
             success = false,
             message = "Supplier with name $supplierName not found.",

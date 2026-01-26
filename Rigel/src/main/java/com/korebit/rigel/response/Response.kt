@@ -1,4 +1,4 @@
-package com.korebit.rigel.dto.request
+package com.korebit.rigel.response
 
 data class Response(
     val message: String,
