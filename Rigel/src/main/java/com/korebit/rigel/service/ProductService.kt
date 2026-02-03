@@ -15,10 +15,10 @@ class ProductService(
     private val supplierRepository: SupplierRepository
 ) {
 
-    fun getAllProducts(): List<ProductRequest?>? {
+    fun getAllProducts(): List<ProductRequest?> {
         val products = productRepository.findAll()
 
-        return products?.map { product -> ProductRequest.Companion.toRequest(product) }
+        return products.map { product -> ProductRequest.Companion.toRequest(product) }
     }
 
     fun saveProduct(product: ProductRequest, supplierName: String, supplierPrice: Double): Response {

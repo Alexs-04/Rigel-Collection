@@ -7,6 +7,5 @@ import org.springframework.stereotype.Repository
 @Repository
 interface ConsumerRepository : JpaRepository<Consumer, Long> {
     fun findByEmail(email: String): Consumer?
-   // fun findByToken(token: String): Consumer?
     fun existsByUsername(username: String): Boolean
 }

@@ -1,11 +1,9 @@
 package com.korebit.rigel.repository;
 
 import com.korebit.rigel.model.Product;
-import jakarta.annotation.Nonnull;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
 import java.util.Optional;
 
 @Repository
