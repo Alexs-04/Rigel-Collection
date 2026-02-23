@@ -1,7 +1,7 @@
 package com.korebit.rigel.util
 
-import com.korebit.rigel.model.Consumer
-import com.korebit.rigel.model.Token
+import com.korebit.rigel.model.beans.Consumer
+import com.korebit.rigel.model.beans.Token
 import com.korebit.rigel.repository.TokenRepository
 import org.springframework.stereotype.Component
 

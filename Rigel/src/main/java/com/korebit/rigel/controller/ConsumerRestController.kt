@@ -1,7 +1,7 @@
 package com.korebit.rigel.controller
 
-import com.korebit.rigel.request.ConsumerRequest
-import com.korebit.rigel.response.Response
+import com.korebit.rigel.dto.ConsumerRequest
+import com.korebit.rigel.dto.response.Response
 import com.korebit.rigel.service.ConsumerService
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody

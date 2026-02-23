@@ -1,6 +1,6 @@
-package com.korebit.rigel.service;
+package com.korebit.rigel.service.jwt;
 
-import com.korebit.rigel.model.Consumer;
+import com.korebit.rigel.model.beans.Consumer;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;

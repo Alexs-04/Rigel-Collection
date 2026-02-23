@@ -1,6 +1,6 @@
 package com.korebit.rigel.repository
 
-import com.korebit.rigel.model.Token
+import com.korebit.rigel.model.beans.Token
 import org.springframework.data.jpa.repository.JpaRepository
 
 interface TokenRepository : JpaRepository<Token, Long> {

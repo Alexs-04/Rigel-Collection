@@ -1,6 +1,6 @@
 package com.korebit.rigel.config;
 
-import com.korebit.rigel.model.Consumer;
+import com.korebit.rigel.model.beans.Consumer;
 import com.korebit.rigel.repository.ConsumerRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

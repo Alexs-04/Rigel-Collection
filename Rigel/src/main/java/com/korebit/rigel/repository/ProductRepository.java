@@ -1,6 +1,6 @@
 package com.korebit.rigel.repository;
 
-import com.korebit.rigel.model.Product;
+import com.korebit.rigel.model.beans.Product;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

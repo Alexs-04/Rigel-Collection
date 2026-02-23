@@ -1,4 +1,4 @@
-package com.korebit.rigel.response;
+package com.korebit.rigel.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

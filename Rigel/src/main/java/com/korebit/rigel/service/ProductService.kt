@@ -1,9 +1,9 @@
 package com.korebit.rigel.service
 
-import com.korebit.rigel.request.ProductRequest
-import com.korebit.rigel.response.Response
-import com.korebit.rigel.model.Product
-import com.korebit.rigel.model.Supplier
+import com.korebit.rigel.dto.ProductRequest
+import com.korebit.rigel.dto.response.Response
+import com.korebit.rigel.model.beans.Product
+import com.korebit.rigel.model.beans.Supplier
 import com.korebit.rigel.model.extra.ProductSupplier
 import com.korebit.rigel.repository.ProductRepository
 import com.korebit.rigel.repository.SupplierRepository

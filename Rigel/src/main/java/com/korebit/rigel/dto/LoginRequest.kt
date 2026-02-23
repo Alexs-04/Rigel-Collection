@@ -1,4 +1,4 @@
-package com.korebit.rigel.request
+package com.korebit.rigel.dto
 
 import java.io.Serializable
 

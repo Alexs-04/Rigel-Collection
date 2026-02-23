@@ -1,11 +1,12 @@
 package com.korebit.rigel.service
 
-import com.korebit.rigel.model.Consumer
-import com.korebit.rigel.model.Token
+import com.korebit.rigel.model.beans.Consumer
+import com.korebit.rigel.model.beans.Token
 import com.korebit.rigel.repository.ConsumerRepository
 import com.korebit.rigel.repository.TokenRepository
-import com.korebit.rigel.request.LoginRequest
-import com.korebit.rigel.response.TokenResponse
+import com.korebit.rigel.dto.LoginRequest
+import com.korebit.rigel.dto.response.TokenResponse
+import com.korebit.rigel.service.jwt.JwtService
 import com.korebit.rigel.util.SaveConsumerToken
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken

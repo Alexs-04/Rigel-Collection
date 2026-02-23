@@ -1,7 +1,7 @@
 package com.korebit.rigel.model.extra
 
-import com.korebit.rigel.model.Product
-import com.korebit.rigel.model.Supplier
+import com.korebit.rigel.model.beans.Product
+import com.korebit.rigel.model.beans.Supplier
 import jakarta.persistence.*
 import java.io.Serializable
 import java.math.BigDecimal

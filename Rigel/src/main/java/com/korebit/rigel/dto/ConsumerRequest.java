@@ -1,6 +1,6 @@
-package com.korebit.rigel.request;
+package com.korebit.rigel.dto;
 
-import com.korebit.rigel.model.Consumer;
+import com.korebit.rigel.model.beans.Consumer;
 import com.korebit.rigel.model.enums.Role;
 
 import java.io.Serializable;

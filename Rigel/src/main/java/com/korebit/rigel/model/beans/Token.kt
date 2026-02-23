@@ -1,4 +1,4 @@
-package com.korebit.rigel.model
+package com.korebit.rigel.model.beans
 
 import com.korebit.rigel.model.enums.TokenType
 import jakarta.persistence.Column

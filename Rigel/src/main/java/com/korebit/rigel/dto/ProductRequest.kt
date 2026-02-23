@@ -1,6 +1,6 @@
-package com.korebit.rigel.request
+package com.korebit.rigel.dto
 
-import com.korebit.rigel.model.Product
+import com.korebit.rigel.model.beans.Product
 import java.io.Serializable
 
 data class ProductRequest(
