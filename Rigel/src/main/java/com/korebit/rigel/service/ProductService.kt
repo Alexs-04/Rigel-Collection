@@ -1,7 +1,8 @@
 package com.korebit.rigel.service
 
-import com.korebit.rigel.dto.ProductRequest
+import com.korebit.rigel.dto.ProductDto
 import com.korebit.rigel.dto.response.Response
+import com.korebit.rigel.exception.EntityNotFundException
 import com.korebit.rigel.model.beans.Product
 import com.korebit.rigel.model.beans.Supplier
 import com.korebit.rigel.model.extra.ProductSupplier
@@ -15,18 +16,15 @@ class ProductService(
     private val supplierRepository: SupplierRepository
 ) {
 
-    fun getAllProducts(): List<ProductRequest?> {
+    fun getAllProducts(): List<ProductDto?> {
         val products = productRepository.findAll()
 
-        return products.map { product -> ProductRequest.Companion.toRequest(product) }
+        return products.map { product -> ProductDto.Companion.toRequest(product) }
     }
 
-    fun saveProduct(product: ProductRequest, supplierName: String, supplierPrice: Double): Response {
-        val supplier: Supplier = supplierRepository.findSupplierByName(supplierName) ?: return Response(
-            success = false,
-            message = "Supplier with name $supplierName not found.",
-            status = 400
-        )
+    fun saveProduct(product: ProductDto, supplierName: String, supplierPrice: Double): Response {
+        val supplier: Supplier = supplierRepository.findSupplierByName(supplierName)
+            ?: throw EntityNotFundException("Supplier not found")
 
         val newProduct = Product(
             name = product.name,
@@ -52,5 +50,13 @@ class ProductService(
             message = "Product saved successfully.",
             status = 200
         )
+    }
+
+    fun findProductByName(name: String): ProductDto {
+        val product = productRepository
+            .findByName(name)
+            .orElseThrow { EntityNotFundException("Product not found") }
+
+        return ProductDto.Companion.toRequest(product)
     }
 }

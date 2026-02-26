@@ -1,6 +1,6 @@
 package com.korebit.rigel.controller.auth
 
-import com.korebit.rigel.dto.LoginRequest
+import com.korebit.rigel.dto.request.LoginRequest
 import com.korebit.rigel.dto.response.Response
 import com.korebit.rigel.service.AuthService
 import org.springframework.http.ResponseEntity

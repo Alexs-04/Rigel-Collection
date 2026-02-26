@@ -5,7 +5,7 @@ import com.korebit.rigel.model.enums.Role;
 
 import java.io.Serializable;
 
-public record ConsumerRequest(
+public record ConsumerDto(
         String name,
         Role role,
         String username,
@@ -13,8 +13,8 @@ public record ConsumerRequest(
         String email,
         String phoneNumber
 ) implements Serializable {
-    public static ConsumerRequest toRequest(Consumer consumer) {
-        return new ConsumerRequest(
+    public static ConsumerDto toRequest(Consumer consumer) {
+        return new ConsumerDto(
                 consumer.getName(),
                 consumer.getRole(),
                 consumer.getUsername(),

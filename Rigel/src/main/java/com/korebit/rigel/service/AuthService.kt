@@ -4,8 +4,9 @@ import com.korebit.rigel.model.beans.Consumer
 import com.korebit.rigel.model.beans.Token
 import com.korebit.rigel.repository.ConsumerRepository
 import com.korebit.rigel.repository.TokenRepository
-import com.korebit.rigel.dto.LoginRequest
+import com.korebit.rigel.dto.request.LoginRequest
 import com.korebit.rigel.dto.response.TokenResponse
+import com.korebit.rigel.exception.EntityNotFundException
 import com.korebit.rigel.service.jwt.JwtService
 import com.korebit.rigel.util.SaveConsumerToken
 import org.springframework.security.authentication.AuthenticationManager
@@ -30,7 +31,7 @@ class AuthService(
         )
 
         val consumer = consumerRepository.findByEmail(request.email ?: "")
-            ?: throw RuntimeException("No consumer found")
+            ?: throw EntityNotFundException("No consumer found")
         val jwtToken = jwtService.generateToken(consumer)
         val refreshToken = jwtService.generateRefreshToken(consumer)
 
@@ -43,7 +44,7 @@ class AuthService(
         val validConsumerTokens: MutableList<Token> = tokenRepository
             .findAllValidIsFalseOrRevokedIsFalseByConsumerId(
                 consumer.id
-                    ?: throw RuntimeException("consumerId is null")
+                    ?: throw IllegalArgumentException("consumerId is null")
             )
 
         if (!validConsumerTokens.isEmpty()) {

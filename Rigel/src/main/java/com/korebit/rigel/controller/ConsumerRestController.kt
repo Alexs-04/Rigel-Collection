@@ -1,6 +1,6 @@
 package com.korebit.rigel.controller
 
-import com.korebit.rigel.dto.ConsumerRequest
+import com.korebit.rigel.dto.ConsumerDto
 import com.korebit.rigel.dto.response.Response
 import com.korebit.rigel.service.ConsumerService
 import org.springframework.web.bind.annotation.PostMapping
@@ -14,7 +14,7 @@ class ConsumerRestController(
     private val consumerService: ConsumerService,
 ) {
     @PostMapping("/add")
-    fun registerConsumer(@RequestBody consumer : ConsumerRequest) : Response {
+    fun registerConsumer(@RequestBody consumer : ConsumerDto) : Response {
         val aux = consumerService.saveConsumer(consumer)
 
         return Response(

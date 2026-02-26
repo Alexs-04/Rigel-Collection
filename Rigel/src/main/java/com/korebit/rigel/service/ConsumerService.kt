@@ -1,6 +1,6 @@
 package com.korebit.rigel.service
 
-import com.korebit.rigel.dto.ConsumerRequest
+import com.korebit.rigel.dto.ConsumerDto
 import com.korebit.rigel.model.beans.Consumer
 import com.korebit.rigel.repository.ConsumerRepository
 import com.korebit.rigel.dto.response.TokenResponse
@@ -17,19 +17,19 @@ class ConsumerService(
     private val saveConsumerToken: SaveConsumerToken
 ) {
 
-    fun saveConsumer(consumerRequest: ConsumerRequest): TokenResponse {
+    fun saveConsumer(consumerDto: ConsumerDto): TokenResponse {
 
-        if (consumerRepository.existsByUsername(consumerRequest.username)) {
+        if (consumerRepository.existsByUsername(consumerDto.username)) {
             throw IllegalArgumentException("Username already exists")
         }
 
         val consumer = Consumer(
-            name = consumerRequest.name,
-            role = consumerRequest.role,
-            username = consumerRequest.username,
-            password = passwordEncoder.encode(consumerRequest.password),
-            email = consumerRequest.email,
-            phoneNumber = consumerRequest.phoneNumber
+            name = consumerDto.name,
+            role = consumerDto.role,
+            username = consumerDto.username,
+            password = passwordEncoder.encode(consumerDto.password),
+            email = consumerDto.email,
+            phoneNumber = consumerDto.phoneNumber
         )
 
         consumerRepository.save(consumer)

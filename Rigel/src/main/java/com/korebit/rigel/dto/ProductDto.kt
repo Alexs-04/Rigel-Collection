@@ -3,7 +3,7 @@ package com.korebit.rigel.dto
 import com.korebit.rigel.model.beans.Product
 import java.io.Serializable
 
-data class ProductRequest(
+data class ProductDto(
     val name: String,
     val description: String,
     val price: Double,
@@ -11,8 +11,8 @@ data class ProductRequest(
     val imageUrl: String,
 ) : Serializable {
     object Companion {
-        fun toRequest(product: Product): ProductRequest {
-            return ProductRequest(
+        fun toRequest(product: Product): ProductDto {
+            return ProductDto(
                 name = product.name,
                 description = product.description,
                 price = product.price.toDouble(),
