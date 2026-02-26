@@ -1,8 +1,16 @@
-package com.korebit.rigel.model
+package com.korebit.rigel.model.beans
 
 import com.korebit.rigel.model.enums.Category
 import com.korebit.rigel.model.extra.ProductSupplier
-import jakarta.persistence.*
+import jakarta.persistence.CascadeType
+import jakarta.persistence.Column
+import jakarta.persistence.Entity
+import jakarta.persistence.EnumType
+import jakarta.persistence.Enumerated
+import jakarta.persistence.GeneratedValue
+import jakarta.persistence.GenerationType
+import jakarta.persistence.Id
+import jakarta.persistence.OneToMany
 import java.io.Serializable
 import java.math.BigDecimal
 

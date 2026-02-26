@@ -1,9 +1,10 @@
 package com.korebit.rigel.service
 
-import com.korebit.rigel.dto.ProductDTO
-import com.korebit.rigel.dto.request.Response
-import com.korebit.rigel.model.Product
-import com.korebit.rigel.model.Supplier
+import com.korebit.rigel.dto.ProductDto
+import com.korebit.rigel.dto.response.Response
+import com.korebit.rigel.exception.EntityNotFundException
+import com.korebit.rigel.model.beans.Product
+import com.korebit.rigel.model.beans.Supplier
 import com.korebit.rigel.model.extra.ProductSupplier
 import com.korebit.rigel.repository.ProductRepository
 import com.korebit.rigel.repository.SupplierRepository
@@ -15,18 +16,15 @@ class ProductService(
     private val supplierRepository: SupplierRepository
 ) {
 
-    fun getAllProducts(): List<ProductDTO?>? {
+    fun getAllProducts(): List<ProductDto?> {
         val products = productRepository.findAll()
 
-        return products?.map { product -> ProductDTO.Companion.toDTO(product) }
+        return products.map { product -> ProductDto.Companion.toRequest(product) }
     }
 
-    fun saveProduct(product: ProductDTO, supplierName: String, supplierPrice: Double): Response {
-        val supplier: Supplier = supplierRepository.findSupplierByName(supplierName) ?: return Response(
-            success = false,
-            message = "Supplier with name $supplierName not found.",
-            status = 400
-        )
+    fun saveProduct(product: ProductDto, supplierName: String, supplierPrice: Double): Response {
+        val supplier: Supplier = supplierRepository.findSupplierByName(supplierName)
+            ?: throw EntityNotFundException("Supplier not found")
 
         val newProduct = Product(
             name = product.name,
@@ -52,5 +50,13 @@ class ProductService(
             message = "Product saved successfully.",
             status = 200
         )
+    }
+
+    fun findProductByName(name: String): ProductDto {
+        val product = productRepository
+            .findByName(name)
+            .orElseThrow { EntityNotFundException("Product not found") }
+
+        return ProductDto.Companion.toRequest(product)
     }
 }
