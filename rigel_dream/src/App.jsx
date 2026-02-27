@@ -1,34 +1,56 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { useContext } from 'react'
 import './App.css'
+import LoginForm from './components/LoginForm'
+import Sidebar from './layout/Sidebar'
+import Topbar from './layout/Topbar'
+import Dashboard from './pages/Dashboard'
+import Products from './pages/Products'
+import Suppliers from './pages/Suppliers'
+import POS from './pages/POS'
+import Settings from './pages/Settings'
+import { AuthContext } from './context/AuthContext'
 
-function App() {
-  const [count, setCount] = useState(0)
+function AppLayout({ children }) {
+  return (
+    <div className="app-flex">
+      <Sidebar />
+      <div className="main">
+        <Topbar />
+        <main className="content">{children}</main>
+      </div>
+    </div>
+  )
+}
+
+function AppRoutes() {
+  const { user } = useContext(AuthContext)
+
+  if (!user) {
+    return <Navigate to="/login" replace />
+  }
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    <AppLayout>
+      <Routes>
+        <Route path="/" element={<Dashboard />} />
+        <Route path="/products" element={<Products />} />
+        <Route path="/suppliers" element={<Suppliers />} />
+        <Route path="/pos" element={<POS />} />
+        <Route path="/settings" element={<Settings />} />
+      </Routes>
+    </AppLayout>
+  )
+}
+
+function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/login" element={<LoginForm />} />
+        <Route path="/*" element={<AppRoutes />} />
+      </Routes>
+    </BrowserRouter>
   )
 }
 

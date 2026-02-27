@@ -1,7 +1,7 @@
 package com.korebit.rigel.controller.auth
 
 import com.korebit.rigel.dto.request.LoginRequest
-import com.korebit.rigel.dto.response.Response
+import com.korebit.rigel.dto.response.TokenResponse
 import com.korebit.rigel.service.AuthService
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PostMapping
@@ -15,15 +15,9 @@ class AuthRestController(
     private val authService: AuthService
 ) {
     @PostMapping("/login")
-    fun tryLogin(@RequestBody request: LoginRequest): ResponseEntity<Response> {
-        authService.login(request)
+    fun tryLogin(@RequestBody request: LoginRequest): ResponseEntity<TokenResponse> {
+        val tokens = authService.login(request)
 
-        return ResponseEntity.ok(
-            Response(
-                "Success login",
-                200,
-                true
-            )
-        )
+        return ResponseEntity.ok(tokens)
     }
 }

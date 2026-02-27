@@ -5,8 +5,39 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>rigel_dream</title>
+    <style>
+      /* banner de debug visible */
+      #debug-banner { position: fixed; left: 8px; top: 8px; background: #ff4d4f; color: white; padding: 6px 8px; border-radius: 4px; z-index: 9999; font-family: monospace; font-size: 12px; }
+      #error-overlay { position: fixed; left: 8px; right: 8px; top: 40px; background: rgba(0,0,0,0.85); color: #ffdddd; padding: 12px; border-radius: 6px; z-index: 10000; font-family: monospace; font-size: 13px; max-height: 60vh; overflow: auto; }
+    </style>
+    <script>
+      // Mostrar errores globales directamente en la página
+      function showClientError(msg) {
+        try {
+          var existing = document.getElementById('error-overlay');
+          if (existing) existing.remove();
+          var d = document.createElement('div');
+          d.id = 'error-overlay';
+          d.innerText = msg;
+          document.addEventListener('DOMContentLoaded', function() { document.body.appendChild(d); });
+          if (document.body) document.body.appendChild(d);
+        } catch (e) {
+          console.error('showClientError failed', e);
+        }
+      }
+      window.addEventListener('error', function (ev) {
+        showClientError('Error: ' + (ev && ev.message) + '\n' + (ev && ev.filename) + ':' + (ev && ev.lineno));
+      });
+      window.addEventListener('unhandledrejection', function (ev) {
+        showClientError('UnhandledRejection: ' + (ev && ev.reason && (ev.reason.message || String(ev.reason))));
+      });
+      window.addEventListener('load', function () {
+        // remove debug-banner after load if you want; keep for now
+      });
+    </script>
   </head>
   <body>
+    <div id="debug-banner">DEBUG: page loaded</div>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>

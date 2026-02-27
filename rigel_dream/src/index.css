@@ -1,68 +1,67 @@
+/* Tailwind removed due to environment; using minimal custom CSS */
+
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: system-ui, Inter, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  color-scheme: dark;
+  color: #e6eef8;
+  background-color: #071329;
 }
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
+/* Layout helpers */
+.app-flex { display: flex; height: 100vh; }
+.sidebar { width: 16rem; background: #071329; color: #f8fafc; padding: 1rem; display: flex; flex-direction: column; }
+.main { flex: 1; display: flex; flex-direction: column; background: linear-gradient(180deg,#071329 0%, #041022 100%); color: #f8fafc; }
+.topbar { display: flex; align-items: center; justify-content: space-between; padding: 0.5rem 1rem; background: rgba(11,18,32,0.6); border-bottom: 1px solid rgba(255,255,255,0.03); }
+.content { padding: 1.5rem; overflow: auto; }
+
+/* Login helpers */
+.center-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+.bg-gradient { background: linear-gradient(180deg, #071329 0%, #04203a 100%); }
+
+/* Card */
+.card {
+  background: linear-gradient(180deg, #ffffff 0%, #f3f4f6 100%);
+  color: #0b1220;
+  padding: 1.25rem;
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(2,6,23,0.6);
+  border: 1px solid rgba(2,6,23,0.08);
 }
 
-body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
-}
-
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
-}
-
-button {
+/* Inputs/buttons */
+.input {
+  width: 100%;
+  padding: 0.6rem 0.75rem;
   border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
+  background: #fff;
+  border: 1px solid #cbd5e1;
+  color: #0b1220;
+  box-sizing: border-box;
+}
+.input:focus { outline: 2px solid rgba(79,70,229,0.12); box-shadow: 0 0 0 4px rgba(99,102,241,0.06); }
+
+.btn-primary {
+  background: linear-gradient(90deg,#4338ca,#7c3aed);
+  color: white;
+  border: none;
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
   cursor: pointer;
-  transition: border-color 0.25s;
+  font-weight: 600;
 }
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
-}
+.btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* Cards small */
+.card-compact { padding: 0.75rem; border-radius: 10px; }
+
+/* Misc */
+.text-muted { color: #6b7280; }
+
+button { font-family: inherit; }
 
 @media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
+  :root { color: #213547; background-color: #ffffff; }
 }
