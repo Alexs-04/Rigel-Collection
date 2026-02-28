@@ -6,8 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>rigel_dream</title>
     <style>
-      /* banner de debug visible */
-      #debug-banner { position: fixed; left: 8px; top: 8px; background: #ff4d4f; color: white; padding: 6px 8px; border-radius: 4px; z-index: 9999; font-family: monospace; font-size: 12px; }
+      /* banner de debug oculto */
+      #debug-banner { display: none; }
       #error-overlay { position: fixed; left: 8px; right: 8px; top: 40px; background: rgba(0,0,0,0.85); color: #ffdddd; padding: 12px; border-radius: 6px; z-index: 10000; font-family: monospace; font-size: 13px; max-height: 60vh; overflow: auto; }
     </style>
     <script>
@@ -37,7 +37,6 @@
     </script>
   </head>
   <body>
-    <div id="debug-banner">DEBUG: page loaded</div>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
