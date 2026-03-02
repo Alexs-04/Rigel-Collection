@@ -19,9 +19,9 @@ function AppLayout({ children }) {
 
   return (
     <div className="app-flex">
-      <Sidebar collapsed={collapsed} />
+      <Sidebar collapsed={collapsed} onToggle={toggle} />
       <div className="main">
-        <Topbar onToggle={toggle} />
+        <Topbar />
         <main className="content">{children}</main>
       </div>
     </div>
