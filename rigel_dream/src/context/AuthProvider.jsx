@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import api from '../services/api';
 import { AuthContext } from './AuthContext';
 
@@ -21,6 +21,18 @@ function mapPayloadToUser(payload) {
 
 export function AuthProvider({ children }) {
   const [accessToken, setAccessToken] = useState(localStorage.getItem('access_token'));
+
+  useEffect(() => {
+    const syncSession = () => setAccessToken(localStorage.getItem('access_token'));
+    window.addEventListener('auth:invalidated', syncSession);
+    window.addEventListener('storage', syncSession);
+
+    return () => {
+      window.removeEventListener('auth:invalidated', syncSession);
+      window.removeEventListener('storage', syncSession);
+    };
+  }, []);
+
   const user = useMemo(() => mapPayloadToUser(parseJwt(accessToken)), [accessToken]);
 
   const hasRole = (...roles) => {

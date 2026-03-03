@@ -7,6 +7,7 @@ import com.korebit.rigel.exception.EntityNotFundException
 import com.korebit.rigel.repository.ProductRepository
 import com.korebit.rigel.repository.SupplierRepository
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import kotlin.jvm.optionals.getOrElse
 
 @Service
@@ -15,10 +16,12 @@ class SupplierService(
     private val productRepository: ProductRepository
 ) {
 
+    @Transactional(readOnly = true)
     fun getAllSuppliers(): List<SupplierDto> {
         return supplierRepository.findAll().map { SupplierDto.toRequest(it) }
     }
 
+    @Transactional(readOnly = true)
     fun getProductsBySupplier(supplierName: String): List<ProductDto?> {
         val supplier = supplierRepository.findSupplierByName(supplierName)
             ?: throw EntityNotFundException("Not match could be found")// Return empty list if supplier not found
@@ -46,6 +49,7 @@ class SupplierService(
         return relation.supplyPrice.toDouble()
     }
 
+    @Transactional
     fun saveSupplier(supplier: SupplierDto): Response {
         supplierRepository.findSupplierByName(supplier.name)?.let {
             throw IllegalArgumentException("Supplier with name ${supplier.name} already exists")
@@ -54,7 +58,8 @@ class SupplierService(
         val newSupplier = com.korebit.rigel.model.beans.Supplier(
             name = supplier.name,
             email = supplier.contactEmail,
-            numberPhone = supplier.phoneNumber
+            numberPhone = supplier.phoneNumber,
+            address = supplier.address
         )
 
         supplierRepository.save(newSupplier)
@@ -66,6 +71,45 @@ class SupplierService(
         )
     }
 
+    @Transactional
+    fun updateSupplier(currentName: String, supplier: SupplierDto): Response {
+        val existingSupplier = supplierRepository.findSupplierByName(currentName)
+            ?: throw EntityNotFundException("Supplier not found")
+
+        if (currentName != supplier.name) {
+            supplierRepository.findSupplierByName(supplier.name)?.let {
+                throw IllegalArgumentException("Supplier with name ${supplier.name} already exists")
+            }
+        }
+
+        existingSupplier.name = supplier.name
+        existingSupplier.email = supplier.contactEmail
+        existingSupplier.numberPhone = supplier.phoneNumber
+        existingSupplier.address = supplier.address
+        supplierRepository.save(existingSupplier)
+
+        return Response(
+            success = true,
+            status = 200,
+            message = "Supplier ${supplier.name} has been updated successfully"
+        )
+    }
+
+    @Transactional
+    fun deleteSupplier(name: String): Response {
+        val supplier = supplierRepository.findSupplierByName(name)
+            ?: throw EntityNotFundException("Supplier not found")
+
+        supplierRepository.delete(supplier)
+
+        return Response(
+            success = true,
+            status = 200,
+            message = "Supplier ${supplier.name} has been deleted successfully"
+        )
+    }
+
+    @Transactional(readOnly = true)
     fun findSupplierByName(name: String): SupplierDto {
         val supplier = supplierRepository.findSupplierByName(name)
             ?: throw EntityNotFundException("Supplier not found")
