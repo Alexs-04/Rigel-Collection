@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useMemo, useState } from 'react'
+import React, { useContext, useEffect, useMemo, useRef, useState } from 'react'
 import api from '../services/api'
 import { AuthContext } from '../context/AuthContext'
 
@@ -32,6 +32,10 @@ export default function Suppliers() {
   const [detailError, setDetailError] = useState('')
   const [editing, setEditing] = useState(false)
 
+  const collapseTimeoutRef = useRef(null)
+  const detailRequestRef = useRef(0)
+  const [isCollapsingDetail, setIsCollapsingDetail] = useState(false)
+
   const loadSuppliers = async () => {
     setLoadingList(true)
     setListError('')
@@ -46,6 +50,13 @@ export default function Suppliers() {
   }
 
   const loadDetail = async (name) => {
+    const requestId = ++detailRequestRef.current
+    if (collapseTimeoutRef.current) {
+      clearTimeout(collapseTimeoutRef.current)
+      collapseTimeoutRef.current = null
+    }
+
+    setIsCollapsingDetail(false)
     setSelectedName(name)
     setLoadingDetail(true)
     setDetailError('')
@@ -56,24 +67,36 @@ export default function Suppliers() {
         api.get(`/suppliers/${encodeURIComponent(name)}/products`).catch(() => ({ data: [] })),
       ])
 
+      if (requestId !== detailRequestRef.current) return
       setDetail(detailRes.data)
       setProducts(Array.isArray(productsRes.data) ? productsRes.data : [])
     } catch (error) {
+      if (requestId !== detailRequestRef.current) return
       setDetailError(normalizeError(error, 'No se pudo cargar el detalle del proveedor.'))
       setDetail(null)
       setProducts([])
     } finally {
-      setLoadingDetail(false)
+      if (requestId === detailRequestRef.current) {
+        setLoadingDetail(false)
+      }
     }
   }
 
   const handleSupplierClick = (name) => {
     if (selectedName === name) {
+      detailRequestRef.current += 1
+      setLoadingDetail(false)
       setSelectedName(null)
-      setDetail(null)
-      setProducts([])
       setDetailError('')
       setEditing(false)
+      setIsCollapsingDetail(true)
+
+      if (collapseTimeoutRef.current) clearTimeout(collapseTimeoutRef.current)
+      collapseTimeoutRef.current = setTimeout(() => {
+        setDetail(null)
+        setProducts([])
+        setIsCollapsingDetail(false)
+      }, 180)
       return
     }
 
@@ -83,6 +106,15 @@ export default function Suppliers() {
   useEffect(() => {
     loadSuppliers()
   }, [])
+
+  useEffect(() => {
+    return () => {
+      if (collapseTimeoutRef.current) clearTimeout(collapseTimeoutRef.current)
+    }
+  }, [])
+
+  const detailExpanded = Boolean(selectedName) || loadingDetail
+  const showDetailContent = Boolean(detail || detailError || loadingDetail || isCollapsingDetail)
 
   const onChangeForm = (key, value) => {
     setForm((prev) => ({ ...prev, [key]: value }))
@@ -216,47 +248,54 @@ export default function Suppliers() {
           </div>
         </div>
 
-        <div className="card" style={{ padding: 16 }}>
+        <div className="card supplier-detail-card" style={{ padding: 16 }}>
           <h2 style={{ marginTop: 0, fontSize: 18 }}>Detalle del proveedor</h2>
-          {!selectedName && <p className="text-muted">Selecciona un proveedor para ver su informacion.</p>}
-          {loadingDetail && <p className="text-muted">Cargando detalle...</p>}
-          {detailError && <p className="text-muted">{detailError}</p>}
+          {!selectedName && !isCollapsingDetail && <p className="text-muted">Selecciona un proveedor para ver su informacion.</p>}
 
-          {detail && !loadingDetail && (
-            <>
-              <div style={{ display: 'grid', gap: 10, marginBottom: 14 }}>
-                <input className="input" value={detail.name} disabled={!editing} onChange={(e) => setDetail((prev) => ({ ...prev, name: e.target.value }))} />
-                <input className="input" type="email" value={detail.contactEmail} disabled={!editing} onChange={(e) => setDetail((prev) => ({ ...prev, contactEmail: e.target.value }))} />
-                <input className="input" value={detail.phoneNumber} disabled={!editing} onChange={(e) => setDetail((prev) => ({ ...prev, phoneNumber: e.target.value }))} />
-                <input className="input" value={detail.address || ''} disabled={!editing} onChange={(e) => setDetail((prev) => ({ ...prev, address: e.target.value }))} />
-              </div>
+          <div className={`supplier-detail-body ${detailExpanded ? 'is-open' : ''}`}>
+            {showDetailContent && (
+              <>
+                {loadingDetail && <p className="text-muted">Cargando detalle...</p>}
+                {detailError && <p className="text-muted">{detailError}</p>}
 
-              {isAdmin && (
-                <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
-                  {!editing && <button className="btn-primary" type="button" onClick={() => setEditing(true)}>Editar</button>}
-                  {editing && <button className="btn-primary" type="button" disabled={saving} onClick={saveChanges}>Guardar cambios</button>}
-                  {editing && <button className="btn-ghost" type="button" onClick={() => { setEditing(false); loadDetail(selectedName) }}>Cancelar</button>}
-                  <button className="btn-ghost" type="button" onClick={deleteSupplier}>Eliminar</button>
-                </div>
-              )}
-
-              <h3 style={{ marginBottom: 8 }}>Productos asociados</h3>
-              {products.length === 0 ? (
-                <p className="text-muted" style={{ marginTop: 0 }}>Este proveedor no tiene productos asociados.</p>
-              ) : (
-                <div style={{ display: 'grid', gap: 8 }}>
-                  {products.map((product) => (
-                    <div key={product.name} style={{ border: '1px solid var(--border)', borderRadius: 8, padding: 10 }}>
-                      <div style={{ fontWeight: 600 }}>{product.name}</div>
-                      <div className="text-muted" style={{ fontSize: 13 }}>
-                        ${product.price} - Stock: {product.stock}
-                      </div>
+                {detail && !loadingDetail && (
+                  <>
+                    <div style={{ display: 'grid', gap: 10, marginBottom: 14 }}>
+                      <input className="input" value={detail.name} disabled={!editing} onChange={(e) => setDetail((prev) => ({ ...prev, name: e.target.value }))} />
+                      <input className="input" type="email" value={detail.contactEmail} disabled={!editing} onChange={(e) => setDetail((prev) => ({ ...prev, contactEmail: e.target.value }))} />
+                      <input className="input" value={detail.phoneNumber} disabled={!editing} onChange={(e) => setDetail((prev) => ({ ...prev, phoneNumber: e.target.value }))} />
+                      <input className="input" value={detail.address || ''} disabled={!editing} onChange={(e) => setDetail((prev) => ({ ...prev, address: e.target.value }))} />
                     </div>
-                  ))}
-                </div>
-              )}
-            </>
-          )}
+
+                    {isAdmin && (
+                      <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
+                        {!editing && <button className="btn-primary" type="button" onClick={() => setEditing(true)}>Editar</button>}
+                        {editing && <button className="btn-primary" type="button" disabled={saving} onClick={saveChanges}>Guardar cambios</button>}
+                        {editing && <button className="btn-ghost" type="button" onClick={() => { setEditing(false); loadDetail(selectedName) }}>Cancelar</button>}
+                        <button className="btn-ghost" type="button" onClick={deleteSupplier}>Eliminar</button>
+                      </div>
+                    )}
+
+                    <h3 style={{ marginBottom: 8 }}>Productos asociados</h3>
+                    {products.length === 0 ? (
+                      <p className="text-muted" style={{ marginTop: 0 }}>Este proveedor no tiene productos asociados.</p>
+                    ) : (
+                      <div style={{ display: 'grid', gap: 8 }}>
+                        {products.map((product) => (
+                          <div key={product.name} style={{ border: '1px solid var(--border)', borderRadius: 8, padding: 10 }}>
+                            <div style={{ fontWeight: 600 }}>{product.name}</div>
+                            <div className="text-muted" style={{ fontSize: 13 }}>
+                              ${product.price} - Stock: {product.stock}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </>
+                )}
+              </>
+            )}
+          </div>
         </div>
       </section>
     </div>

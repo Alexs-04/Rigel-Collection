@@ -146,3 +146,30 @@ label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 6px
 
 /* Legacy: keep other rules at bottom */
 .logo.react { }
+
+.supplier-detail-card {
+  transition: box-shadow 180ms ease, border-color 180ms ease;
+}
+
+.supplier-detail-body {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transform: translateY(-6px);
+  transition: max-height 180ms ease, opacity 180ms ease, transform 180ms ease;
+}
+
+.supplier-detail-body.is-open {
+  max-height: 1200px;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .supplier-detail-card,
+  .supplier-detail-body,
+  .supplier-detail-body.is-open {
+    transition: none;
+    transform: none;
+  }
+}

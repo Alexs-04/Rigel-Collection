@@ -1,4 +1,4 @@
-package com.korebit.rigel.config;
+package com.korebit.rigel.util;
 
 import com.korebit.rigel.model.beans.Token;
 import com.korebit.rigel.repository.TokenRepository;
