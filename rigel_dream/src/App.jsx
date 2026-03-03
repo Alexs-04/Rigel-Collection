@@ -28,6 +28,15 @@ function AppLayout({ children }) {
   )
 }
 
+function RoleRoute({ children, allowedRoles }) {
+  const { user } = useContext(AuthContext)
+
+  if (!user) return <Navigate to="/login" replace />
+  if (!allowedRoles.includes(user.role)) return <Navigate to="/" replace />
+
+  return children
+}
+
 function AppRoutes() {
   const { user } = useContext(AuthContext)
 
@@ -41,9 +50,9 @@ function AppRoutes() {
         <Route path="/" element={<Dashboard />} />
         <Route path="/products" element={<Products />} />
         <Route path="/suppliers" element={<Suppliers />} />
-        <Route path="/pos" element={<POS />} />
-        <Route path="/logs" element={<Logs />} />
-        <Route path="/settings" element={<Settings />} />
+        <Route path="/pos" element={<RoleRoute allowedRoles={['ROOT', 'ADMIN', 'USER']}><POS /></RoleRoute>} />
+        <Route path="/logs" element={<RoleRoute allowedRoles={['ROOT', 'ADMIN']}><Logs /></RoleRoute>} />
+        <Route path="/settings" element={<RoleRoute allowedRoles={['ROOT', 'ADMIN']}><Settings /></RoleRoute>} />
       </Routes>
     </AppLayout>
   )

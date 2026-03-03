@@ -5,4 +5,5 @@ import org.springframework.data.jpa.repository.JpaRepository
 
 interface TokenRepository : JpaRepository<Token, Long> {
     fun findAllValidIsFalseOrRevokedIsFalseByConsumerId(id: Long): MutableList<Token>
+    fun findByToken(token: String): Token?
 }

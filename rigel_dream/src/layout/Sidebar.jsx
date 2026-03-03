@@ -1,23 +1,26 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import { NavLink } from 'react-router-dom'
 import { Home, ShoppingCart, Box, Users, FileText, Settings, Menu, ShoppingBag } from 'lucide-react'
+import { AuthContext } from '../context/AuthContext'
 
 const items = [
-	{ to: '/', label: 'Dashboard', icon: Home },
-	{ to: '/pos', label: 'Punto de venta', icon: ShoppingCart },
-	{ to: '/products', label: 'Productos', icon: Box },
-	{ to: '/suppliers', label: 'Proveedores', icon: Users },
-	{ to: '/purchases', label: 'Compras', icon: ShoppingBag },
-	{ to: '/logs', label: 'Bitácora', icon: FileText },
-	{ to: '/settings', label: 'Configuración', icon: Settings },
+	{ to: '/', label: 'Dashboard', icon: Home, roles: ['ROOT', 'ADMIN', 'USER', 'SUPPLIER'] },
+	{ to: '/pos', label: 'Punto de venta', icon: ShoppingCart, roles: ['ROOT', 'ADMIN', 'USER'] },
+	{ to: '/products', label: 'Productos', icon: Box, roles: ['ROOT', 'ADMIN', 'USER', 'SUPPLIER'] },
+	{ to: '/suppliers', label: 'Proveedores', icon: Users, roles: ['ROOT', 'ADMIN', 'USER', 'SUPPLIER'] },
+	{ to: '/purchases', label: 'Compras', icon: ShoppingBag, roles: ['ROOT', 'ADMIN'] },
+	{ to: '/logs', label: 'Bitácora', icon: FileText, roles: ['ROOT', 'ADMIN'] },
+	{ to: '/settings', label: 'Configuración', icon: Settings, roles: ['ROOT', 'ADMIN'] },
 ]
 
 export default function Sidebar({ collapsed = false, onToggle = () => {} }) {
+	const { user } = useContext(AuthContext)
 	const width = collapsed ? 80 : 256 // px
 	const textColor = '#111827' // slate-900
 	const mutedColor = '#6b7280' // slate-500
 	const activeBg = '#eef2ff' // light purple-ish
 	const accent = '#6366f1' // indigo-500
+	const visibleItems = items.filter((it) => !user?.role || it.roles.includes(user.role))
 
 	return (
 		<aside
@@ -68,7 +71,7 @@ export default function Sidebar({ collapsed = false, onToggle = () => {} }) {
 			</div>
 
 			<nav style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-				{items.map((it) => {
+				{visibleItems.map((it) => {
 					const Icon = it.icon
 					return (
 						<NavLink

@@ -1,16 +1,19 @@
 package com.korebit.rigel.service.jwt;
 
 import com.korebit.rigel.model.beans.Consumer;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Function;
 
 @Service
 public class JwtService {
@@ -30,15 +33,44 @@ public class JwtService {
         return buildToken(consumer, jwtRefresh);
     }
 
+    public String extractUsername(final String token) {
+        return extractClaim(token, Claims::getSubject);
+    }
+
+    public boolean isTokenValid(final String token, final UserDetails userDetails) {
+        final String username = extractUsername(token);
+        return username.equals(userDetails.getUsername()) && !isTokenExpired(token);
+    }
+
+    public <T> T extractClaim(final String token, final Function<Claims, T> claimResolver) {
+        final Claims claims = extractAllClaims(token);
+        return claimResolver.apply(claims);
+    }
+
     private String buildToken(final Consumer consumer, final long expiration) {
         return Jwts.builder()
                 .setId(Objects.requireNonNull(consumer.getId()).toString())
-                .addClaims(Map.of("name", consumer.getName()))
+                .addClaims(Map.of(
+                        "name", consumer.getName(),
+                        "role", consumer.getRole().name()
+                ))
                 .setSubject(consumer.getEmail())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(getSecretKey())
                 .compact();
+    }
+
+    private boolean isTokenExpired(final String token) {
+        return extractClaim(token, Claims::getExpiration).before(new Date());
+    }
+
+    private Claims extractAllClaims(final String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(getSecretKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
     }
 
     private SecretKey getSecretKey() {
