@@ -125,6 +125,7 @@ export default function Suppliers() {
     contactEmail: source.contactEmail.trim(),
     phoneNumber: source.phoneNumber.trim(),
     address: source.address.trim(),
+    products: Array.isArray(source.products) ? source.products : [],
   })
 
   const addSupplier = async (event) => {
