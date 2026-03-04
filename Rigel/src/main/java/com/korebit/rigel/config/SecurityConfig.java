@@ -1,5 +1,6 @@
 package com.korebit.rigel.config;
 
+import com.korebit.rigel.util.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -32,6 +33,10 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/product/**", "/suppliers/**")
                         .hasAnyRole("ROOT", "ADMIN", "USER", "SUPPLIER")
                         .requestMatchers(HttpMethod.POST, "/product/add", "/suppliers/add")
+                        .hasAnyRole("ROOT", "ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/suppliers/**")
+                        .hasAnyRole("ROOT", "ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/suppliers/**")
                         .hasAnyRole("ROOT", "ADMIN")
                         .requestMatchers("/consumer/**")
                         .hasAnyRole("ROOT", "ADMIN")

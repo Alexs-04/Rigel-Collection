@@ -49,28 +49,27 @@ public class JwtService {
 
     private String buildToken(final Consumer consumer, final long expiration) {
         return Jwts.builder()
-                .setId(Objects.requireNonNull(consumer.getId()).toString())
-                .addClaims(Map.of(
+                .id(Objects.requireNonNull(consumer.getId()).toString())
+                .claims(Map.of(
                         "name", consumer.getName(),
                         "role", consumer.getRole().name()
                 ))
-                .setSubject(consumer.getEmail())
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + expiration))
-                .signWith(getSecretKey())
+                .subject(consumer.getEmail())
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis() + expiration))
+                .signWith(getSecretKey(), Jwts.SIG.HS256) // ahora se especifica algoritmo
                 .compact();
     }
-
     private boolean isTokenExpired(final String token) {
         return extractClaim(token, Claims::getExpiration).before(new Date());
     }
 
     private Claims extractAllClaims(final String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(getSecretKey())
+        return Jwts.parser()
+                .verifyWith(getSecretKey())   // antes setSigningKey
                 .build()
-                .parseClaimsJws(token)
-                .getBody();
+                .parseSignedClaims(token)     // antes parseClaimsJws
+                .getPayload();                // antes getBody
     }
 
     private SecretKey getSecretKey() {
