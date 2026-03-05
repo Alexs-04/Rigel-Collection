@@ -3,9 +3,11 @@ package com.korebit.rigel.controller
 import com.korebit.rigel.dto.SupplierDto
 import com.korebit.rigel.service.SupplierService
 import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
@@ -23,9 +25,17 @@ class SupplierRestController(
     fun getProductsBySupplier(@PathVariable supplierName: String) = supplierService.getProductsBySupplier(supplierName)
 
     @GetMapping("/{name}")
-    fun findSupplierByName(@PathVariable name: String): SupplierDto = findSupplierByName(name)
+    fun findSupplierByName(@PathVariable name: String): SupplierDto = supplierService.findSupplierByName(name)
 
     @PostMapping("/add")
     fun saveSupplier(@RequestBody supplier: SupplierDto): ResponseEntity<Any> =
         ResponseEntity.ok(supplierService.saveSupplier(supplier))
+
+    @PutMapping("/{name}")
+    fun updateSupplier(@PathVariable name: String, @RequestBody supplier: SupplierDto): ResponseEntity<Any> =
+        ResponseEntity.ok(supplierService.updateSupplier(name, supplier))
+
+    @DeleteMapping("/{name}")
+    fun deleteSupplier(@PathVariable name: String): ResponseEntity<Any> =
+        ResponseEntity.ok(supplierService.deleteSupplier(name))
 }

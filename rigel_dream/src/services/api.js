@@ -7,28 +7,46 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  withCredentials: false, // cambiar a true si usas cookies de refresh
+  withCredentials: false,
 });
 
-// Attach token if present in localStorage
+function readJwtPayload(token) {
+  try {
+    return JSON.parse(atob(token.split('.')[1]));
+  } catch {
+    return null;
+  }
+}
+
+function invalidateSession() {
+  localStorage.removeItem('access_token');
+  localStorage.removeItem('refresh_token');
+  window.dispatchEvent(new Event('auth:invalidated'));
+}
+
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('access_token');
-  if (token && config.headers) {
-    config.headers['Authorization'] = `Bearer ${token}`;
+  if (!token || !config.headers) {
+    return config;
   }
+
+  const payload = readJwtPayload(token);
+  const isExpired = !payload?.exp || (payload.exp * 1000) <= Date.now();
+  if (isExpired) {
+    invalidateSession();
+    return config;
+  }
+
+  config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
 
-// Response interceptor para manejar 401/403 globalmente
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const status = error?.response?.status;
     if (status === 401 || status === 403) {
-      // aquí podrías intentar refresh token
-      localStorage.removeItem('access_token');
-      localStorage.removeItem('refresh_token');
-      // opcional: window.location.href = '/login';
+      invalidateSession();
     }
     return Promise.reject(error);
   }
