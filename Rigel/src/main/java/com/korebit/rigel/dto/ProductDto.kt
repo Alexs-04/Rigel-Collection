@@ -6,18 +6,32 @@ import java.io.Serializable
 data class ProductDto(
     val name: String,
     val description: String,
+    val barcode: String,
+    val category: String,
     val price: Double,
     val stock: Int,
     val imageUrl: String,
+    val suppliers: List<ProductSupplierDto> = emptyList(),
 ) : Serializable {
-    object Companion {
+    companion object {
         fun toRequest(product: Product): ProductDto {
+            val suppliers = product.suppliers.mapNotNull { relation ->
+                val supplier = relation.supplier ?: return@mapNotNull null
+                ProductSupplierDto(
+                    name = supplier.name,
+                    supplyPrice = relation.supplyPrice.toDouble()
+                )
+            }
+
             return ProductDto(
                 name = product.name,
                 description = product.description,
+                barcode = product.barcode,
+                category = product.category.name,
                 price = product.price.toDouble(),
                 stock = product.stockQuantity,
                 imageUrl = product.imageUrl,
+                suppliers = suppliers,
             )
         }
     }

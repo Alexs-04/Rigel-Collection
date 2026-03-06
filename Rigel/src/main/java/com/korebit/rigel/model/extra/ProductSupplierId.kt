@@ -5,8 +5,8 @@ import java.io.Serializable
 
 @Embeddable
 class ProductSupplierId(
-    var productId: Long,
-    var supplierId: Long
+    var productId: Long? = null,
+    var supplierId: Long? = null
 ) : Serializable {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -19,8 +19,8 @@ class ProductSupplierId(
     }
 
     override fun hashCode(): Int {
-        var result = productId.hashCode()
-        result = 31 * result + supplierId.hashCode()
+        var result = productId?.hashCode() ?: 0
+        result = 31 * result + (supplierId?.hashCode() ?: 0)
         return result
     }
 }
