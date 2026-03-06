@@ -59,7 +59,6 @@ class ProductService(
         )
 
         newProduct.suppliers.add(relation)
-        supplier.products.add(relation)
 
         productRepository.save(newProduct)
 
@@ -120,7 +119,6 @@ class ProductService(
         )
 
         existingProduct.suppliers.add(relation)
-        supplier.products.add(relation)
 
         productRepository.save(existingProduct)
 
