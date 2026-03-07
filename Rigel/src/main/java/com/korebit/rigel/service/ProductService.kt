@@ -110,15 +110,11 @@ class ProductService(
         existingProduct.category = parseCategory(productRequest.category)
         existingProduct.imageUrl = productRequest.imageUrl.trim()
 
-        existingProduct.suppliers.clear()
-
-        val relation = ProductSupplier(
+        updateSupplierRelation(
             product = existingProduct,
             supplier = supplier,
-            supplyPrice = productRequest.supplierPrice.toBigDecimal()
+            supplierPrice = productRequest.supplierPrice
         )
-
-        existingProduct.suppliers.add(relation)
 
         productRepository.save(existingProduct)
 
@@ -140,6 +136,29 @@ class ProductService(
             success = true,
             status = 200,
             message = "Product ${product.name} has been deleted successfully"
+        )
+    }
+
+    private fun updateSupplierRelation(product: Product, supplier: Supplier, supplierPrice: Double) {
+        val normalizedPrice = supplierPrice.toBigDecimal()
+        val currentRelationForSupplier = product.suppliers.firstOrNull { relation ->
+            relation.supplier?.id == supplier.id
+        }
+
+        if (currentRelationForSupplier != null) {
+            currentRelationForSupplier.supplyPrice = normalizedPrice
+            // ProductAddRequest soporta un proveedor activo; eliminamos relaciones sobrantes.
+            product.suppliers.removeAll { it !== currentRelationForSupplier }
+            return
+        }
+
+        product.suppliers.clear()
+        product.suppliers.add(
+            ProductSupplier(
+                product = product,
+                supplier = supplier,
+                supplyPrice = normalizedPrice
+            )
         )
     }
 
