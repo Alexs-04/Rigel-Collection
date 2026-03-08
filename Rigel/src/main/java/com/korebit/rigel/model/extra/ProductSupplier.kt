@@ -9,7 +9,7 @@ import java.math.BigDecimal
 @Entity(name = "products_suppliers")
 class ProductSupplier (
     @EmbeddedId
-    var id : ProductSupplierId? = null,
+    var id : ProductSupplierId = ProductSupplierId(),
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("productId")
@@ -17,7 +17,7 @@ class ProductSupplier (
     var product : Product? = null,
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @MapsId("supplierId") // Mapea el ID del proveedor desde la clave compuesta
+    @MapsId("supplierId")
     @JoinColumn(name = "supplier_id", nullable = false)
     var supplier : Supplier? = null,
 
