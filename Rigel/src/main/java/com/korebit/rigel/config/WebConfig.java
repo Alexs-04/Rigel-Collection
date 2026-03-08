@@ -9,25 +9,37 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
 
-    private final LogInterceptor requestInterceptor;
+    private final LogInterceptor logInterceptor;
 
-    public WebConfig(LogInterceptor requestInterceptor) {
-        this.requestInterceptor = requestInterceptor;
+    public WebConfig(LogInterceptor logInterceptor) {
+        this.logInterceptor = logInterceptor;
     }
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
                 .allowedOrigins("http://localhost:5173")
-                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS") // Añade OPTIONS
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
-                .exposedHeaders("Authorization") // Expone Authorization header
+                .exposedHeaders("Authorization", "X-Correlation-Id")
                 .allowCredentials(true);
     }
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(requestInterceptor)
-                .addPathPatterns("/**");
+        registry.addInterceptor(logInterceptor)
+                .addPathPatterns("/**")
+                .excludePathPatterns(
+                        "/error",
+                        "/favicon.ico",
+                        "/actuator/**",
+                        "/**/*.css",
+                        "/**/*.js",
+                        "/**/*.map",
+                        "/**/*.ico",
+                        "/**/*.png",
+                        "/**/*.jpg",
+                        "/**/*.svg"
+                );
     }
 }
