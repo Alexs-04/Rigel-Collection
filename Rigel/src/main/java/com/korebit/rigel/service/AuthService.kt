@@ -32,6 +32,9 @@ class AuthService(
 
         val consumer = consumerRepository.findByEmail(request.email ?: "")
             ?: throw EntityNotFundException("No consumer found")
+        if (!consumer.active) {
+            throw IllegalArgumentException("Usuario inactivo. Contacta a un administrador")
+        }
         val jwtToken = jwtService.generateToken(consumer)
         val refreshToken = jwtService.generateRefreshToken(consumer)
 

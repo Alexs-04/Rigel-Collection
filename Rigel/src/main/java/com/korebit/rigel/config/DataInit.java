@@ -1,6 +1,7 @@
 package com.korebit.rigel.config;
 
 import com.korebit.rigel.model.beans.Consumer;
+import com.korebit.rigel.model.enums.Role;
 import com.korebit.rigel.repository.ConsumerRepository;
 import org.jspecify.annotations.NonNull;
 import org.springframework.boot.CommandLineRunner;
@@ -19,14 +20,17 @@ public class DataInit implements CommandLineRunner {
 
     @Override
     public void run(String @NonNull ... args) throws IllegalAccessError {
-        String defaultEmail = "admin@admin";
-        String defaultPassword = "admin";
+        String defaultEmail = "arlix@korebit";
+        String defaultPassword = "root";
         var existingConsumer = consumerRepository.findByEmail(defaultEmail);
         if (existingConsumer == null) {
             var consumer = new Consumer();
+            consumer.setName("Root");
+            consumer.setUsername("root");
             consumer.setEmail(defaultEmail);
             consumer.setPassword(passwordEncoder.encode(defaultPassword));
-            consumer.setRole(com.korebit.rigel.model.enums.Role.ADMIN);
+            consumer.setRole(Role.ROOT);
+            consumer.setActive(true);
             consumerRepository.save(consumer);
         }else {
             System.out.println("Default admin user already exists. Skipping creation.");

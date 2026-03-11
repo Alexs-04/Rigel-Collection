@@ -40,6 +40,8 @@ public class SecurityConfig {
                         .hasAnyRole("ROOT", "ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/product/**", "/suppliers/**")
                         .hasAnyRole("ROOT", "ADMIN")
+                        .requestMatchers("/consumer/api/users/**")
+                        .hasRole("ROOT")
                         .requestMatchers("/consumer/**")
                         .hasAnyRole("ROOT", "ADMIN")
                         .anyRequest().authenticated()
