@@ -61,7 +61,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+            UserDetails userDetails;
+            try {
+                userDetails = userDetailsService.loadUserByUsername(username);
+            } catch (RuntimeException ex) {
+                filterChain.doFilter(request, response);
+                return;
+            }
             Token storedToken = tokenRepository.findByToken(jwt);
             boolean tokenIsActive = storedToken != null && !storedToken.getExpired() && !storedToken.getRevoked();
 

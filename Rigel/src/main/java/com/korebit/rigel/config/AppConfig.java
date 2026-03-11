@@ -47,6 +47,7 @@ public class AppConfig {
                     .username(consumer.getEmail())
                     .password(consumer.getPassword())
                     .authorities(List.of(new SimpleGrantedAuthority("ROLE_" + consumer.getRole().name())))
+                    .disabled(!consumer.getActive())
                     .build();
         };
     }

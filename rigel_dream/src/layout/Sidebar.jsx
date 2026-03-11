@@ -1,6 +1,6 @@
 import React, {useContext} from 'react'
 import {NavLink} from 'react-router-dom'
-import {Home, ShoppingCart, Box, Users, FileText, Settings, Menu, ShoppingBag} from 'lucide-react'
+import {Home, ShoppingCart, Box, Users, FileText, Settings, Menu, ShoppingBag, User, PackageOpenIcon} from 'lucide-react'
 import {AuthContext} from '../context/AuthContext'
 
 const items = [
@@ -10,13 +10,12 @@ const items = [
     {to: '/suppliers', label: 'Proveedores', icon: Users, roles: ['ROOT', 'ADMIN', 'USER', 'SUPPLIER']},
     {to: '/purchases', label: 'Compras', icon: ShoppingBag, roles: ['ROOT', 'ADMIN']},
     {to: '/logs', label: 'Bitácora', icon: FileText, roles: ['ROOT', 'ADMIN']},
+    {to : '/inventory', label: 'Inventario', icon: PackageOpenIcon, roles: ['ROOT', 'ADMIN', 'USER']},
+    {to: '/users', label: 'Usuarios', icon: User, roles: ['ROOT']},
     {to: '/settings', label: 'Configuración', icon: Settings, roles: ['ROOT', 'ADMIN']},
 ]
 
-export default function Sidebar({
-                                    collapsed = false, onToggle = () => {
-    }
-                                }) {
+export default function Sidebar({collapsed = false, onToggle = () => {}}) {
     const {user} = useContext(AuthContext)
     const width = collapsed ? 80 : 256 // px
     const textColor = '#111827' // slate-900
@@ -32,7 +31,7 @@ export default function Sidebar({
                 width,
                 display: 'flex',
                 flexDirection: 'column',
-                padding: 16,
+                padding: '8px 16px 16px',
                 position: 'sticky',
                 top: 0,
                 height: '100vh',
@@ -41,15 +40,14 @@ export default function Sidebar({
                 borderRight: '1px solid rgba(2,6,23,0.04)',
             }}
         >
-            {/* Header: only the hamburguesa button, no logo/text */}
+            {/* Header: alineado con la altura y el eje vertical del topbar */}
             <div
-                className={`mb-6 px-2 flex items-center`}
                 style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: 18,
                     justifyContent: collapsed ? 'center' : 'flex-start',
-                    paddingTop: 8,
+                    height: 56,
+                    marginBottom: 16,
                 }}
             >
                 <button
@@ -58,7 +56,7 @@ export default function Sidebar({
                     style={{
                         background: 'transparent',
                         border: 'none',
-                        padding: 10,
+                        padding: 8,
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',

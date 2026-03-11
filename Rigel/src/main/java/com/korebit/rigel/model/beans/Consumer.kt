@@ -1,6 +1,5 @@
 package com.korebit.rigel.model.beans
 
-import com.korebit.rigel.model.beans.Token
 import com.korebit.rigel.model.enums.Role
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
@@ -16,7 +15,7 @@ import java.io.Serializable
 
 @Entity(name = "consumers")
 class Consumer (
-    @Id @GeneratedValue(strategy = GenerationType.AUTO)
+    @Id @GeneratedValue(strategy = GenerationType.SEQUENCE)
     var id: Long? = null,
 
     @Column(nullable = false, length = 64)
@@ -36,6 +35,9 @@ class Consumer (
 
     @Column(nullable = true, length = 15)
     var phoneNumber: String = "",
+
+    @Column(nullable = false)
+    var active: Boolean = true,
 
     @OneToMany(mappedBy = "consumer", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
     var tokens: MutableList<Token> = mutableListOf(),

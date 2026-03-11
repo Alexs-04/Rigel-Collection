@@ -16,6 +16,7 @@ function mapPayloadToUser(payload) {
     return {
         username: payload.sub || payload.name || payload.email,
         role: payload.role || 'USER',
+        active: payload.active !== false,
     };
 }
 

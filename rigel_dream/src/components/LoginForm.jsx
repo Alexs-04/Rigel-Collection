@@ -23,7 +23,12 @@ export default function LoginForm() {
                 navigate('/');
             }
         } catch (err) {
-            setError(err?.response?.data?.message || 'Error al iniciar sesión');
+            const status = err?.response?.status
+            if (status === 401 || status === 403) {
+                setError(err?.response?.data?.message || 'Tu cuenta no puede iniciar sesion en este momento')
+            } else {
+                setError(err?.response?.data?.message || 'Error al iniciar sesión')
+            }
         } finally {
             setLoading(false);
         }

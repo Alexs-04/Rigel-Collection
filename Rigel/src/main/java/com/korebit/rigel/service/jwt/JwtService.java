@@ -52,7 +52,8 @@ public class JwtService {
                 .id(Objects.requireNonNull(consumer.getId()).toString())
                 .claims(Map.of(
                         "name", consumer.getName(),
-                        "role", consumer.getRole().name()
+                        "role", consumer.getRole().name(),
+                        "active", consumer.getActive()
                 ))
                 .subject(consumer.getEmail())
                 .issuedAt(new Date())

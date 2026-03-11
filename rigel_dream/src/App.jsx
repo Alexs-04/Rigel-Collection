@@ -10,6 +10,9 @@ import Suppliers from './pages/Suppliers'
 import POS from './pages/POS'
 import Settings from './pages/Settings'
 import Logs from './pages/Logs'
+import Users from './pages/Users'
+import Purchases from "./pages/Purchases.tsx";
+import Inventory from "./pages/Inventory.tsx";
 import {AuthContext} from './context/AuthContext'
 
 function AppLayout({children}) {
@@ -38,9 +41,14 @@ function RoleRoute({children, allowedRoles}) {
 }
 
 function AppRoutes() {
-    const {user} = useContext(AuthContext)
+    const {user, logout} = useContext(AuthContext)
 
     if (!user) {
+        return <Navigate to="/login" replace/>
+    }
+
+    if (user.active === false) {
+        logout()
         return <Navigate to="/login" replace/>
     }
 
@@ -53,6 +61,11 @@ function AppRoutes() {
                 <Route path="/pos" element={<RoleRoute allowedRoles={['ROOT', 'ADMIN', 'USER']}><POS/></RoleRoute>}/>
                 <Route path="/logs" element={<RoleRoute allowedRoles={['ROOT', 'ADMIN']}><Logs/></RoleRoute>}/>
                 <Route path="/settings" element={<RoleRoute allowedRoles={['ROOT', 'ADMIN']}><Settings/></RoleRoute>}/>
+                <Route path="/users" element={<RoleRoute allowedRoles={['ROOT']}><Users/></RoleRoute>}/>
+                <Route path="/purchases"
+                       element={<RoleRoute allowedRoles={['ROOT', 'ADMIN']}><Purchases/></RoleRoute>}/>
+                <Route path="/inventory"
+                       element={<RoleRoute allowedRoles={['ROOT', 'ADMIN', 'USER']}><Inventory/></RoleRoute>}/>
             </Routes>
         </AppLayout>
     )
