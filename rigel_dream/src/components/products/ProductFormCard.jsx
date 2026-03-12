@@ -1,5 +1,5 @@
 import React from 'react'
-import ProductFieldsGrid from './ProductFieldsGrid'
+import ProductFieldsGrid from './ProductFieldsGrid.jsx'
 
 export default function ProductFormCard({
     isAdmin,

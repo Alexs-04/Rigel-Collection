@@ -1,9 +1,9 @@
 import React, {useContext, useMemo} from 'react'
 import {AuthContext} from '../context/AuthContext'
-import ProductDetailPanel from './products/components/ProductDetailPanel'
-import ProductFormCard from './products/components/ProductFormCard'
-import ProductsListPanel from './products/components/ProductsListPanel'
-import {useProductsPageState} from './products/hooks/useProductsPageState'
+import ProductDetailPanel from '../components/products/ProductDetailPanel.jsx'
+import ProductFormCard from '../components/products/ProductFormCard.jsx'
+import ProductsListPanel from '../components/products/ProductsListPanel.jsx'
+import {useProductsPageState} from '../hooks/products/useProductsPageState.js'
 
 export default function Products() {
     const {user} = useContext(AuthContext)

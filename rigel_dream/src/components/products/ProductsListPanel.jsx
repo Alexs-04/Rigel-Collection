@@ -1,5 +1,5 @@
 import React from 'react'
-import {formatPriceMxn, toCategoryLabel} from '../../../utils/productPresentation'
+import {formatPriceMxn, toCategoryLabel} from '../../utils/productPresentation.js'
 
 export default function ProductsListPanel({
     search,

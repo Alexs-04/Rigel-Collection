@@ -1,5 +1,5 @@
 import React from 'react'
-import {CATEGORY_OPTIONS_ES} from '../../../utils/productPresentation'
+import {CATEGORY_OPTIONS_ES} from '../../utils/productPresentation.js'
 
 export default function ProductFieldsGrid({value, onChange, suppliers, disabled, isRequired}) {
     return (

@@ -1,6 +1,6 @@
 import React from 'react'
-import {formatPriceMxn} from '../../../utils/productPresentation'
-import ProductFieldsGrid from './ProductFieldsGrid'
+import {formatPriceMxn} from '../../utils/productPresentation.js'
+import ProductFieldsGrid from './ProductFieldsGrid.jsx'
 
 export default function ProductDetailPanel({
     selectedName,
