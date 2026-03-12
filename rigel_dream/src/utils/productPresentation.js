@@ -13,6 +13,7 @@ const CATEGORY_LABELS = {
     MEDICAL: 'Medico',
     DAIRY: 'Lacteos',
     CANNED: 'Enlatados',
+    SWEET_BREAD : 'Pan dulce',
     OTHERS: 'Otros',
 }
 
