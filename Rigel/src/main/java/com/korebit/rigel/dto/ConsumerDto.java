@@ -11,7 +11,8 @@ public record ConsumerDto(
         String username,
         String password,
         String email,
-        String phoneNumber
+        String phoneNumber,
+        Boolean active
 ) implements Serializable {
     public static ConsumerDto toRequest(Consumer consumer) {
         return new ConsumerDto(
@@ -20,7 +21,8 @@ public record ConsumerDto(
                 consumer.getUsername(),
                 consumer.getPassword(),
                 consumer.getEmail(),
-                consumer.getPhoneNumber()
+                consumer.getPhoneNumber(),
+                consumer.getActive()
         );
     }
 }

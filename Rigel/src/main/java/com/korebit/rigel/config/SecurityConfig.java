@@ -1,5 +1,6 @@
 package com.korebit.rigel.config;
 
+import com.korebit.rigel.filter.RequestCorrelationFilter;
 import com.korebit.rigel.util.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,8 +20,9 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(
             HttpSecurity http,
             AuthenticationProvider authenticationProvider,
-            JwtAuthenticationFilter jwtAuthenticationFilter
-    ) throws Exception {
+            JwtAuthenticationFilter jwtAuthenticationFilter,
+            RequestCorrelationFilter requestCorrelationFilter
+    ) {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
@@ -38,11 +40,14 @@ public class SecurityConfig {
                         .hasAnyRole("ROOT", "ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/product/**", "/suppliers/**")
                         .hasAnyRole("ROOT", "ADMIN")
+                        .requestMatchers("/consumer/api/users/**")
+                        .hasRole("ROOT")
                         .requestMatchers("/consumer/**")
                         .hasAnyRole("ROOT", "ADMIN")
                         .anyRequest().authenticated()
                 )
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(requestCorrelationFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(jwtAuthenticationFilter, RequestCorrelationFilter.class);
 
         return http.build();
     }
