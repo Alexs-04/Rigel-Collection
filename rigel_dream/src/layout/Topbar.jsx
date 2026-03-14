@@ -43,7 +43,7 @@ export default function Topbar() {
                         fontWeight: 700,
                     }}
                 >
-                    R
+                    ⭐
                 </div>
                 <div style={{fontWeight: 700, color: textColor}}>Rigel</div>
             </div>
