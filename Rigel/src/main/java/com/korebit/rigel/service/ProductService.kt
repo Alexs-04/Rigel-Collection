@@ -1,6 +1,7 @@
 package com.korebit.rigel.service
 
 import com.korebit.rigel.dto.ProductDto
+import com.korebit.rigel.dto.request.AddRelationRequest
 import com.korebit.rigel.dto.request.ProductAddRequest
 import com.korebit.rigel.dto.response.Response
 import com.korebit.rigel.exception.EntityNotFundException
@@ -65,6 +66,35 @@ class ProductService(
         return Response(
             success = true,
             message = "Product saved successfully.",
+            status = 200
+        )
+    }
+
+    fun addRelationToProduct(relation: AddRelationRequest): Response {
+        val product = productRepository.findByName(relation.productName)
+            .orElseThrow { EntityNotFundException("Product with name ${relation.productName} not found") }
+
+        val supplier = supplierRepository.findSupplierByName(relation.supplierName)
+            ?: throw EntityNotFundException("Supplier with name ${relation.supplierName} not found")
+
+        product.suppliers.forEach {
+            if (it.supplier == supplier) {
+                throw IllegalArgumentException("Product ${product.name} already has a supplier. Only one supplier can be associated with a product.")
+            }
+        }
+
+        val newRelation = ProductSupplier(
+            product = product,
+            supplier = supplier,
+            supplyPrice = relation.price.toBigDecimal()
+        )
+
+        product.suppliers.add(newRelation)
+        productRepository.save(product)
+
+        return Response(
+            success = true,
+            message = "Relation = $relation",
             status = 200
         )
     }

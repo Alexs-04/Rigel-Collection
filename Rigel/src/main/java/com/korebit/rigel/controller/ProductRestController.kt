@@ -1,5 +1,6 @@
 package com.korebit.rigel.controller
 
+import com.korebit.rigel.dto.request.AddRelationRequest
 import com.korebit.rigel.dto.request.ProductAddRequest
 import com.korebit.rigel.service.ProductService
 import org.springframework.http.ResponseEntity
@@ -36,5 +37,10 @@ class ProductRestController(
     @DeleteMapping("/{name}")
     fun deleteProduct(@PathVariable name: String): ResponseEntity<Any> {
         return ResponseEntity.ok(productService.deleteProduct(name))
+    }
+
+    @PutMapping("/add-relation")
+    fun addSupplierToProduct(@RequestBody relation : AddRelationRequest): ResponseEntity<Any> {
+        return ResponseEntity.ok(productService.addRelationToProduct(relation))
     }
 }
