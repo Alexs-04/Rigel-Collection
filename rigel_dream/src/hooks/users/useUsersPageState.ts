@@ -1,7 +1,7 @@
 import {useEffect, useRef, useState} from 'react'
 import type {FormEvent} from 'react'
 import api from '../../services/api'
-import {loadDetailSafely} from '../../utils/detailLoader.ts'
+import {loadDetailSafely} from '../../utils/detailLoader'
 import type {UserDetail, UserFormValues, UserSummary} from '../../types/users'
 
 const initialForm: UserFormValues = {

@@ -1,5 +1,4 @@
-import type {Context} from 'react'
-import {AuthContext as rawAuthContext} from './AuthContext.jsx'
+import {createContext} from 'react'
 
 export interface AuthUser {
     username?: string
@@ -15,5 +14,5 @@ export interface AuthContextValue {
     logout?: () => void
 }
 
-export const AuthContext = rawAuthContext as Context<AuthContextValue | null>
+export const AuthContext = createContext<AuthContextValue | null>(null)
 
