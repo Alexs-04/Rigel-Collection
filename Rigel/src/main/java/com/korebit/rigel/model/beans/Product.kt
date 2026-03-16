@@ -16,34 +16,36 @@ import java.io.Serializable
 import java.math.BigDecimal
 
 @Entity(name = "products")
-class Product (
+class Product(
     @Id @GeneratedValue(strategy = GenerationType.AUTO)
-    var id : Long? = null,
+    var id: Long? = null,
 
     @Column(nullable = false, length = 64)
-    var name : String = "",
+    var name: String = "",
 
     @Column(nullable = false, length = 64)
-    var description : String = "",
+    var description: String = "",
 
     @Column(nullable = false, length = 32, unique = true)
-    var barcode : String = "",
+    var barcode: String = "",
 
     @Column(nullable = false, precision = 19, scale = 4)
-    var price : BigDecimal = BigDecimal.ZERO,
+    var price: BigDecimal = BigDecimal.ZERO,
 
     @Column(nullable = false, length = 32)
-    var stockQuantity : Int = 0,
+    var stockQuantity: Int = 0,
 
     @Enumerated(EnumType.STRING)
-    var category : Category = Category.OTHERS,
+    var category: Category = Category.OTHERS,
 
     @Column(nullable = true, length = 256)
-    var imageUrl : String = "",
+    var imageUrl: String = "",
 
     @OneToMany(mappedBy = "product", cascade = [CascadeType.ALL], orphanRemoval = true)
-    var suppliers : MutableList<ProductSupplier> = mutableListOf(),
+    var suppliers: MutableList<ProductSupplier> = mutableListOf(),
 
     @OneToMany(mappedBy = "product", cascade = [CascadeType.ALL], orphanRemoval = true)
     var ticketDetails: MutableList<TicketDetail> = mutableListOf(),
+
+    var perishable: Boolean = false,
 ) : Serializable

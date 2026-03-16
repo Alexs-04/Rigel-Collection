@@ -5,9 +5,11 @@ import com.korebit.rigel.dto.TicketDto
 import com.korebit.rigel.dto.request.TicketAddRequest
 import com.korebit.rigel.dto.response.Response
 import com.korebit.rigel.exception.EntityNotFundException
+import com.korebit.rigel.model.beans.Batch
 import com.korebit.rigel.model.beans.Product
 import com.korebit.rigel.model.beans.Ticket
 import com.korebit.rigel.model.extra.TicketDetail
+import com.korebit.rigel.repository.BatchRepository
 import com.korebit.rigel.repository.ConsumerRepository
 import com.korebit.rigel.repository.ProductRepository
 import com.korebit.rigel.repository.TicketRepository
@@ -22,6 +24,7 @@ class TicketService(
     private val ticketRepository: TicketRepository,
     private val consumerRepository: ConsumerRepository,
     private val productRepository: ProductRepository,
+    private val batchRepository: BatchRepository,
 ) {
 
     private data class ResolvedItem(
@@ -31,6 +34,54 @@ class TicketService(
         val discount: BigDecimal,
         val product: Product,
     )
+
+    @Transactional
+    fun deleteTicket(barcode: String): Response {
+        val ticket = ticketRepository.findTicketByBarcode(barcode)
+            ?: throw EntityNotFundException("Ticket with barcode $barcode not found")
+
+        val restoredByBatch = mutableMapOf<Batch, Int>()
+        val stockToRestoreByBarcode = ticket.ticketDetails
+            .groupBy { it.product?.barcode ?: "" }
+            .mapValues { (_, details) -> details.sumOf { it.quantity } }
+
+        val productByBarcode = ticket.ticketDetails
+            .mapNotNull { it.product }
+            .associateBy { it.barcode }
+
+        stockToRestoreByBarcode.forEach { (barcode, quantityToRestore) ->
+            val product = productByBarcode[barcode]
+                ?: throw EntityNotFundException("Product with barcode $barcode not found")
+
+            product.stockQuantity += quantityToRestore
+        }
+
+        ticket.ticketDetails.forEach { detail ->
+            val batch = detail.batch ?: return@forEach
+            restoredByBatch[batch] = (restoredByBatch[batch] ?: 0) + detail.quantity
+        }
+
+        restoredByBatch.forEach { (batch, restoredQty) ->
+            batch.remainingAmount += restoredQty
+            if (batch.remainingAmount > 0 && !batch.expirationDate.isBefore(LocalDate.now())) {
+                batch.available = true
+            }
+        }
+
+        if (restoredByBatch.isNotEmpty()) {
+            batchRepository.saveAll(restoredByBatch.keys)
+        }
+
+        productRepository.saveAll(productByBarcode.values)
+
+        ticketRepository.delete(ticket)
+
+        return Response(
+            success = true,
+            message = "Ticket deleted successfully",
+            status = 200
+        )
+    }
 
     @Transactional
     fun addTicket(ticket: TicketAddRequest): Response {
@@ -77,6 +128,8 @@ class TicketService(
         val productByBarcode = resolvedItems
             .associate { it.barcode to it.product }
 
+        val sellableBatchesByBarcode = mutableMapOf<String, List<Batch>>()
+
         requiredStockByBarcode.forEach { (barcode, requiredQuantity) ->
             val product = productByBarcode[barcode]
                 ?: throw EntityNotFundException("Product with barcode $barcode not found")
@@ -86,6 +139,18 @@ class TicketService(
                     "Insufficient stock for product $barcode. Available: ${product.stockQuantity}, requested: $requiredQuantity"
                 )
             }
+
+            val productId = product.id ?: throw EntityNotFundException("Product id for barcode $barcode not found")
+            val sellableBatches = batchRepository.findSellableByProductId(productId, LocalDate.now())
+            val availableOnFloor = sellableBatches.sumOf { it.remainingAmount }
+
+            if (availableOnFloor < requiredQuantity) {
+                throw IllegalArgumentException(
+                    "Insufficient sellable batch stock for product $barcode. Available on floor: $availableOnFloor, requested: $requiredQuantity"
+                )
+            }
+
+            sellableBatchesByBarcode[barcode] = sellableBatches
         }
 
         val newTicket = Ticket(
@@ -96,23 +161,59 @@ class TicketService(
             consumer = currentConsumer,
         )
 
-        val details = resolvedItems.map { item ->
-            val subtotal = item.price
-                .multiply(BigDecimal.valueOf(item.quantity.toLong()))
-                .subtract(item.discount)
+        val consumedByBatch = mutableMapOf<Batch, Int>()
+        val details = mutableListOf<TicketDetail>()
 
-            if (subtotal < BigDecimal.ZERO) {
-                throw IllegalArgumentException("Subtotal for product ${item.barcode} cannot be negative")
+        resolvedItems.groupBy { it.barcode }.forEach { (barcode, items) ->
+            val batches = sellableBatchesByBarcode[barcode].orEmpty()
+            var batchIndex = 0
+
+            items.forEach { item ->
+                var remainingToAllocate = item.quantity
+                var firstChunk = true
+
+                while (remainingToAllocate > 0) {
+                    if (batchIndex >= batches.size) {
+                        throw IllegalArgumentException("No sellable batches left for product $barcode")
+                    }
+
+                    val batch = batches[batchIndex]
+                    val alreadyConsumed = consumedByBatch[batch] ?: 0
+                    val freeInBatch = batch.remainingAmount - alreadyConsumed
+
+                    if (freeInBatch <= 0) {
+                        batchIndex++
+                        continue
+                    }
+
+                    val consumedNow = minOf(remainingToAllocate, freeInBatch)
+                    val appliedDiscount = if (firstChunk) item.discount else BigDecimal.ZERO
+
+                    val subtotal = item.price
+                        .multiply(BigDecimal.valueOf(consumedNow.toLong()))
+                        .subtract(appliedDiscount)
+
+                    if (subtotal < BigDecimal.ZERO) {
+                        throw IllegalArgumentException("Subtotal for product ${item.barcode} cannot be negative")
+                    }
+
+                    details.add(
+                        TicketDetail(
+                            quantity = consumedNow,
+                            price = item.price,
+                            discount = appliedDiscount,
+                            subtotal = subtotal,
+                            ticket = newTicket,
+                            product = item.product,
+                            batch = batch,
+                        )
+                    )
+
+                    consumedByBatch[batch] = alreadyConsumed + consumedNow
+                    remainingToAllocate -= consumedNow
+                    firstChunk = false
+                }
             }
-
-            TicketDetail(
-                quantity = item.quantity,
-                price = item.price,
-                discount = item.discount,
-                subtotal = subtotal,
-                ticket = newTicket,
-                product = item.product,
-            )
         }
 
         newTicket.ticketDetails.addAll(details)
@@ -121,6 +222,17 @@ class TicketService(
         }
         
         decrementStock(requiredStockByBarcode, productByBarcode)
+
+        consumedByBatch.forEach { (batch, consumedQty) ->
+            batch.remainingAmount -= consumedQty
+            if (batch.remainingAmount <= 0) {
+                batch.remainingAmount = 0
+                batch.available = false
+            }
+        }
+        if (consumedByBatch.isNotEmpty()) {
+            batchRepository.saveAll(consumedByBatch.keys)
+        }
         
         ticketRepository.save(newTicket)
 
@@ -142,7 +254,7 @@ class TicketService(
             ticket.dateAndTime,
             ticket.totalAmount.toDouble(),
             ticket.ticketDetails.map { x ->
-                TicketDetailDto(x.product?.barcode ?: "", x.quantity, x.price, x.discount, x.product?.name ?: "")
+                TicketDetailDto(x.product?.barcode ?: "", x.quantity, x.price, x.discount, x.batch?.code, x.product?.name ?: "")
             }
         )
     }
@@ -175,7 +287,7 @@ class TicketService(
                 ticket.dateAndTime,
                 ticket.totalAmount.toDouble(),
                 ticket.ticketDetails.map { x ->
-                    TicketDetailDto(x.product?.barcode ?: "", x.quantity, x.price, x.discount, x.product?.name ?: "")
+                    TicketDetailDto(x.product?.barcode ?: "", x.quantity, x.price, x.discount, x.batch?.code, x.product?.name ?: "")
                 }
             )
         }
