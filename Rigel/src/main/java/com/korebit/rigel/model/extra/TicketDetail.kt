@@ -2,6 +2,7 @@ package com.korebit.rigel.model.extra
 
 import com.korebit.rigel.model.beans.Product
 import com.korebit.rigel.model.beans.Ticket
+import com.korebit.rigel.model.beans.Batch
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.FetchType
@@ -38,4 +39,8 @@ class TicketDetail(
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id")
     var product : Product? = null,
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "batch_id", referencedColumnName = "id")
+    var batch: Batch? = null,
 ) : Serializable
