@@ -1,6 +1,5 @@
 package com.korebit.rigel.service
 
-import com.korebit.rigel.dto.TicketDetailDto
 import com.korebit.rigel.dto.TicketDto
 import com.korebit.rigel.dto.request.TicketAddRequest
 import com.korebit.rigel.dto.response.Response
@@ -247,16 +246,7 @@ class TicketService(
         val ticket = ticketRepository.findTicketByBarcode(barcode)
             ?: throw EntityNotFundException("Ticket with barcode $barcode not found")
 
-        return TicketDto(
-            ticket.consumer?.email ?: "Unknown",
-            ticket.barcode,
-            ticket.description,
-            ticket.dateAndTime,
-            ticket.totalAmount.toDouble(),
-            ticket.ticketDetails.map { x ->
-                TicketDetailDto(x.product?.barcode ?: "", x.quantity, x.price, x.discount, x.batch?.code, x.product?.name ?: "")
-            }
-        )
+        return TicketDto.toDto(ticket)
     }
 
     private fun decrementStock(requiredStockByBarcode: Map<String, Int>, productByBarcode: Map<String, Product>) {
@@ -280,16 +270,7 @@ class TicketService(
 
      fun getAllTickets() : List<TicketDto> {
         return ticketRepository.findAll().map { ticket ->
-            TicketDto(
-                ticket.consumer?.email ?: "Unknown",
-                ticket.barcode,
-                ticket.description,
-                ticket.dateAndTime,
-                ticket.totalAmount.toDouble(),
-                ticket.ticketDetails.map { x ->
-                    TicketDetailDto(x.product?.barcode ?: "", x.quantity, x.price, x.discount, x.batch?.code, x.product?.name ?: "")
-                }
-            )
+            TicketDto.toDto(ticket)
         }
     }
 }
