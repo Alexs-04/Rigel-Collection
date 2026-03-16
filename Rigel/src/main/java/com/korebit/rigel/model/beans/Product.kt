@@ -47,5 +47,6 @@ class Product(
     @OneToMany(mappedBy = "product", cascade = [CascadeType.ALL], orphanRemoval = true)
     var ticketDetails: MutableList<TicketDetail> = mutableListOf(),
 
+    @Column(nullable = true)
     var perishable: Boolean = false,
 ) : Serializable
