@@ -8,9 +8,12 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface BatchRepository extends JpaRepository<Batch, Long> {
+
+    Optional<Batch> findByCode(String code);
 
     @Query("""
             select b from batches b
