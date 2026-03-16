@@ -7,5 +7,5 @@ data class TicketDetailDto(
 	val quantity: Int,
 	val price: BigDecimal,
 	val discount: BigDecimal = BigDecimal.ZERO,
-	val productName : String,
+	val productName: String = "",
 )
