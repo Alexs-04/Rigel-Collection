@@ -1,0 +1,5 @@
+package com.korebit.rigel.model.enums;
+
+public enum ContainerType {
+    LARGE_GLASS_CONTAINER, SMALL_GLASS_CONTAINER, LARGE_PLASTIC_CONTAINER,  SMALL_PLASTIC_CONTAINER, BEER_CONTAINER
+}

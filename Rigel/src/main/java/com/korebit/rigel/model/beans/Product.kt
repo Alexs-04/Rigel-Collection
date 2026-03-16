@@ -2,6 +2,7 @@ package com.korebit.rigel.model.beans
 
 import com.korebit.rigel.model.enums.Category
 import com.korebit.rigel.model.extra.ProductSupplier
+import com.korebit.rigel.model.extra.TicketDetail
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
@@ -41,5 +42,8 @@ class Product (
     var imageUrl : String = "",
 
     @OneToMany(mappedBy = "product", cascade = [CascadeType.ALL], orphanRemoval = true)
-    var suppliers : MutableList<ProductSupplier> = mutableListOf()
+    var suppliers : MutableList<ProductSupplier> = mutableListOf(),
+
+    @OneToMany(mappedBy = "product", cascade = [CascadeType.ALL], orphanRemoval = true)
+    var ticketDetails: MutableList<TicketDetail> = mutableListOf(),
 ) : Serializable

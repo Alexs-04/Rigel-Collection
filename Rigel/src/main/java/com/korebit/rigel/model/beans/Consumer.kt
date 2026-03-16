@@ -41,4 +41,10 @@ class Consumer (
 
     @OneToMany(mappedBy = "consumer", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
     var tokens: MutableList<Token> = mutableListOf(),
+
+    @OneToMany(mappedBy = "consumer", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
+    var tickets: MutableList<Ticket> = mutableListOf(),
+
+    @OneToMany(mappedBy = "consumer", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
+    var containers : MutableList<Amount> = mutableListOf(),
 ) : Serializable

@@ -1,18 +1,11 @@
 import {useContext, useMemo} from 'react'
-// @ts-ignore
 import {AuthContext} from '../context/AuthContext'
+import type {AuthContextValue} from '../context/AuthContext'
 import SupplierDetailPanel from '../components/suppliers/SupplierDetailPanel'
 import SupplierFormCard from '../components/suppliers/SupplierFormCard'
 import SuppliersListPanel from '../components/suppliers/SuppliersListPanel'
 import {useSuppliersPageState} from '../hooks/suppliers/useSuppliersPageState'
 
-interface AuthUser {
-    role?: string
-}
-
-interface AuthContextValue {
-    user?: AuthUser | null
-}
 
 export default function Suppliers() {
     const {user} = useContext(AuthContext) as AuthContextValue

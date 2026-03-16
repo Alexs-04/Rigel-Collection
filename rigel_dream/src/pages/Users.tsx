@@ -1,5 +1,5 @@
 import {useContext, useMemo} from 'react'
-import {AuthContext} from '../context/AuthContext.ts'
+import {AuthContext} from '../context/AuthContext'
 import UserDetailPanel from '../components/users/UserDetailPanel'
 import UserFormCard from '../components/users/UserFormCard'
 import UsersListPanel from '../components/users/UsersListPanel'
