@@ -38,6 +38,9 @@ class Amount(
     @Column(nullable = false)
     var expirationDate: LocalDateTime = LocalDateTime.now(),
 
+    @Column(nullable = false)
+    var returned : Boolean = false,
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_id")
     var consumer: Consumer? = null,

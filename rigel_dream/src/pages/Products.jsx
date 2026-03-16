@@ -57,10 +57,18 @@ export default function Products() {
                 onSubmit={addProduct}
             />
 
+            <section className="card" style={{padding: 16}}>
+                <h2 style={{marginTop: 0, fontSize: 18}}> Búsqueda</h2>
+                <input
+                    className="input"
+                    placeholder="Buscar por nombre, código o categoría"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                />
+            </section>
+
             <section style={{display: 'grid', gridTemplateColumns: 'minmax(280px, 1fr) minmax(380px, 1.2fr)', gap: 16}}>
                 <ProductsListPanel
-                    search={search}
-                    onSearchChange={setSearch}
                     loadingList={loadingList}
                     listError={listError}
                     products={filteredProducts}

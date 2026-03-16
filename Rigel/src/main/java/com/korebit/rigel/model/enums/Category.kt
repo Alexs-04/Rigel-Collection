@@ -16,5 +16,7 @@ enum class Category {
     DAIRY,
     CANNED,
     SWEET_BREAD,
+    TOBACCO,
+    SPECIAL,
     OTHERS
 }
