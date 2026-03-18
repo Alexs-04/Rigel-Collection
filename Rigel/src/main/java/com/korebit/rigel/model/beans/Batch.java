@@ -4,6 +4,8 @@ import com.korebit.rigel.model.extra.ProductSupplier;
 import jakarta.persistence.*;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
@@ -41,6 +43,9 @@ public class Batch implements Serializable {
             @JoinColumn(name = "supplier_id", referencedColumnName = "supplier_id", nullable = false)
     })
     private ProductSupplier productSupplier;
+
+    @OneToMany(mappedBy = "batch", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Purchase> purchases = new ArrayList<>();
 
     public Batch(Long id, String code, LocalDate receptionDate, LocalDate expirationDate, Integer receivedAmount,
                  Integer remainingAmount, Boolean available, BigDecimal price, String notes, ProductSupplier productSupplier) {
@@ -137,5 +142,13 @@ public class Batch implements Serializable {
 
     public void setProductSupplier(ProductSupplier productSupplier) {
         this.productSupplier = productSupplier;
+    }
+
+    public List<Purchase> getPurchases() {
+        return purchases;
+    }
+
+    public void setPurchases(List<Purchase> purchases) {
+        this.purchases = purchases;
     }
 }

@@ -1,6 +1,6 @@
 import {useEffect, useMemo, useRef, useState} from 'react'
 import api from '../../services/api.js'
-import {loadDetailSafely} from '../../utils/detailLoader.js'
+import {loadDetailSafely} from '../../utils/detailLoader'
 
 const initialForm = {
     name: '',
