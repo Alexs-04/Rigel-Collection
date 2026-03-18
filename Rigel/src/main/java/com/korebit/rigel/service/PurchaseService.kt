@@ -161,10 +161,12 @@ class PurchaseService(
     }
 
     private fun validateRequest(request: PurchaseCreateRequest) {
-        if (request.productName.trim().isEmpty()) throw IllegalArgumentException("Product name is required")
-        if (request.supplierName.trim().isEmpty()) throw IllegalArgumentException("Supplier name is required")
-        if (request.quantity <= 0) throw IllegalArgumentException("Quantity must be greater than zero")
-        if (request.unitPrice < 0) throw IllegalArgumentException("Unit price cannot be negative")
+        when {
+            request.productName.trim().isEmpty() -> throw IllegalArgumentException("Product name is required")
+            request.supplierName.trim().isEmpty() -> throw IllegalArgumentException("Supplier name is required")
+            request.quantity <= 0 -> throw IllegalArgumentException("Quantity must be greater than zero")
+            request.unitPrice < 0 -> throw IllegalArgumentException("Unit price cannot be negative")
+        }
 
         request.code?.trim()?.takeIf { it.isNotEmpty() }?.let { code ->
             if (purchaseRepository.findByCode(code).isPresent) {
