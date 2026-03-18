@@ -8,7 +8,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpHeaders;
-import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -18,6 +17,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Objects;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -33,17 +33,21 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected boolean shouldNotFilter(@NonNull HttpServletRequest request) {
+    protected boolean shouldNotFilter(@org.jspecify.annotations.NonNull HttpServletRequest request) {
+        Objects.requireNonNull(request, "Request must not be null");
         String servletPath = request.getServletPath();
         return servletPath.startsWith("/auth/") || servletPath.equals("/consumer/api/add");
     }
 
     @Override
     protected void doFilterInternal(
-            @NonNull HttpServletRequest request,
-            @NonNull HttpServletResponse response,
-            @NonNull FilterChain filterChain
+            @org.jspecify.annotations.NonNull HttpServletRequest request,
+            @org.jspecify.annotations.NonNull HttpServletResponse response,
+            @org.jspecify.annotations.NonNull FilterChain filterChain
     ) throws ServletException, IOException {
+        Objects.requireNonNull(request, "Request must not be null");
+        Objects.requireNonNull(response, "Response must not be null");
+        Objects.requireNonNull(filterChain, "Chain must not be null");
         final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {

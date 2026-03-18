@@ -1,6 +1,7 @@
 package com.korebit.rigel.model.extra
 
 import com.korebit.rigel.model.beans.Product
+import com.korebit.rigel.model.beans.Purchase
 import com.korebit.rigel.model.beans.Supplier
 import com.korebit.rigel.model.beans.Batch
 import jakarta.persistence.*
@@ -25,6 +26,9 @@ class ProductSupplier (
     var supplyPrice : BigDecimal = BigDecimal.ZERO,
 
     @OneToMany(mappedBy = "productSupplier", cascade = [CascadeType.ALL], orphanRemoval = true)
-    var batches: MutableList<Batch> = mutableListOf()
+    var batches: MutableList<Batch> = mutableListOf(),
+
+    @OneToMany(mappedBy = "productSupplier", cascade = [CascadeType.ALL], orphanRemoval = true)
+    var purchases: MutableList<Purchase> = mutableListOf()
 
 ): Serializable
