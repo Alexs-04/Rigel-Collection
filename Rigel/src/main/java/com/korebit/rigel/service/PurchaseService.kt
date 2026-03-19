@@ -8,7 +8,6 @@ import com.korebit.rigel.model.beans.Batch
 import com.korebit.rigel.model.beans.Purchase
 import com.korebit.rigel.model.extra.ProductSupplier
 import com.korebit.rigel.repository.BatchRepository
-import com.korebit.rigel.repository.ProductRepository
 import com.korebit.rigel.repository.ProductSupplierRepository
 import com.korebit.rigel.repository.PurchaseRepository
 import org.springframework.stereotype.Service
@@ -22,7 +21,6 @@ class PurchaseService(
     private val purchaseRepository: PurchaseRepository,
     private val productSupplierRepository: ProductSupplierRepository,
     private val batchRepository: BatchRepository,
-    private val productRepository: ProductRepository,
 ) {
 
     @Transactional(readOnly = true)
@@ -56,8 +54,6 @@ class PurchaseService(
         validateRequest(request)
 
         val relation = resolveRelation(request.productName, request.supplierName)
-        val product = relation.product ?: throw EntityNotFundException("Product not found in relation")
-
         val batch = resolveOrCreateBatch(request, relation)
 
         val quantity = request.quantity
@@ -69,8 +65,6 @@ class PurchaseService(
         if (batch.expirationDate.isBefore(LocalDate.now())) {
             batch.available = false
         }
-
-        product.stockQuantity += quantity
 
         val unitPrice = request.unitPrice.toBigDecimal()
         val totalPrice = unitPrice.multiply(BigDecimal.valueOf(quantity.toLong()))
@@ -90,7 +84,6 @@ class PurchaseService(
         batch.purchases.add(purchase)
 
         batchRepository.save(batch)
-        productRepository.save(product)
         purchaseRepository.save(purchase)
 
         return Response(

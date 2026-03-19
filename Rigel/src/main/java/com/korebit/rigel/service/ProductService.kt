@@ -56,7 +56,6 @@ class ProductService(
             description = productRequest.description.trim(),
             barcode = barcode,
             price = productRequest.price.toBigDecimal(),
-            stockQuantity = 0,
             category = parseCategory(productRequest.category),
             imageUrl = productRequest.imageUrl.trim()
         )
@@ -70,7 +69,6 @@ class ProductService(
         relation.batches.add(createBatchEntity(initialBatch, relation))
 
         newProduct.suppliers.add(relation)
-        recalculateStock(newProduct)
 
         productRepository.save(newProduct)
 
@@ -159,8 +157,6 @@ class ProductService(
             activeRelation.batches.add(createBatchEntity(newBatch, activeRelation))
         }
 
-        recalculateStock(existingProduct)
-
         productRepository.save(existingProduct)
 
         return Response(
@@ -205,7 +201,6 @@ class ProductService(
 
         validateBatchFields(batchRequest)
         activeRelation.batches.add(createBatchEntity(batchRequest, activeRelation))
-        recalculateStock(product)
         productRepository.save(product)
 
         return Response(
@@ -265,11 +260,6 @@ class ProductService(
         }
     }
 
-    private fun recalculateStock(product: Product) {
-        product.stockQuantity = product.suppliers
-            .flatMap { it.batches }
-            .sumOf { it.remainingAmount }
-    }
 
     private fun resolveSupplier(name: String): Supplier {
         val normalizedName = name.trim()

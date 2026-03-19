@@ -40,20 +40,6 @@ class TicketService(
             ?: throw EntityNotFundException("Ticket with barcode $barcode not found")
 
         val restoredByBatch = mutableMapOf<Batch, Int>()
-        val stockToRestoreByBarcode = ticket.ticketDetails
-            .groupBy { it.product?.barcode ?: "" }
-            .mapValues { (_, details) -> details.sumOf { it.quantity } }
-
-        val productByBarcode = ticket.ticketDetails
-            .mapNotNull { it.product }
-            .associateBy { it.barcode }
-
-        stockToRestoreByBarcode.forEach { (barcode, quantityToRestore) ->
-            val product = productByBarcode[barcode]
-                ?: throw EntityNotFundException("Product with barcode $barcode not found")
-
-            product.stockQuantity += quantityToRestore
-        }
 
         ticket.ticketDetails.forEach { detail ->
             val batch = detail.batch ?: return@forEach
@@ -70,8 +56,6 @@ class TicketService(
         if (restoredByBatch.isNotEmpty()) {
             batchRepository.saveAll(restoredByBatch.keys)
         }
-
-        productRepository.saveAll(productByBarcode.values)
 
         ticketRepository.delete(ticket)
 
@@ -132,12 +116,6 @@ class TicketService(
         requiredStockByBarcode.forEach { (barcode, requiredQuantity) ->
             val product = productByBarcode[barcode]
                 ?: throw EntityNotFundException("Product with barcode $barcode not found")
-
-            if (product.stockQuantity < requiredQuantity) {
-                throw IllegalArgumentException(
-                    "Insufficient stock for product $barcode. Available: ${product.stockQuantity}, requested: $requiredQuantity"
-                )
-            }
 
             val productId = product.id ?: throw EntityNotFundException("Product id for barcode $barcode not found")
             val sellableBatches = batchRepository.findSellableByProductId(productId, LocalDate.now())
@@ -219,8 +197,6 @@ class TicketService(
         newTicket.totalAmount = details.fold(BigDecimal.ZERO) { acc, detail ->
             acc.add(detail.subtotal)
         }
-        
-        decrementStock(requiredStockByBarcode, productByBarcode)
 
         consumedByBatch.forEach { (batch, consumedQty) ->
             batch.remainingAmount -= consumedQty
@@ -249,15 +225,6 @@ class TicketService(
         return TicketDto.toDto(ticket)
     }
 
-    private fun decrementStock(requiredStockByBarcode: Map<String, Int>, productByBarcode: Map<String, Product>) {
-        productByBarcode.forEach { (barcode, product) ->
-            val quantityToDecrement = requiredStockByBarcode[barcode] ?: 0
-            if (quantityToDecrement > 0) {
-                product.stockQuantity -= quantityToDecrement
-            }
-        }
-        productRepository.saveAll(productByBarcode.values)
-    }
 
     private fun generateTicketBarcode(): String {
         var barcode: String
