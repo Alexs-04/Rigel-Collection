@@ -1,0 +1,6 @@
+CREATE DATABASE rigel_db;
+USE rigel_db;
+CREATE USER rigel_root WITH PASSWORD 'root';
+GRANT ALL PRIVILIGES ON DATABASE rigel_db TO rigel_root;
+CREATE SCHEMA rigel AUTHORIZATION rigel_root;
+GRANT ALL PRIVILEGES ON SCHEMA rigel TO rigel_root;

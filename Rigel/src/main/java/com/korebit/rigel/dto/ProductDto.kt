@@ -34,7 +34,9 @@ data class ProductDto(
                 barcode = product.barcode,
                 category = product.category.name,
                 price = product.price.toDouble(),
-                stock = product.stockQuantity,
+                stock = product.suppliers
+                    .flatMap { it.batches }
+                    .sumOf { it.remainingAmount },
                 imageUrl = product.imageUrl,
                 suppliers = suppliers,
             )

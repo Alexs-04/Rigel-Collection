@@ -43,8 +43,6 @@ class BatchService(
             request.supplierName.trim(),
         ) ?: throw EntityNotFundException("Supplier ${request.supplierName} is not related to product ${request.productName}")
 
-        val product = relation.product ?: throw EntityNotFundException("Product not found in relation")
-
         val initialRemaining = request.remainingAmount ?: request.receivedAmount
         if (initialRemaining < 0 || initialRemaining > request.receivedAmount) {
             throw IllegalArgumentException("Remaining amount must be between 0 and received amount")
@@ -61,10 +59,7 @@ class BatchService(
         batch.notes = request.notes.trim()
         batch.productSupplier = relation
 
-        product.stockQuantity += initialRemaining
-
         batchRepository.save(batch)
-        productRepository.save(product)
 
         return Response(
             success = true,
@@ -85,8 +80,6 @@ class BatchService(
             request.supplierName.trim(),
         ) ?: throw EntityNotFundException("Supplier ${request.supplierName} is not related to product ${request.productName}")
 
-        val product = relation.product ?: throw EntityNotFundException("Product not found in relation")
-
         val consumedAmount = batch.receivedAmount - batch.remainingAmount
         if (request.receivedAmount < consumedAmount) {
             throw IllegalArgumentException("Received amount cannot be less than consumed amount ($consumedAmount)")
@@ -97,8 +90,6 @@ class BatchService(
             throw IllegalArgumentException("Remaining amount must be between 0 and received amount")
         }
 
-        val previousRemaining = batch.remainingAmount
-
         batch.code = request.code.trim()
         batch.receptionDate = request.receptionDate
         batch.expirationDate = request.expirationDate
@@ -108,15 +99,6 @@ class BatchService(
         batch.price = request.price.toBigDecimal()
         batch.notes = request.notes.trim()
         batch.productSupplier = relation
-
-        val delta = desiredRemaining - previousRemaining
-        if (delta != 0) {
-            product.stockQuantity += delta
-            if (product.stockQuantity < 0) {
-                throw IllegalArgumentException("Product stock cannot be negative")
-            }
-            productRepository.save(product)
-        }
 
         batchRepository.save(batch)
 
@@ -132,15 +114,6 @@ class BatchService(
         val batch = batchRepository.findById(batchId)
             .orElseThrow { EntityNotFundException("Batch with id $batchId not found") }
 
-        val product = batch.productSupplier?.product ?: throw EntityNotFundException("Product not found in relation")
-
-        if (batch.remainingAmount > 0) {
-            product.stockQuantity -= batch.remainingAmount
-            if (product.stockQuantity < 0) {
-                throw IllegalArgumentException("Product stock cannot be negative")
-            }
-            productRepository.save(product)
-        }
 
         batchRepository.delete(batch)
 
