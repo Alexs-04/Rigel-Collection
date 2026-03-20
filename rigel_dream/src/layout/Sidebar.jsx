@@ -1,21 +1,37 @@
 import React, {useContext} from 'react'
 import {NavLink} from 'react-router-dom'
-import {Home, ShoppingCart, Box, Users, FileText, Settings, Menu, ShoppingBag, User, PackageOpenIcon} from 'lucide-react'
+import {
+    Home,
+    ShoppingCart,
+    Box,
+    Users,
+    FileText,
+    Settings,
+    Menu,
+    ShoppingBag,
+    User,
+    PackageOpenIcon,
+    BottleWine
+} from 'lucide-react'
 import {AuthContext} from '../context/AuthContext'
 
 const items = [
     {to: '/', label: 'Dashboard', icon: Home, roles: ['ROOT', 'ADMIN', 'USER', 'SUPPLIER']},
     {to: '/pos', label: 'Punto de venta', icon: ShoppingCart, roles: ['ROOT', 'ADMIN', 'USER']},
+    {to: '/amounts', label: 'Importes', icon: BottleWine, roles: ['ROOT', 'ADMIN', 'USER']},
     {to: '/products', label: 'Productos', icon: Box, roles: ['ROOT', 'ADMIN', 'USER', 'SUPPLIER']},
     {to: '/suppliers', label: 'Proveedores', icon: Users, roles: ['ROOT', 'ADMIN', 'USER', 'SUPPLIER']},
     {to: '/purchases', label: 'Compras', icon: ShoppingBag, roles: ['ROOT', 'ADMIN']},
     {to: '/logs', label: 'Bitácora', icon: FileText, roles: ['ROOT', 'ADMIN']},
-    {to : '/inventory', label: 'Inventario', icon: PackageOpenIcon, roles: ['ROOT', 'ADMIN', 'USER']},
+    {to: '/inventory', label: 'Inventario', icon: PackageOpenIcon, roles: ['ROOT', 'ADMIN', 'USER']},
     {to: '/users', label: 'Usuarios', icon: User, roles: ['ROOT']},
     {to: '/settings', label: 'Configuración', icon: Settings, roles: ['ROOT', 'ADMIN']},
 ]
 
-export default function Sidebar({collapsed = false, onToggle = () => {}}) {
+export default function Sidebar({
+                                    collapsed = false, onToggle = () => {
+    }
+                                }) {
     const {user} = useContext(AuthContext)
     const width = collapsed ? 80 : 256 // px
     const textColor = '#111827' // slate-900

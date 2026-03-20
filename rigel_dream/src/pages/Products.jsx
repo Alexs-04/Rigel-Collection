@@ -1,9 +1,9 @@
 import React, {useContext, useMemo} from 'react'
 import {AuthContext} from '../context/AuthContext'
-import ProductDetailPanel from './products/components/ProductDetailPanel'
-import ProductFormCard from './products/components/ProductFormCard'
-import ProductsListPanel from './products/components/ProductsListPanel'
-import {useProductsPageState} from './products/hooks/useProductsPageState'
+import ProductDetailPanel from '../components/products/ProductDetailPanel.jsx'
+import ProductFormCard from '../components/products/ProductFormCard.jsx'
+import ProductsListPanel from '../components/products/ProductsListPanel.jsx'
+import {useProductsPageState} from '../hooks/products/useProductsPageState.js'
 
 export default function Products() {
     const {user} = useContext(AuthContext)
@@ -57,10 +57,18 @@ export default function Products() {
                 onSubmit={addProduct}
             />
 
+            <section className="card" style={{padding: 16}}>
+                <h2 style={{marginTop: 0, fontSize: 18}}> Búsqueda</h2>
+                <input
+                    className="input"
+                    placeholder="Buscar por nombre, código o categoría"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                />
+            </section>
+
             <section style={{display: 'grid', gridTemplateColumns: 'minmax(280px, 1fr) minmax(380px, 1.2fr)', gap: 16}}>
                 <ProductsListPanel
-                    search={search}
-                    onSearchChange={setSearch}
                     loadingList={loadingList}
                     listError={listError}
                     products={filteredProducts}

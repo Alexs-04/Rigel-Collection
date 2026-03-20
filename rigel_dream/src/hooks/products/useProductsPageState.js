@@ -1,6 +1,20 @@
 import {useEffect, useMemo, useRef, useState} from 'react'
-import api from '../../../services/api'
-import {loadDetailSafely} from '../../../utils/detailLoader'
+import api from '../../services/api.js'
+import {loadDetailSafely} from '../../utils/detailLoader'
+
+function toDateInputValue(date) {
+    return date.toISOString().slice(0, 10)
+}
+
+function buildInitialBatchDates() {
+    const today = new Date()
+    const expiration = new Date(today)
+    expiration.setMonth(expiration.getMonth() + 6)
+    return {
+        receptionDate: toDateInputValue(today),
+        expirationDate: toDateInputValue(expiration),
+    }
+}
 
 const initialForm = {
     name: '',
@@ -12,6 +26,14 @@ const initialForm = {
     imageUrl: '',
     supplierName: '',
     supplierPrice: '',
+    batchCode: '',
+    batchReceptionDate: buildInitialBatchDates().receptionDate,
+    batchExpirationDate: buildInitialBatchDates().expirationDate,
+    batchReceivedAmount: '',
+    batchRemainingAmount: '',
+    batchAvailable: true,
+    batchPrice: '',
+    batchNotes: '',
 }
 
 function normalizeError(error, fallback) {
@@ -20,26 +42,80 @@ function normalizeError(error, fallback) {
 
 function mapProductDetail(data) {
     const firstSupplier = Array.isArray(data.suppliers) && data.suppliers.length > 0 ? data.suppliers[0] : null
+    const batchDates = buildInitialBatchDates()
     return {
         ...data,
         supplierName: firstSupplier?.name || '',
         supplierPrice: firstSupplier?.supplyPrice ?? data.price ?? '',
+        batchCode: '',
+        batchReceptionDate: batchDates.receptionDate,
+        batchExpirationDate: batchDates.expirationDate,
+        batchReceivedAmount: '',
+        batchRemainingAmount: '',
+        batchAvailable: true,
+        batchPrice: firstSupplier?.supplyPrice ?? data.price ?? '',
+        batchNotes: '',
     }
 }
 
-function buildPayload(source) {
-    const supplierName = (source.supplierName || '').trim()
+function hasBatchInput(source) {
+    return Boolean(
+        String(source.batchCode || '').trim() ||
+        String(source.batchReceivedAmount || '').trim() ||
+        String(source.batchRemainingAmount || '').trim() ||
+        String(source.batchNotes || '').trim()
+    )
+}
+
+function buildBatchPayload(source) {
+    const receivedAmount = Number(source.batchReceivedAmount || 0)
+    const remainingRaw = String(source.batchRemainingAmount || '').trim()
+
     return {
+        code: String(source.batchCode || '').trim(),
+        receptionDate: String(source.batchReceptionDate || '').trim(),
+        expirationDate: String(source.batchExpirationDate || '').trim(),
+        receivedAmount,
+        remainingAmount: remainingRaw ? Number(remainingRaw) : receivedAmount,
+        available: Boolean(source.batchAvailable),
+        price: Number(source.batchPrice || source.supplierPrice || source.price || 0),
+        notes: String(source.batchNotes || '').trim(),
+    }
+}
+
+function validateBatchPayload(batch) {
+    if (!batch.code) throw new Error('El codigo del lote es obligatorio.')
+    if (!batch.receptionDate) throw new Error('La fecha de recepcion del lote es obligatoria.')
+    if (!batch.expirationDate) throw new Error('La fecha de caducidad del lote es obligatoria.')
+    if (!Number.isFinite(batch.receivedAmount) || batch.receivedAmount <= 0) {
+        throw new Error('La cantidad recibida del lote debe ser mayor a 0.')
+    }
+    if (!Number.isFinite(batch.remainingAmount) || batch.remainingAmount < 0 || batch.remainingAmount > batch.receivedAmount) {
+        throw new Error('La cantidad restante del lote debe estar entre 0 y la cantidad recibida.')
+    }
+}
+
+function buildPayload(source, {requireBatch = false} = {}) {
+    const supplierName = (source.supplierName || '').trim()
+    const payload = {
         name: (source.name || '').trim(),
         description: (source.description || '').trim(),
         barcode: (source.barcode || '').trim(),
         category: (source.category || 'OTHERS').trim().toUpperCase(),
         price: Number(source.price || 0),
-        stock: Number(source.stock || 0),
         imageUrl: (source.imageUrl || '').trim(),
         supplierName,
         supplierPrice: Number(source.supplierPrice || source.price || 0),
     }
+
+    const includeBatch = requireBatch || hasBatchInput(source)
+    if (includeBatch) {
+        const batch = buildBatchPayload(source)
+        validateBatchPayload(batch)
+        payload.batch = batch
+    }
+
+    return payload
 }
 
 function matchesSearch(product, rawSearch) {
@@ -176,7 +252,7 @@ export function useProductsPageState({isAdmin}) {
         setFormMessage('')
 
         try {
-            const payload = buildPayload(form)
+            const payload = buildPayload(form, {requireBatch: true})
             if (!payload.supplierName) throw new Error('Selecciona un proveedor para el producto.')
 
             await api.post('/product/add', payload)
@@ -197,7 +273,7 @@ export function useProductsPageState({isAdmin}) {
         setDetailError('')
 
         try {
-            const payload = buildPayload(detail)
+            const payload = buildPayload(detail, {requireBatch: false})
             if (!payload.supplierName) throw new Error('Selecciona un proveedor para el producto.')
 
             await api.put(`/product/${encodeURIComponent(selectedName)}`, payload)

@@ -1,33 +1,22 @@
 import React from 'react'
-import {formatPriceMxn, toCategoryLabel} from '../../../utils/productPresentation'
+import {formatPriceMxn, toCategoryLabel} from '../../utils/productPresentation.js'
 
 export default function ProductsListPanel({
-    search,
-    onSearchChange,
     loadingList,
     listError,
     products,
     selectedName,
     onProductClick,
 }) {
-    const isFiltered = Boolean(search.trim())
-
     return (
         <div className="card" style={{padding: 16}}>
             <h2 style={{marginTop: 0, fontSize: 18}}>Lista de productos</h2>
-            <input
-                className="input"
-                placeholder="Buscar por nombre, codigo o categoria"
-                value={search}
-                onChange={(e) => onSearchChange(e.target.value)}
-                style={{marginBottom: 12}}
-            />
 
             {loadingList && <p className="text-muted">Cargando productos...</p>}
             {!loadingList && listError && <p className="text-muted">{listError}</p>}
             {!loadingList && !listError && products.length === 0 && (
                 <p className="text-muted">
-                    {isFiltered ? 'No se encontraron productos con ese criterio.' : 'No hay productos registrados.'}
+                    No se encontraron productos con ese criterio.
                 </p>
             )}
 

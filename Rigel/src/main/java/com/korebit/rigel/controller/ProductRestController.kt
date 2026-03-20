@@ -1,6 +1,8 @@
 package com.korebit.rigel.controller
 
+import com.korebit.rigel.dto.request.AddRelationRequest
 import com.korebit.rigel.dto.request.ProductAddRequest
+import com.korebit.rigel.dto.request.ProductBatchRequest
 import com.korebit.rigel.service.ProductService
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -23,6 +25,9 @@ class ProductRestController(
     @GetMapping("/{name}")
     fun getProductByName(@PathVariable name: String) = productService.findProductByName(name)
 
+    @GetMapping("/{name}/batches")
+    fun getProductBatches(@PathVariable name: String) = productService.getBatchesByProduct(name)
+
     @PostMapping("/add")
     fun saveProduct(@RequestBody product: ProductAddRequest): ResponseEntity<Any> {
         return ResponseEntity.ok(productService.saveProduct(product))
@@ -33,8 +38,18 @@ class ProductRestController(
         return ResponseEntity.ok(productService.updateProduct(name, product))
     }
 
+    @PutMapping("/{name}/batch")
+    fun addBatchToProduct(@PathVariable name: String, @RequestBody batch: ProductBatchRequest): ResponseEntity<Any> {
+        return ResponseEntity.ok(productService.addBatchToProduct(name, batch))
+    }
+
     @DeleteMapping("/{name}")
     fun deleteProduct(@PathVariable name: String): ResponseEntity<Any> {
         return ResponseEntity.ok(productService.deleteProduct(name))
+    }
+
+    @PutMapping("/add-relation")
+    fun addSupplierToProduct(@RequestBody relation : AddRelationRequest): ResponseEntity<Any> {
+        return ResponseEntity.ok(productService.addRelationToProduct(relation))
     }
 }

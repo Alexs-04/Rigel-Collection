@@ -6,13 +6,14 @@ import Sidebar from './layout/Sidebar'
 import Topbar from './layout/Topbar'
 import Dashboard from './pages/Dashboard'
 import Products from './pages/Products'
-import Suppliers from './pages/Suppliers'
+import Suppliers from './pages/Suppliers.tsx'
 import POS from './pages/POS'
 import Settings from './pages/Settings'
 import Logs from './pages/Logs'
 import Users from './pages/Users'
 import Purchases from "./pages/Purchases.tsx";
 import Inventory from "./pages/Inventory.tsx";
+import Amounts from "./pages/Amounts.tsx";
 import {AuthContext} from './context/AuthContext'
 
 function AppLayout({children}) {
@@ -66,6 +67,7 @@ function AppRoutes() {
                        element={<RoleRoute allowedRoles={['ROOT', 'ADMIN']}><Purchases/></RoleRoute>}/>
                 <Route path="/inventory"
                        element={<RoleRoute allowedRoles={['ROOT', 'ADMIN', 'USER']}><Inventory/></RoleRoute>}/>
+                <Route path="/amounts" element={<RoleRoute allowedRoles={['ROOT', 'ADMIN', 'USER']}><Amounts /></RoleRoute>}/>
             </Routes>
         </AppLayout>
     )

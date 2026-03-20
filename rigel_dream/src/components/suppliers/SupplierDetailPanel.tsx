@@ -1,8 +1,29 @@
-import React from 'react'
-import {formatPriceMxn} from '../../../utils/productPresentation'
-import ProductFieldsGrid from './ProductFieldsGrid'
+import type {SupplierDetail, SupplierFormValues, SupplierProduct} from '../../types/suppliers'
+import SupplierFieldsGrid from './SupplierFieldsGrid'
+import SupplierProductsList from './SupplierProductsList'
 
-export default function ProductDetailPanel({
+type SupplierDetailField = keyof Pick<SupplierFormValues, 'name' | 'contactEmail' | 'phoneNumber' | 'address'>
+
+interface SupplierDetailPanelProps {
+    selectedName: string | null
+    isCollapsingDetail: boolean
+    detailExpanded: boolean
+    showDetailContent: boolean
+    loadingDetail: boolean
+    detailError: string
+    detail: SupplierDetail | null
+    products: SupplierProduct[]
+    editing: boolean
+    saving: boolean
+    isAdmin: boolean
+    onChangeDetail: (key: SupplierDetailField, value: string) => void
+    onStartEdit: () => void
+    onCancelEdit: () => void
+    onSaveChanges: () => void
+    onDeleteSupplier: () => void
+}
+
+export default function SupplierDetailPanel({
     selectedName,
     isCollapsingDetail,
     detailExpanded,
@@ -10,24 +31,24 @@ export default function ProductDetailPanel({
     loadingDetail,
     detailError,
     detail,
+    products,
     editing,
     saving,
     isAdmin,
-    suppliers,
     onChangeDetail,
     onStartEdit,
     onCancelEdit,
     onSaveChanges,
-    onDeleteProduct,
-}) {
+    onDeleteSupplier,
+}: SupplierDetailPanelProps) {
     return (
-        <div className="card product-detail-card" style={{padding: 16}}>
-            <h2 style={{marginTop: 0, fontSize: 18}}>Detalle del producto</h2>
+        <div className="card supplier-detail-card" style={{padding: 16}}>
+            <h2 style={{marginTop: 0, fontSize: 18}}>Detalle del proveedor</h2>
             {!selectedName && !isCollapsingDetail && (
-                <p className="text-muted">Selecciona un producto para ver su informacion.</p>
+                <p className="text-muted">Selecciona un proveedor para ver su informacion.</p>
             )}
 
-            <div className={`product-detail-body ${detailExpanded ? 'is-open' : ''}`}>
+            <div className={`supplier-detail-body ${detailExpanded ? 'is-open' : ''}`}>
                 {showDetailContent && (
                     <>
                         {loadingDetail && <p className="text-muted">Cargando detalle...</p>}
@@ -35,9 +56,8 @@ export default function ProductDetailPanel({
 
                         {detail && !loadingDetail && (
                             <>
-                                <ProductFieldsGrid
+                                <SupplierFieldsGrid
                                     value={detail}
-                                    suppliers={suppliers}
                                     disabled={!editing}
                                     isRequired={editing}
                                     onChange={onChangeDetail}
@@ -60,32 +80,14 @@ export default function ProductDetailPanel({
                                                 Cancelar
                                             </button>
                                         )}
-                                        <button className="btn-ghost" type="button" onClick={onDeleteProduct}>
+                                        <button className="btn-ghost" type="button" onClick={onDeleteSupplier}>
                                             Eliminar
                                         </button>
                                     </div>
                                 )}
 
-                                <h3 style={{marginBottom: 8}}>Proveedor(es) asociado(s)</h3>
-                                {Array.isArray(detail.suppliers) && detail.suppliers.length > 0 ? (
-                                    <div style={{display: 'grid', gap: 8}}>
-                                        {detail.suppliers.map((supplier) => (
-                                            <div
-                                                key={`${detail.name}-${supplier.name}`}
-                                                style={{border: '1px solid var(--border)', borderRadius: 8, padding: 10}}
-                                            >
-                                                <div style={{fontWeight: 600}}>{supplier.name}</div>
-                                                <div className="text-muted" style={{fontSize: 13}}>
-                                                    Precio proveedor: {formatPriceMxn(supplier.supplyPrice)}
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                ) : (
-                                    <p className="text-muted" style={{marginTop: 0}}>
-                                        Este producto no tiene proveedores asociados.
-                                    </p>
-                                )}
+                                <h3 style={{marginBottom: 8}}>Productos asociados</h3>
+                                <SupplierProductsList products={products} />
                             </>
                         )}
                     </>

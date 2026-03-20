@@ -1,5 +1,5 @@
 import React from 'react'
-import ProductFieldsGrid from './ProductFieldsGrid'
+import ProductFieldsGrid from './ProductFieldsGrid.jsx'
 
 export default function ProductFormCard({
     isAdmin,
@@ -31,6 +31,7 @@ export default function ProductFormCard({
                     suppliers={suppliers}
                     disabled={false}
                     isRequired={true}
+                    requireBatch={true}
                     onChange={onChangeForm}
                 />
 

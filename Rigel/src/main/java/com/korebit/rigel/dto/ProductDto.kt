@@ -17,9 +17,14 @@ data class ProductDto(
         fun toRequest(product: Product): ProductDto {
             val suppliers = product.suppliers.mapNotNull { relation ->
                 val supplier = relation.supplier ?: return@mapNotNull null
+                val batches = relation.batches
+                    .sortedByDescending { it.receptionDate }
+                    .map(ProductBatchDto::fromEntity)
+
                 ProductSupplierDto(
                     name = supplier.name,
-                    supplyPrice = relation.supplyPrice.toDouble()
+                    supplyPrice = relation.supplyPrice.toDouble(),
+                    batches = batches,
                 )
             }
 
@@ -29,7 +34,9 @@ data class ProductDto(
                 barcode = product.barcode,
                 category = product.category.name,
                 price = product.price.toDouble(),
-                stock = product.stockQuantity,
+                stock = product.suppliers
+                    .flatMap { it.batches }
+                    .sumOf { it.remainingAmount },
                 imageUrl = product.imageUrl,
                 suppliers = suppliers,
             )
