@@ -40,6 +40,7 @@ export default function ProductDetailPanel({
                                     suppliers={suppliers}
                                     disabled={!editing}
                                     isRequired={editing}
+                                    requireBatch={false}
                                     onChange={onChangeDetail}
                                 />
 
@@ -78,6 +79,16 @@ export default function ProductDetailPanel({
                                                 <div className="text-muted" style={{fontSize: 13}}>
                                                     Precio proveedor: {formatPriceMxn(supplier.supplyPrice)}
                                                 </div>
+
+                                                {Array.isArray(supplier.batches) && supplier.batches.length > 0 && (
+                                                    <div style={{display: 'grid', gap: 6, marginTop: 8}}>
+                                                        {supplier.batches.map((batch) => (
+                                                            <div key={`${supplier.name}-${batch.id}`} style={{fontSize: 13}}>
+                                                                Lote {batch.code} - restante {batch.remainingAmount}/{batch.receivedAmount} - {batch.available ? 'Disponible' : 'No disponible'}
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                )}
                                             </div>
                                         ))}
                                     </div>

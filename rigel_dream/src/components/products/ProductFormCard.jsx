@@ -31,6 +31,7 @@ export default function ProductFormCard({
                     suppliers={suppliers}
                     disabled={false}
                     isRequired={true}
+                    requireBatch={true}
                     onChange={onChangeForm}
                 />
 
