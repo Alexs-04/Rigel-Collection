@@ -33,13 +33,12 @@ class ProductService(
 
     @Transactional
     fun saveProduct(productRequest: ProductAddRequest): Response {
-        val name = productRequest.name.trim()
-        val barcode = productRequest.barcode.trim()
-        val initialBatch = productRequest.batch
-            ?: throw IllegalArgumentException("Batch data is required when creating a product")
+        val name = productRequest.name.safeTrim()
+        val barcode = productRequest.barcode.safeTrim()
+        val supplierName = productRequest.supplierName.safeTrim()
+        val supplierPrice = productRequest.supplierPrice
 
-        validateCommonFields(name, barcode, productRequest.supplierName, productRequest.supplierPrice)
-        validateBatchFields(initialBatch)
+        validateCommonFields(name, barcode, supplierName, supplierPrice)
 
         productRepository.findByName(name).ifPresent {
             throw IllegalArgumentException("Product with name $name already exists")
@@ -49,24 +48,27 @@ class ProductService(
             throw IllegalArgumentException("Product with barcode $barcode already exists")
         }
 
-        val supplier = resolveSupplier(productRequest.supplierName)
+        val supplier = resolveSupplier(supplierName)
 
         val newProduct = Product(
             name = name,
-            description = productRequest.description.trim(),
+            description = productRequest.description.safeTrim(),
             barcode = barcode,
-            price = productRequest.price.toBigDecimal(),
-            category = parseCategory(productRequest.category),
-            imageUrl = productRequest.imageUrl.trim()
+            price = (productRequest.price ?: 0.0).toBigDecimal(),
+            category = parseCategory(productRequest.category.safeTrim()),
+            imageUrl = productRequest.imageUrl.safeTrim()
         )
 
         val relation = ProductSupplier(
             product = newProduct,
             supplier = supplier,
-            supplyPrice = productRequest.supplierPrice.toBigDecimal()
+            supplyPrice = supplierPrice!!.toBigDecimal()
         )
 
-        relation.batches.add(createBatchEntity(initialBatch, relation))
+        productRequest.batch?.let { initialBatch ->
+            validateBatchFields(initialBatch)
+            relation.batches.add(createBatchEntity(initialBatch, relation))
+        }
 
         newProduct.suppliers.add(relation)
 
@@ -120,10 +122,12 @@ class ProductService(
         val existingProduct = productRepository.findByName(currentName)
             .orElseThrow { EntityNotFundException("Product not found") }
 
-        val newName = productRequest.name.trim()
-        val newBarcode = productRequest.barcode.trim()
+        val newName = productRequest.name.safeTrim()
+        val newBarcode = productRequest.barcode.safeTrim()
+        val supplierName = productRequest.supplierName.safeTrim()
+        val supplierPrice = productRequest.supplierPrice
 
-        validateCommonFields(newName, newBarcode, productRequest.supplierName, productRequest.supplierPrice)
+        validateCommonFields(newName, newBarcode, supplierName, supplierPrice)
 
         if (!currentName.equals(newName, ignoreCase = false)) {
             productRepository.findByName(newName).ifPresent {
@@ -137,19 +141,19 @@ class ProductService(
             }
         }
 
-        val supplier = resolveSupplier(productRequest.supplierName)
+        val supplier = resolveSupplier(supplierName)
 
         existingProduct.name = newName
-        existingProduct.description = productRequest.description.trim()
+        existingProduct.description = productRequest.description.safeTrim()
         existingProduct.barcode = newBarcode
-        existingProduct.price = productRequest.price.toBigDecimal()
-        existingProduct.category = parseCategory(productRequest.category)
-        existingProduct.imageUrl = productRequest.imageUrl.trim()
+        existingProduct.price = (productRequest.price ?: 0.0).toBigDecimal()
+        existingProduct.category = parseCategory(productRequest.category.safeTrim())
+        existingProduct.imageUrl = productRequest.imageUrl.safeTrim()
 
         val activeRelation = updateSupplierRelation(
             product = existingProduct,
             supplier = supplier,
-            supplierPrice = productRequest.supplierPrice
+            supplierPrice = supplierPrice!!
         )
 
         productRequest.batch?.let { newBatch ->
@@ -206,7 +210,7 @@ class ProductService(
         return Response(
             success = true,
             status = 200,
-            message = "Batch ${batchRequest.code.trim()} added to product ${product.name} successfully"
+            message = "Batch ${batchRequest.code.safeTrim()} added to product ${product.name} successfully"
         )
     }
 
@@ -241,21 +245,22 @@ class ProductService(
     }
 
     private fun createBatchEntity(batchRequest: ProductBatchRequest, relation: ProductSupplier): Batch {
-        val code = batchRequest.code.trim()
+        val code = batchRequest.code.safeTrim()
+        val receivedAmount = batchRequest.receivedAmount ?: 0
         if (batchRepository.findByCode(code).isPresent) {
             throw IllegalArgumentException("Batch with code $code already exists")
         }
 
-        val remaining = batchRequest.remainingAmount ?: batchRequest.receivedAmount
+        val remaining = batchRequest.remainingAmount ?: receivedAmount
         return Batch().apply {
             this.code = code
-            this.receptionDate = batchRequest.receptionDate
-            this.expirationDate = batchRequest.expirationDate
-            this.receivedAmount = batchRequest.receivedAmount
+            this.receptionDate = batchRequest.receptionDate!!
+            this.expirationDate = batchRequest.expirationDate!!
+            this.receivedAmount = receivedAmount
             this.remainingAmount = remaining
-            this.available = batchRequest.available
-            this.price = batchRequest.price.toBigDecimal()
-            this.notes = batchRequest.notes.trim()
+            this.available = batchRequest.available ?: true
+            this.price = (batchRequest.price ?: 0.0).toBigDecimal()
+            this.notes = batchRequest.notes.safeTrim()
             this.productSupplier = relation
         }
     }
@@ -275,25 +280,37 @@ class ProductService(
             }
     }
 
-    private fun validateCommonFields(name: String, barcode: String, supplierName: String, supplierPrice: Double) {
+    private fun validateCommonFields(name: String, barcode: String, supplierName: String, supplierPrice: Double?) {
         if (name.isBlank()) throw IllegalArgumentException("Product name is required")
         if (barcode.isBlank()) throw IllegalArgumentException("Product barcode is required")
         if (supplierName.isBlank()) throw IllegalArgumentException("Supplier name is required")
+        if (supplierPrice == null) throw IllegalArgumentException("Supplier price is required")
         if (supplierPrice < 0) throw IllegalArgumentException("Supplier price cannot be negative")
     }
 
     private fun validateBatchFields(batchRequest: ProductBatchRequest) {
-        val code = batchRequest.code.trim()
-        val remaining = batchRequest.remainingAmount ?: batchRequest.receivedAmount
+        val code = batchRequest.code.safeTrim()
+        val receptionDate = batchRequest.receptionDate
+        val expirationDate = batchRequest.expirationDate
+        val receivedAmount = batchRequest.receivedAmount
+        val price = batchRequest.price
+        val remaining = batchRequest.remainingAmount ?: receivedAmount ?: 0
 
         if (code.isBlank()) throw IllegalArgumentException("Batch code is required")
-        if (batchRequest.receivedAmount <= 0) throw IllegalArgumentException("Batch received amount must be greater than zero")
-        if (remaining < 0 || remaining > batchRequest.receivedAmount) {
+        if (receptionDate == null) throw IllegalArgumentException("Batch reception date is required")
+        if (expirationDate == null) throw IllegalArgumentException("Batch expiration date is required")
+        if (receivedAmount == null || receivedAmount <= 0) {
+            throw IllegalArgumentException("Batch received amount must be greater than zero")
+        }
+        if (remaining < 0 || remaining > receivedAmount) {
             throw IllegalArgumentException("Batch remaining amount must be between 0 and received amount")
         }
-        if (batchRequest.price < 0) throw IllegalArgumentException("Batch price cannot be negative")
-        if (batchRequest.expirationDate.isBefore(batchRequest.receptionDate)) {
+        if (price == null) throw IllegalArgumentException("Batch price is required")
+        if (price < 0) throw IllegalArgumentException("Batch price cannot be negative")
+        if (expirationDate.isBefore(receptionDate)) {
             throw IllegalArgumentException("Batch expiration date cannot be before reception date")
         }
     }
+
+    private fun String?.safeTrim(): String = this?.trim() ?: ""
 }
