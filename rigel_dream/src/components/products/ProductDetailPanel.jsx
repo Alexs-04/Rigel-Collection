@@ -40,7 +40,6 @@ export default function ProductDetailPanel({
                                     suppliers={suppliers}
                                     disabled={!editing}
                                     isRequired={editing}
-                                    requireBatch={false}
                                     onChange={onChangeDetail}
                                 />
 

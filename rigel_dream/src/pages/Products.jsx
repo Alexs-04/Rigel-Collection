@@ -42,7 +42,8 @@ export default function Products() {
             <section className="card" style={{padding: 20}}>
                 <h1 style={{marginTop: 0, marginBottom: 6}}>Productos</h1>
                 <p className="text-muted" style={{marginTop: 0}}>
-                    Consulta el catalogo y administra productos con proveedores previamente registrados.
+                    Consulta el catalogo y administra productos con proveedores previamente registrados. El inventario y
+                    los lotes se registran desde Compras.
                 </p>
             </section>
 
