@@ -1,6 +1,7 @@
 package com.korebit.rigel.dto.request;
 
 import com.korebit.rigel.dto.TicketDetailDto;
+import com.korebit.rigel.enums.MethodPayment;
 
 import java.io.Serializable;
 import java.time.LocalDate;
@@ -10,6 +11,8 @@ public record TicketAddRequest(
         String description,
         LocalDate dateAndTime,
         List<TicketDetailDto> products,
-        String currentConsumerEmail
+        String currentConsumerEmail,
+
+        MethodPayment methodPayment
 ) implements Serializable {
 }

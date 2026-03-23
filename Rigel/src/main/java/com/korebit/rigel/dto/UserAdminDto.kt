@@ -1,7 +1,7 @@
 package com.korebit.rigel.dto
 
 import com.korebit.rigel.model.beans.Consumer
-import com.korebit.rigel.model.enums.Role
+import com.korebit.rigel.enums.Role
 import java.io.Serializable
 
 data class UserAdminDto(

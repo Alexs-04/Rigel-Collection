@@ -1,6 +1,6 @@
 package com.korebit.rigel.model.beans
 
-import com.korebit.rigel.model.enums.Category
+import com.korebit.rigel.enums.Category
 import com.korebit.rigel.model.extra.ProductSupplier
 import com.korebit.rigel.model.extra.TicketDetail
 import jakarta.persistence.CascadeType

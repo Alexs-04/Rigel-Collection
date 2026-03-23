@@ -1,6 +1,6 @@
 package com.korebit.rigel.model.beans
 
-import com.korebit.rigel.model.enums.Role
+import com.korebit.rigel.enums.Role
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity

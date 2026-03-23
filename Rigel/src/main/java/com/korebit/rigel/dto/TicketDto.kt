@@ -1,5 +1,6 @@
 package com.korebit.rigel.dto
 
+import com.korebit.rigel.enums.MethodPayment
 import com.korebit.rigel.model.beans.Ticket
 import java.io.Serializable
 import java.time.LocalDate
@@ -11,6 +12,7 @@ data class TicketDto(
     val dateAndTime: LocalDate = LocalDate.now(),
     val totalAmount: Double = 0.0,
     val products: List<TicketDetailDto> = emptyList(),
+    val payment: MethodPayment = MethodPayment.CASH
 ) : Serializable {
     companion object {
         fun toDto(ticket : Ticket): TicketDto {
@@ -22,7 +24,8 @@ data class TicketDto(
                 ticket.totalAmount.toDouble(),
                 ticket.ticketDetails.map { x ->
                     TicketDetailDto(x.product?.barcode ?: "", x.quantity, x.price, x.discount, x.batch?.code, x.product?.name ?: "")
-                }
+                },
+                ticket.payment
             )
         }
     }

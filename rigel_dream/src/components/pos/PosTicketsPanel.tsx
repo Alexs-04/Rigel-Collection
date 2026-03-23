@@ -1,4 +1,5 @@
 import {formatPriceMxn} from '../../utils/productPresentation'
+import {toPaymentLabel} from '../../utils/paymentPresentation'
 import type {PosTicket} from '../../types/pos'
 
 interface PosTicketsPanelProps {
@@ -53,7 +54,7 @@ export default function PosTicketsPanel({tickets, onReload, loading}: PosTickets
                             )}
 
                             <small className="text-muted" style={{fontSize: 12}}>
-                                {ticket.products?.length || 0} linea(s) de producto
+                                {ticket.products?.length || 0} linea(s) de producto - Pago: {toPaymentLabel(ticket.payment)}
                             </small>
                         </article>
                     ))}

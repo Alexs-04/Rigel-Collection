@@ -1,6 +1,6 @@
 package com.korebit.rigel.dto.request
 
-import com.korebit.rigel.model.enums.Role
+import com.korebit.rigel.enums.Role
 import java.io.Serializable
 
 data class UserUpsertRequest(

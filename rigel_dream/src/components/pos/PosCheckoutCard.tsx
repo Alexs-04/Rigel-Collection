@@ -1,8 +1,12 @@
 import {formatPriceMxn} from '../../utils/productPresentation'
+import {PAYMENT_OPTIONS_ES} from '../../utils/paymentPresentation'
+import type {MethodPayment} from '../../types/pos'
 
 interface PosCheckoutCardProps {
     description: string
     onDescriptionChange: (value: string) => void
+    methodPayment: MethodPayment
+    onMethodPaymentChange: (value: MethodPayment) => void
     totals: {
         items: number
         subtotal: number
@@ -17,6 +21,8 @@ interface PosCheckoutCardProps {
 export default function PosCheckoutCard({
     description,
     onDescriptionChange,
+    methodPayment,
+    onMethodPaymentChange,
     totals,
     message,
     submitting,
@@ -34,6 +40,21 @@ export default function PosCheckoutCard({
                     value={description}
                     onChange={(event) => onDescriptionChange(event.target.value)}
                 />
+            </label>
+
+            <label style={{marginBottom: 0}}>
+                Metodo de pago
+                <select
+                    className="input"
+                    value={methodPayment}
+                    onChange={(event) => onMethodPaymentChange(event.target.value as MethodPayment)}
+                >
+                    {PAYMENT_OPTIONS_ES.map((option) => (
+                        <option key={option.value} value={option.value}>
+                            {option.label}
+                        </option>
+                    ))}
+                </select>
             </label>
 
             <div

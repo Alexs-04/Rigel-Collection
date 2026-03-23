@@ -1,7 +1,7 @@
 package com.korebit.rigel.config;
 
 import com.korebit.rigel.model.beans.Consumer;
-import com.korebit.rigel.model.enums.Role;
+import com.korebit.rigel.enums.Role;
 import com.korebit.rigel.repository.ConsumerRepository;
 import org.jspecify.annotations.NonNull;
 import org.springframework.boot.CommandLineRunner;
