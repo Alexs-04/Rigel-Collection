@@ -1,9 +1,12 @@
 package com.korebit.rigel.model.beans
 
+import com.korebit.rigel.enums.MethodPayment
 import com.korebit.rigel.model.extra.TicketDetail
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
+import jakarta.persistence.EnumType
+import jakarta.persistence.Enumerated
 import jakarta.persistence.FetchType
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
@@ -35,6 +38,9 @@ class Ticket(
 
     @OneToMany(mappedBy = "ticket", cascade = [CascadeType.ALL], orphanRemoval = true)
     var ticketDetails: MutableList<TicketDetail> = mutableListOf(),
+
+    @Enumerated(EnumType.STRING)
+    var payment: MethodPayment = MethodPayment.CASH,
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "consumer_id")

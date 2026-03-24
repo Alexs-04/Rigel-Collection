@@ -10,7 +10,7 @@ import com.korebit.rigel.exception.EntityNotFundException
 import com.korebit.rigel.model.beans.Batch
 import com.korebit.rigel.model.beans.Product
 import com.korebit.rigel.model.beans.Supplier
-import com.korebit.rigel.model.enums.Category
+import com.korebit.rigel.enums.Category
 import com.korebit.rigel.model.extra.ProductSupplier
 import com.korebit.rigel.repository.BatchRepository
 import com.korebit.rigel.repository.ProductRepository

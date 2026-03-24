@@ -10,7 +10,7 @@ import com.korebit.rigel.repository.ConsumerRepository
 import com.korebit.rigel.dto.response.TokenResponse
 import com.korebit.rigel.dto.response.Response
 import com.korebit.rigel.exception.EntityNotFundException
-import com.korebit.rigel.model.enums.Role
+import com.korebit.rigel.enums.Role
 import com.korebit.rigel.repository.TokenRepository
 import com.korebit.rigel.service.jwt.JwtService
 import com.korebit.rigel.util.SaveConsumerToken

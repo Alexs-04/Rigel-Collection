@@ -25,6 +25,8 @@ export interface PosTicketDetail {
     productName: string
 }
 
+export type MethodPayment = 'CASH' | 'CARD' | 'TRANSFER' | 'DEPOSIT'
+
 export interface PosTicket {
     consumer: string
     barcode: string
@@ -32,6 +34,7 @@ export interface PosTicket {
     dateAndTime: string
     totalAmount: number
     products: PosTicketDetail[]
+    payment?: MethodPayment
 }
 
 export interface PosTicketCreatePayload {
@@ -44,5 +47,6 @@ export interface PosTicketCreatePayload {
         discount: number
     }>
     currentConsumerEmail: string
+    methodPayment: MethodPayment
 }
 

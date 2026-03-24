@@ -21,6 +21,8 @@ export default function POS() {
         setSearch,
         description,
         setDescription,
+        methodPayment,
+        setMethodPayment,
         loadingData,
         listError,
         submitting,
@@ -76,6 +78,8 @@ export default function POS() {
                         <PosCheckoutCard
                             description={description}
                             onDescriptionChange={setDescription}
+                            methodPayment={methodPayment}
+                            onMethodPaymentChange={setMethodPayment}
                             totals={totals}
                             message={checkoutMessage}
                             submitting={submitting}

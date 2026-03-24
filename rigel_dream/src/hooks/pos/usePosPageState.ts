@@ -1,5 +1,5 @@
 import {useEffect, useMemo, useState} from 'react'
-import type {PosCartItem, PosCatalogItem, PosTicketCreatePayload, PosTicket} from '../../types/pos'
+import type {MethodPayment, PosCartItem, PosCatalogItem, PosTicketCreatePayload, PosTicket} from '../../types/pos'
 import {createPosTicket, fetchPosCatalog, fetchPosTickets} from '../../services/posService'
 
 function normalizeError(error: unknown, fallback: string): string {
@@ -21,6 +21,7 @@ export function usePosPageState(currentConsumerEmail: string) {
     const [cart, setCart] = useState<PosCartItem[]>([])
     const [search, setSearch] = useState('')
     const [description, setDescription] = useState('')
+    const [methodPayment, setMethodPayment] = useState<MethodPayment>('CASH')
 
     const [loadingData, setLoadingData] = useState(true)
     const [listError, setListError] = useState('')
@@ -151,6 +152,7 @@ export function usePosPageState(currentConsumerEmail: string) {
             description: description.trim(),
             dateAndTime: toTodayIso(),
             currentConsumerEmail: currentConsumerEmail.trim(),
+            methodPayment,
             products: cart.map((item) => ({
                 barcode: item.barcode,
                 quantity: item.quantity,
@@ -165,6 +167,7 @@ export function usePosPageState(currentConsumerEmail: string) {
             await createPosTicket(payload)
             setCheckoutMessage('Venta registrada correctamente.')
             setDescription('')
+            setMethodPayment('CASH')
             setCart([])
             await loadPosData()
         } catch (error) {
@@ -188,6 +191,8 @@ export function usePosPageState(currentConsumerEmail: string) {
         setSearch,
         description,
         setDescription,
+        methodPayment,
+        setMethodPayment,
         loadingData,
         listError,
         submitting,

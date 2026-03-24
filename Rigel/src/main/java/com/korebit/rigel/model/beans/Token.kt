@@ -1,6 +1,6 @@
 package com.korebit.rigel.model.beans
 
-import com.korebit.rigel.model.enums.TokenType
+import com.korebit.rigel.enums.TokenType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.EnumType

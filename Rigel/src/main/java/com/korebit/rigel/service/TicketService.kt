@@ -136,6 +136,7 @@ class TicketService(
             barcode = generateTicketBarcode(),
             totalAmount = BigDecimal.ZERO,
             consumer = currentConsumer,
+            payment = ticket.methodPayment
         )
 
         val consumedByBatch = mutableMapOf<Batch, Int>()
