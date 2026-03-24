@@ -32,7 +32,6 @@ class Product(
     @Column(nullable = false, precision = 19, scale = 4)
     var price: BigDecimal = BigDecimal.ZERO,
 
-
     @Enumerated(EnumType.STRING)
     var category: Category = Category.OTHERS,
 
