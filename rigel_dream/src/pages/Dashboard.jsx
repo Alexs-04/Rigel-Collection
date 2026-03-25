@@ -25,7 +25,96 @@ function normalizeError(error) {
     return error?.response?.data?.message || 'No se pudo cargar la informacion del dashboard.'
 }
 
+function percentage(value, total) {
+    if (!total) return 0
+    return Math.max(0, Math.min(100, (Number(value || 0) / total) * 100))
+}
+
+function SalesComparisonChart({sales}) {
+    const values = [
+        {label: 'Dia', value: Number(sales?.day || 0), color: '#6366f1'},
+        {label: 'Mes', value: Number(sales?.month || 0), color: '#22c55e'},
+        {label: 'Anio', value: Number(sales?.year || 0), color: '#0ea5e9'},
+    ]
+
+    const maxValue = Math.max(...values.map((item) => item.value), 0)
+
+    return (
+        <section className="card" style={{padding: 16}}>
+            <h2 style={{marginTop: 0, marginBottom: 12, fontSize: 18}}>Comparativo de ventas</h2>
+            <div style={{display: 'grid', gap: 10}}>
+                {values.map((item) => {
+                    const width = maxValue > 0 ? (item.value / maxValue) * 100 : 0
+                    return (
+                        <div key={item.label}>
+                            <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: 4}}>
+                                <span style={{fontSize: 13}}>{item.label}</span>
+                                <strong style={{fontSize: 13}}>{formatCurrency(item.value)}</strong>
+                            </div>
+                            <div style={{height: 10, borderRadius: 999, background: 'rgba(2, 6, 23, 0.08)', overflow: 'hidden'}}>
+                                <div
+                                    style={{
+                                        width: `${width}%`,
+                                        height: '100%',
+                                        borderRadius: 999,
+                                        background: item.color,
+                                        transition: 'width 180ms ease',
+                                    }}
+                                />
+                            </div>
+                        </div>
+                    )
+                })}
+            </div>
+        </section>
+    )
+}
+
+function CatalogCompositionChart({stats}) {
+    const slices = [
+        {label: 'Productos', value: Number(stats?.totalProducts || 0), color: '#6366f1'},
+        {label: 'Proveedores', value: Number(stats?.totalSuppliers || 0), color: '#22c55e'},
+        {label: 'Lotes', value: Number(stats?.totalBatches || 0), color: '#0ea5e9'},
+        {label: 'Tickets', value: Number(stats?.totalTickets || 0), color: '#f59e0b'},
+    ]
+
+    const total = slices.reduce((acc, item) => acc + item.value, 0)
+
+    return (
+        <section className="card" style={{padding: 16}}>
+            <h2 style={{marginTop: 0, marginBottom: 12, fontSize: 18}}>Composicion del sistema</h2>
+            <div style={{height: 14, borderRadius: 999, overflow: 'hidden', display: 'flex', background: 'rgba(2, 6, 23, 0.08)'}}>
+                {slices.map((item) => (
+                    <div
+                        key={item.label}
+                        title={`${item.label}: ${formatNumber(item.value)}`}
+                        style={{
+                            width: `${percentage(item.value, total)}%`,
+                            background: item.color,
+                            minWidth: item.value > 0 ? 4 : 0,
+                        }}
+                    />
+                ))}
+            </div>
+
+            <div style={{display: 'grid', gap: 8, marginTop: 12}}>
+                {slices.map((item) => (
+                    <div key={item.label} style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+                        <div style={{display: 'inline-flex', alignItems: 'center', gap: 8}}>
+                            <span style={{display: 'inline-block', width: 10, height: 10, borderRadius: 999, background: item.color}}/>
+                            <span style={{fontSize: 13}}>{item.label}</span>
+                        </div>
+                        <strong style={{fontSize: 13}}>{formatNumber(item.value)}</strong>
+                    </div>
+                ))}
+            </div>
+        </section>
+    )
+}
+
 function TopList({title, data, emptyText}) {
+    const maxTotal = Math.max(...data.map((item) => Number(item.total || 0)), 0)
+
     return (
         <section className="card" style={{padding: 16}}>
             <h2 style={{marginTop: 0, marginBottom: 12, fontSize: 18}}>{title}</h2>
@@ -33,19 +122,30 @@ function TopList({title, data, emptyText}) {
             {!!data.length && (
                 <div style={{display: 'grid', gap: 10}}>
                     {data.map((item, index) => (
-                        <div
-                            key={`${item.name}-${index}`}
-                            style={{
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                alignItems: 'center',
-                                padding: '10px 12px',
-                                border: '1px solid rgba(2, 6, 23, 0.08)',
-                                borderRadius: 8,
-                            }}
-                        >
-                            <span>{item.name}</span>
-                            <strong>{formatNumber(item.total)}</strong>
+                        <div key={`${item.name}-${index}`}>
+                            <div
+                                style={{
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    padding: '10px 12px',
+                                    border: '1px solid rgba(2, 6, 23, 0.08)',
+                                    borderRadius: 8,
+                                }}
+                            >
+                                <span>{item.name}</span>
+                                <strong>{formatNumber(item.total)}</strong>
+                            </div>
+                            <div style={{height: 6, marginTop: 8, borderRadius: 999, background: 'rgba(2, 6, 23, 0.08)', overflow: 'hidden'}}>
+                                <div
+                                    style={{
+                                        height: '100%',
+                                        width: `${maxTotal > 0 ? (Number(item.total || 0) / maxTotal) * 100 : 0}%`,
+                                        borderRadius: 999,
+                                        background: '#6366f1',
+                                    }}
+                                />
+                            </div>
                         </div>
                     ))}
                 </div>
@@ -148,6 +248,11 @@ export default function Dashboard() {
                         <h3 style={{margin: '6px 0 0', fontSize: 22}}>{item.value}</h3>
                     </article>
                 ))}
+            </section>
+
+            <section style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 16}}>
+                <SalesComparisonChart sales={sales}/>
+                <CatalogCompositionChart stats={stats}/>
             </section>
 
             <section style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16}}>
