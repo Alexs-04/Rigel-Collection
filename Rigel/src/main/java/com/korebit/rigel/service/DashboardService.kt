@@ -31,24 +31,25 @@ class DashboardService(
     }
 
     @Transactional(readOnly = true)
-    fun getSalesForMonth(date: LocalDate): BigDecimal {
+    fun getSalesForMonth(date: LocalDate? = null): BigDecimal {
         val (startDate, endDate) = monthRange(date)
         return sumSalesBetween(startDate, endDate)
     }
 
     @Transactional(readOnly = true)
-    fun getSalesForDay(date: LocalDate): BigDecimal {
-        return sumSalesBetween(date, date)
+    fun getSalesForDay(date: LocalDate? = null): BigDecimal {
+        val safeDate = requireDate(date)
+        return sumSalesBetween(safeDate, safeDate)
     }
 
     @Transactional(readOnly = true)
-    fun getSalesForYear(date: LocalDate): BigDecimal {
+    fun getSalesForYear(date: LocalDate? = null): BigDecimal {
         val (startDate, endDate) = yearRange(date)
         return sumSalesBetween(startDate, endDate)
     }
 
     @Transactional(readOnly = true)
-    fun getMayorProductSale(date: LocalDate, limit: Int = DEFAULT_TOP_LIMIT): List<DashboardTopItem> {
+    fun getMayorProductSale(date: LocalDate? = null, limit: Int = DEFAULT_TOP_LIMIT): List<DashboardTopItem> {
         val sanitizedLimit = sanitizeLimit(limit)
         val (startDate, endDate) = monthRange(date)
         return ticketRepository.findTopSellingProducts(startDate, endDate)
@@ -57,7 +58,7 @@ class DashboardService(
     }
 
     @Transactional(readOnly = true)
-    fun getTopSellingSupplier(date: LocalDate, limit: Int = DEFAULT_TOP_LIMIT): List<DashboardTopItem> {
+    fun getTopSellingSupplier(date: LocalDate? = null, limit: Int = DEFAULT_TOP_LIMIT): List<DashboardTopItem> {
         val sanitizedLimit = sanitizeLimit(limit)
         val (startDate, endDate) = monthRange(date)
         return ticketRepository.findTopSellingSuppliers(startDate, endDate)
@@ -66,7 +67,7 @@ class DashboardService(
     }
 
     @Transactional(readOnly = true)
-    fun getDashboardSnapshot(date: LocalDate = LocalDate.now(), limit: Int = DEFAULT_TOP_LIMIT): DashboardSnapshot {
+    fun getDashboardSnapshot(date: LocalDate? = null, limit: Int = DEFAULT_TOP_LIMIT): DashboardSnapshot {
         val safeDate = requireDate(date)
         val sales = DashboardSalesSummary(
             day = getSalesForDay(safeDate),
@@ -88,12 +89,12 @@ class DashboardService(
         return ticketRepository.sumTotalAmountBetween(startDate, endDate) ?: BigDecimal.ZERO
     }
 
-    private fun monthRange(date: LocalDate): Pair<LocalDate, LocalDate> {
+    private fun monthRange(date: LocalDate?): Pair<LocalDate, LocalDate> {
         val safeDate = requireDate(date)
         return safeDate.withDayOfMonth(1) to safeDate.withDayOfMonth(safeDate.lengthOfMonth())
     }
 
-    private fun yearRange(date: LocalDate): Pair<LocalDate, LocalDate> {
+    private fun yearRange(date: LocalDate?): Pair<LocalDate, LocalDate> {
         val safeDate = requireDate(date)
         return safeDate.withDayOfYear(1) to safeDate.withDayOfYear(safeDate.lengthOfYear())
     }
@@ -108,8 +109,8 @@ class DashboardService(
         return limit
     }
 
-    private fun requireDate(date: LocalDate): LocalDate {
-        return date
+    private fun requireDate(date: LocalDate?): LocalDate {
+        return date ?: LocalDate.now()
     }
 
     companion object {
