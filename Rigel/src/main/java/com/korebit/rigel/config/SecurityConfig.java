@@ -46,6 +46,8 @@ public class SecurityConfig {
                         .hasAnyRole("ROOT", "ADMIN", "USER")
                         .requestMatchers(HttpMethod.DELETE, "/tickets", "/tickets/**")
                         .hasAnyRole("ROOT", "ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/logs", "/logs/**")
+                        .hasAnyRole("ROOT", "ADMIN")
                         .requestMatchers("/consumer/api/users/**")
                         .hasRole("ROOT")
                         .requestMatchers("/consumer/**")
