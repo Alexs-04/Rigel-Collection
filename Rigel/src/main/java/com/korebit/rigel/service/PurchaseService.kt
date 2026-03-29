@@ -10,10 +10,12 @@ import com.korebit.rigel.model.extra.ProductSupplier
 import com.korebit.rigel.repository.BatchRepository
 import com.korebit.rigel.repository.ProductSupplierRepository
 import com.korebit.rigel.repository.PurchaseRepository
+import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import java.util.UUID
 
 @Service
@@ -22,6 +24,12 @@ class PurchaseService(
     private val productSupplierRepository: ProductSupplierRepository,
     private val batchRepository: BatchRepository,
 ) {
+
+    companion object {
+        private const val PURCHASE_CODE_PREFIX = "PUR"
+        private const val MAX_PURCHASE_CODE_RETRIES = 6
+        private val PURCHASE_CODE_DATE_FORMAT: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMdd")
+    }
 
     @Transactional(readOnly = true)
     fun getAllPurchases(): List<PurchaseDto> {
@@ -51,7 +59,7 @@ class PurchaseService(
 
     @Transactional
     fun createPurchase(request: PurchaseCreateRequest): Response {
-        validateRequest(request)
+        val normalizedRequestedCode = validateRequest(request)
 
         val relation = resolveRelation(request.productName, request.supplierName)
         val batch = resolveOrCreateBatch(request, relation)
@@ -69,25 +77,21 @@ class PurchaseService(
         val unitPrice = request.unitPrice.toBigDecimal()
         val totalPrice = unitPrice.multiply(BigDecimal.valueOf(quantity.toLong()))
 
-        val purchase = Purchase(
-            code = resolvePurchaseCode(request.code),
+        batchRepository.save(batch)
+
+        val persisted = persistPurchaseWithUniqueCode(
+            requestedCode = normalizedRequestedCode,
             purchaseDate = request.purchaseDate,
             quantity = quantity,
             unitPrice = unitPrice,
             totalPrice = totalPrice,
             notes = request.notes.trim(),
-            productSupplier = relation,
+            relation = relation,
             batch = batch,
         )
 
-        relation.purchases.add(purchase)
-        batch.purchases.add(purchase)
-
-        batchRepository.save(batch)
-        purchaseRepository.save(purchase)
-
         return Response(
-            message = "Purchase ${purchase.code} created successfully",
+            message = "Purchase ${persisted.code} created successfully",
             status = 201,
             success = true,
         )
@@ -153,7 +157,7 @@ class PurchaseService(
         return batch
     }
 
-    private fun validateRequest(request: PurchaseCreateRequest) {
+    private fun validateRequest(request: PurchaseCreateRequest): String? {
         when {
             request.productName.trim().isEmpty() -> throw IllegalArgumentException("Product name is required")
             request.supplierName.trim().isEmpty() -> throw IllegalArgumentException("Supplier name is required")
@@ -161,25 +165,79 @@ class PurchaseService(
             request.unitPrice < 0 -> throw IllegalArgumentException("Unit price cannot be negative")
         }
 
-        request.code?.trim()?.takeIf { it.isNotEmpty() }?.let { code ->
-            if (purchaseRepository.findByCode(code).isPresent) {
+        val normalizedCode = request.code?.trim()?.takeIf { it.isNotEmpty() }
+        normalizedCode?.let { code ->
+            if (purchaseRepository.existsByCodeIgnoreCase(code)) {
                 throw IllegalArgumentException("Purchase with code $code already exists")
             }
         }
+
+        return normalizedCode
     }
 
-    private fun resolvePurchaseCode(rawCode: String?): String {
-        val normalized = rawCode?.trim().orEmpty()
-        if (normalized.isNotEmpty()) {
-            return normalized
+    private fun persistPurchaseWithUniqueCode(
+        requestedCode: String?,
+        purchaseDate: LocalDate,
+        quantity: Int,
+        unitPrice: BigDecimal,
+        totalPrice: BigDecimal,
+        notes: String,
+        relation: ProductSupplier,
+        batch: Batch,
+    ): Purchase {
+        var attempt = 0
+        var currentCode = requestedCode ?: generatePurchaseCode()
+
+        while (attempt < MAX_PURCHASE_CODE_RETRIES) {
+            attempt++
+
+            val purchase = Purchase(
+                code = currentCode,
+                purchaseDate = purchaseDate,
+                quantity = quantity,
+                unitPrice = unitPrice,
+                totalPrice = totalPrice,
+                notes = notes,
+                productSupplier = relation,
+                batch = batch,
+            )
+
+            try {
+                return purchaseRepository.saveAndFlush(purchase)
+            } catch (ex: DataIntegrityViolationException) {
+                if (!isPurchaseCodeConstraintViolation(ex)) {
+                    throw ex
+                }
+
+                if (requestedCode != null) {
+                    throw IllegalArgumentException("Purchase with code $requestedCode already exists")
+                }
+
+                currentCode = generatePurchaseCode()
+            }
         }
 
-        var generated: String
-        do {
-            generated = "PUR-${UUID.randomUUID().toString().replace("-", "").take(10).uppercase()}"
-        } while (purchaseRepository.findByCode(generated).isPresent)
+        throw IllegalStateException("Could not generate a unique purchase code after $MAX_PURCHASE_CODE_RETRIES attempts")
+    }
 
-        return generated
+    private fun generatePurchaseCode(): String {
+        val datePart = LocalDate.now().format(PURCHASE_CODE_DATE_FORMAT)
+        val randomPart = UUID.randomUUID().toString().replace("-", "").take(12).uppercase()
+        return "$PURCHASE_CODE_PREFIX-$datePart-$randomPart"
+    }
+
+    private fun isPurchaseCodeConstraintViolation(ex: DataIntegrityViolationException): Boolean {
+        val messages = mutableListOf<String>()
+        var current: Throwable? = ex
+        while (current != null) {
+            current.message?.let(messages::add)
+            current = current.cause
+        }
+        val message = messages.joinToString(" ").lowercase()
+
+        return message.contains("uk_purchases_code") ||
+            message.contains("purchases_code_key") ||
+            (message.contains("duplicate key") && message.contains("code"))
     }
 }
 

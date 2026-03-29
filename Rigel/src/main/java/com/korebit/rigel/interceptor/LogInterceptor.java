@@ -1,6 +1,7 @@
 package com.korebit.rigel.interceptor;
 
 import com.korebit.rigel.filter.RequestCorrelationFilter;
+import com.korebit.rigel.service.SystemMovementService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.jspecify.annotations.NonNull;
@@ -8,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
@@ -18,6 +20,12 @@ public class LogInterceptor implements HandlerInterceptor {
 
     private static final Logger log = LoggerFactory.getLogger(LogInterceptor.class);
     private static final String START_TIME_ATTR = "requestStartNano";
+    private static final String LOGS_PATH_PREFIX = "/logs";
+    private final SystemMovementService systemMovementService;
+
+    public LogInterceptor(SystemMovementService systemMovementService) {
+        this.systemMovementService = systemMovementService;
+    }
 
     @Override
     public boolean preHandle(HttpServletRequest request,
@@ -62,6 +70,9 @@ public class LogInterceptor implements HandlerInterceptor {
                     resolveHandler(handler),
                     ex
             );
+            if (shouldPersistMovement(request, response, ex)) {
+                persistMovement(request, response, durationMs);
+            }
             return;
         }
 
@@ -75,6 +86,9 @@ public class LogInterceptor implements HandlerInterceptor {
                     getUsername(),
                     resolveHandler(handler)
             );
+            if (shouldPersistMovement(request, response, ex)) {
+                persistMovement(request, response, durationMs);
+            }
             return;
         }
 
@@ -87,6 +101,48 @@ public class LogInterceptor implements HandlerInterceptor {
                 getUsername(),
                 resolveHandler(handler)
         );
+
+        if (shouldPersistMovement(request, response, ex)) {
+            persistMovement(request, response, durationMs);
+        }
+    }
+
+    private boolean shouldPersistMovement(HttpServletRequest request, HttpServletResponse response, Exception ex) {
+        String path = request.getRequestURI();
+        if (path != null && path.startsWith(LOGS_PATH_PREFIX)) {
+            return false;
+        }
+
+        int status = response.getStatus();
+        if (ex != null || status >= 400) {
+            return true;
+        }
+
+        String method = request.getMethod();
+        return "POST".equalsIgnoreCase(method)
+                || "PUT".equalsIgnoreCase(method)
+                || "PATCH".equalsIgnoreCase(method)
+                || "DELETE".equalsIgnoreCase(method);
+    }
+
+    private void persistMovement(HttpServletRequest request, HttpServletResponse response, long durationMs) {
+        try {
+            systemMovementService.recordMovement(
+                    getUsername(),
+                    getRole(),
+                    request.getMethod(),
+                    request.getRequestURI(),
+                    response.getStatus(),
+                    Math.max(durationMs, 0),
+                    getCorrelationId(request)
+            );
+        } catch (RuntimeException persistenceError) {
+            log.warn("movement_persist_failed correlationId={} method={} path={} reason={}",
+                    getCorrelationId(request),
+                    request.getMethod(),
+                    request.getRequestURI(),
+                    persistenceError.getMessage());
+        }
     }
 
     private long resolveDurationMs(HttpServletRequest request) {
@@ -115,5 +171,19 @@ public class LogInterceptor implements HandlerInterceptor {
             return "anonymous";
         }
         return authentication.getName();
+    }
+
+    private String getRole() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated() || authentication instanceof AnonymousAuthenticationToken) {
+            return "ANONYMOUS";
+        }
+        for (GrantedAuthority authority : authentication.getAuthorities()) {
+            String value = authority.getAuthority();
+            if (value != null && value.startsWith("ROLE_")) {
+                return value.substring("ROLE_".length());
+            }
+        }
+        return "UNKNOWN";
     }
 }
