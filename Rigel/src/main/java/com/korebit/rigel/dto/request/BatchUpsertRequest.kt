@@ -1,5 +1,6 @@
 package com.korebit.rigel.dto.request
 
+import java.io.Serializable
 import java.time.LocalDate
 
 data class BatchUpsertRequest(
@@ -13,5 +14,5 @@ data class BatchUpsertRequest(
     val available: Boolean = true,
     val price: Double,
     val notes: String = "",
-)
+) : Serializable
 

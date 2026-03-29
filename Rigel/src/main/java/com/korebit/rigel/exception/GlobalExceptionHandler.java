@@ -2,6 +2,7 @@ package com.korebit.rigel.exception;
 
 import com.korebit.rigel.filter.RequestCorrelationFilter;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -40,6 +41,15 @@ public class GlobalExceptionHandler {
         Map<String, Object> error = buildError(HttpStatus.NOT_FOUND, "Entidad no encontrada", ex.getMessage(), request);
 
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ResponseEntity<?> handleDataIntegrityViolationException(DataIntegrityViolationException ex, HttpServletRequest request) {
+
+        Map<String, Object> error = buildError(HttpStatus.CONFLICT, "Conflicto de datos", ex.getMostSpecificCause().getMessage(), request);
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
     }
 
     @ExceptionHandler(Exception.class)

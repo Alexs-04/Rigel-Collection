@@ -5,6 +5,7 @@ import com.korebit.rigel.dto.request.BatchUpsertRequest
 import com.korebit.rigel.dto.response.Response
 import com.korebit.rigel.exception.EntityNotFundException
 import com.korebit.rigel.model.beans.Batch
+import com.korebit.rigel.model.extra.ProductSupplier
 import com.korebit.rigel.repository.BatchRepository
 import com.korebit.rigel.repository.ProductRepository
 import com.korebit.rigel.repository.ProductSupplierRepository
@@ -37,27 +38,11 @@ class BatchService(
     @Transactional
     fun createBatch(request: BatchUpsertRequest): Response {
         validateRequest(request)
-
-        val relation = productSupplierRepository.findByProduct_NameAndSupplier_Name(
-            request.productName.trim(),
-            request.supplierName.trim(),
-        ) ?: throw EntityNotFundException("Supplier ${request.supplierName} is not related to product ${request.productName}")
-
-        val initialRemaining = request.remainingAmount ?: request.receivedAmount
-        if (initialRemaining < 0 || initialRemaining > request.receivedAmount) {
-            throw IllegalArgumentException("Remaining amount must be between 0 and received amount")
-        }
+        val relation = findRelationOrThrow(request)
+        val initialRemaining = resolveRemainingAmountForCreate(request)
 
         val batch = Batch()
-        batch.code = request.code.trim()
-        batch.receptionDate = request.receptionDate
-        batch.expirationDate = request.expirationDate
-        batch.receivedAmount = request.receivedAmount
-        batch.remainingAmount = initialRemaining
-        batch.available = request.available
-        batch.price = request.price.toBigDecimal()
-        batch.notes = request.notes.trim()
-        batch.productSupplier = relation
+        applyBatchFields(batch, request, relation, initialRemaining)
 
         batchRepository.save(batch)
 
@@ -75,30 +60,10 @@ class BatchService(
         val batch = batchRepository.findById(batchId)
             .orElseThrow { EntityNotFundException("Batch with id $batchId not found") }
 
-        val relation = productSupplierRepository.findByProduct_NameAndSupplier_Name(
-            request.productName.trim(),
-            request.supplierName.trim(),
-        ) ?: throw EntityNotFundException("Supplier ${request.supplierName} is not related to product ${request.productName}")
+        val relation = findRelationOrThrow(request)
+        val desiredRemaining = resolveRemainingAmountForUpdate(batch, request)
 
-        val consumedAmount = batch.receivedAmount - batch.remainingAmount
-        if (request.receivedAmount < consumedAmount) {
-            throw IllegalArgumentException("Received amount cannot be less than consumed amount ($consumedAmount)")
-        }
-
-        val desiredRemaining = request.remainingAmount ?: (request.receivedAmount - consumedAmount)
-        if (desiredRemaining < 0 || desiredRemaining > request.receivedAmount) {
-            throw IllegalArgumentException("Remaining amount must be between 0 and received amount")
-        }
-
-        batch.code = request.code.trim()
-        batch.receptionDate = request.receptionDate
-        batch.expirationDate = request.expirationDate
-        batch.receivedAmount = request.receivedAmount
-        batch.remainingAmount = desiredRemaining
-        batch.available = request.available
-        batch.price = request.price.toBigDecimal()
-        batch.notes = request.notes.trim()
-        batch.productSupplier = relation
+        applyBatchFields(batch, request, relation, desiredRemaining)
 
         batchRepository.save(batch)
 
@@ -133,6 +98,52 @@ class BatchService(
         if (request.expirationDate.isBefore(request.receptionDate)) {
             throw IllegalArgumentException("Expiration date cannot be before reception date")
         }
+    }
+
+    private fun findRelationOrThrow(request: BatchUpsertRequest): ProductSupplier {
+        return productSupplierRepository.findByProduct_NameAndSupplier_Name(
+            request.productName.trim(),
+            request.supplierName.trim(),
+        ) ?: throw EntityNotFundException("Supplier ${request.supplierName} is not related to product ${request.productName}")
+    }
+
+    private fun resolveRemainingAmountForCreate(request: BatchUpsertRequest): Int {
+        val initialRemaining = request.remainingAmount ?: request.receivedAmount
+        if (initialRemaining < 0 || initialRemaining > request.receivedAmount) {
+            throw IllegalArgumentException("Remaining amount must be between 0 and received amount")
+        }
+        return initialRemaining
+    }
+
+    private fun resolveRemainingAmountForUpdate(batch: Batch, request: BatchUpsertRequest): Int {
+        val consumedAmount = batch.receivedAmount - batch.remainingAmount
+        if (request.receivedAmount < consumedAmount) {
+            throw IllegalArgumentException("Received amount cannot be less than consumed amount ($consumedAmount)")
+        }
+
+        val desiredRemaining = request.remainingAmount ?: (request.receivedAmount - consumedAmount)
+        if (desiredRemaining < 0 || desiredRemaining > request.receivedAmount) {
+            throw IllegalArgumentException("Remaining amount must be between 0 and received amount")
+        }
+
+        return desiredRemaining
+    }
+
+    private fun applyBatchFields(
+        batch: Batch,
+        request: BatchUpsertRequest,
+        relation: ProductSupplier,
+        remainingAmount: Int,
+    ) {
+        batch.code = request.code.trim()
+        batch.receptionDate = request.receptionDate
+        batch.expirationDate = request.expirationDate
+        batch.receivedAmount = request.receivedAmount
+        batch.remainingAmount = remainingAmount
+        batch.available = request.available
+        batch.price = request.price.toBigDecimal()
+        batch.notes = request.notes.trim()
+        batch.productSupplier = relation
     }
 }
 
