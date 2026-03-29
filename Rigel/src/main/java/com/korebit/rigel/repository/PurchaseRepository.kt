@@ -10,6 +10,7 @@ import java.util.Optional
 @Repository
 interface PurchaseRepository : JpaRepository<Purchase, Long> {
     fun findByCode(code: String): Optional<Purchase>
+    fun existsByCodeIgnoreCase(code: String): Boolean
 
     @Query(
         """
