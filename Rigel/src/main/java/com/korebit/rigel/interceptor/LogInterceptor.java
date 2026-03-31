@@ -20,6 +20,7 @@ public class LogInterceptor implements HandlerInterceptor {
 
     private static final Logger log = LoggerFactory.getLogger(LogInterceptor.class);
     private static final String START_TIME_ATTR = "requestStartNano";
+    private static final String LOGS_PATH_PREFIX = "/logs";
     private final SystemMovementService systemMovementService;
 
     public LogInterceptor(SystemMovementService systemMovementService) {
@@ -69,7 +70,9 @@ public class LogInterceptor implements HandlerInterceptor {
                     resolveHandler(handler),
                     ex
             );
-            persistMovement(request, response, durationMs);
+            if (shouldPersistMovement(request, response, ex)) {
+                persistMovement(request, response, durationMs);
+            }
             return;
         }
 
@@ -83,7 +86,9 @@ public class LogInterceptor implements HandlerInterceptor {
                     getUsername(),
                     resolveHandler(handler)
             );
-            persistMovement(request, response, durationMs);
+            if (shouldPersistMovement(request, response, ex)) {
+                persistMovement(request, response, durationMs);
+            }
             return;
         }
 
@@ -97,7 +102,27 @@ public class LogInterceptor implements HandlerInterceptor {
                 resolveHandler(handler)
         );
 
-        persistMovement(request, response, durationMs);
+        if (shouldPersistMovement(request, response, ex)) {
+            persistMovement(request, response, durationMs);
+        }
+    }
+
+    private boolean shouldPersistMovement(HttpServletRequest request, HttpServletResponse response, Exception ex) {
+        String path = request.getRequestURI();
+        if (path != null && path.startsWith(LOGS_PATH_PREFIX)) {
+            return false;
+        }
+
+        int status = response.getStatus();
+        if (ex != null || status >= 400) {
+            return true;
+        }
+
+        String method = request.getMethod();
+        return "POST".equalsIgnoreCase(method)
+                || "PUT".equalsIgnoreCase(method)
+                || "PATCH".equalsIgnoreCase(method)
+                || "DELETE".equalsIgnoreCase(method);
     }
 
     private void persistMovement(HttpServletRequest request, HttpServletResponse response, long durationMs) {

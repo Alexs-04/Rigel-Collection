@@ -24,6 +24,7 @@ export interface FetchMovementsParams {
     status?: number
     fromDate?: string
     toDate?: string
+    importantOnly?: boolean
     page?: number
     size?: number
 }

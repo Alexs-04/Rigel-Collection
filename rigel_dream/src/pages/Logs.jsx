@@ -1,4 +1,4 @@
-import {useEffect, useState} from 'react'
+import {useCallback, useEffect, useState} from 'react'
 import {fetchSystemMovementById, fetchSystemMovements} from '../services/logsService'
 
 function normalizeError(error) {
@@ -27,6 +27,7 @@ export default function Logs() {
         status: '',
         fromDate: '',
         toDate: '',
+        importantOnly: true,
     })
     const [pageData, setPageData] = useState({items: [], page: 0, size: 20, totalElements: 0, totalPages: 0})
     const [loadingList, setLoadingList] = useState(true)
@@ -37,7 +38,7 @@ export default function Logs() {
     const [detailError, setDetailError] = useState('')
     const [refreshKey, setRefreshKey] = useState(0)
 
-    const loadMovements = async () => {
+    const loadMovements = useCallback(async () => {
         setLoadingList(true)
         setListError('')
         try {
@@ -47,6 +48,7 @@ export default function Logs() {
                 status: filters.status ? Number(filters.status) : undefined,
                 fromDate: filters.fromDate || undefined,
                 toDate: filters.toDate || undefined,
+                importantOnly: filters.importantOnly,
                 page: pageData.page,
                 size: pageData.size,
             })
@@ -56,7 +58,7 @@ export default function Logs() {
         } finally {
             setLoadingList(false)
         }
-    }
+    }, [filters, pageData.page, pageData.size])
 
     const loadDetail = async (id) => {
         setLoadingDetail(true)
@@ -73,7 +75,7 @@ export default function Logs() {
 
     useEffect(() => {
         void loadMovements()
-    }, [pageData.page, pageData.size, refreshKey])
+    }, [loadMovements, refreshKey])
 
     const onSearch = () => {
         setPageData((prev) => ({...prev, page: 0}))
@@ -81,7 +83,7 @@ export default function Logs() {
     }
 
     const onClear = () => {
-        setFilters({search: '', method: '', status: '', fromDate: '', toDate: ''})
+        setFilters({search: '', method: '', status: '', fromDate: '', toDate: '', importantOnly: true})
         setSelectedId(null)
         setDetail(null)
         setPageData((prev) => ({...prev, page: 0}))
@@ -156,6 +158,24 @@ export default function Logs() {
                         Limpiar
                     </button>
                 </div>
+
+                <label
+                    style={{
+                        marginTop: 10,
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: 8,
+                        fontSize: 13,
+                        color: '#334155',
+                    }}
+                >
+                    <input
+                        type="checkbox"
+                        checked={filters.importantOnly}
+                        onChange={(event) => setFilters((prev) => ({...prev, importantOnly: event.target.checked}))}
+                    />
+                    Solo eventos importantes (crear, actualizar, eliminar o fallos)
+                </label>
             </section>
 
             <section

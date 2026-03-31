@@ -49,6 +49,7 @@ class SystemMovementService(
         status: Int?,
         fromDate: LocalDate?,
         toDate: LocalDate?,
+        importantOnly: Boolean,
         page: Int,
         size: Int,
     ): SystemMovementPageDto {
@@ -88,6 +89,13 @@ class SystemMovementService(
 
             if (toInstant != null) {
                 predicates += cb.lessThan(root.get("occurredAt"), toInstant)
+            }
+
+            if (importantOnly) {
+                val mutatingMethods = root.get<String>("method").`in`("POST", "PUT", "PATCH", "DELETE")
+                val failedStatus = cb.greaterThanOrEqualTo(root.get<Int>("status"), 400)
+                val nonLogsPath = cb.notLike(root.get<String>("path"), "/logs%")
+                predicates += cb.and(nonLogsPath, cb.or(mutatingMethods, failedStatus))
             }
 
             cb.and(*predicates.toTypedArray())

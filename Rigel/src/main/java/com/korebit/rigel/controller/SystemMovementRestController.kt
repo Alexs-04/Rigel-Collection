@@ -28,10 +28,11 @@ class SystemMovementRestController(
         @RequestParam(required = false)
         @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
         toDate: LocalDate?,
+        @RequestParam(required = false, defaultValue = "true") importantOnly: Boolean,
         @RequestParam(required = false, defaultValue = "0") page: Int,
         @RequestParam(required = false, defaultValue = "20") size: Int,
     ): SystemMovementPageDto {
-        return systemMovementService.getMovements(search, method, status, fromDate, toDate, page, size)
+        return systemMovementService.getMovements(search, method, status, fromDate, toDate, importantOnly, page, size)
     }
 
     @GetMapping("/{id}")
