@@ -14,8 +14,10 @@ import jakarta.persistence.ManyToOne
 import java.io.Serializable
 import java.math.BigDecimal
 import java.time.LocalDateTime
+import jakarta.persistence.Table
 
 @Entity(name = "amounts")
+@Table(name = "amounts")
 class Amount(
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     var folio: Long = 0,
@@ -26,8 +28,17 @@ class Amount(
     @Enumerated(EnumType.STRING)
     var type: ContainerType = ContainerType.BEER_CONTAINER,
 
+    @Column(nullable = false, length = 128)
+    var customerName: String = "",
+
     @Column(nullable = false)
     var quantity: Int = 0,
+
+    @Column(nullable = false, precision = 19, scale = 4)
+    var saleUnitPrice: BigDecimal = BigDecimal.ZERO,
+
+    @Column(nullable = true, precision = 19, scale = 4)
+    var buyoutUnitPrice: BigDecimal? = null,
 
     @Column(nullable = false)
     var total: BigDecimal = BigDecimal.ZERO,
@@ -40,6 +51,18 @@ class Amount(
 
     @Column(nullable = false)
     var returned : Boolean = false,
+
+    @Column(nullable = true)
+    var returnedAt: LocalDateTime? = null,
+
+    @Column(nullable = true)
+    var boughtOutAt: LocalDateTime? = null,
+
+    @Column(nullable = true, precision = 19, scale = 4)
+    var buyoutTotal: BigDecimal? = null,
+
+    @Column(nullable = false, length = 256)
+    var notes: String = "",
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_id")
