@@ -1,5 +1,9 @@
 import {useCallback, useEffect, useState} from 'react'
 import {fetchSystemMovementById, fetchSystemMovements} from '../services/logsService'
+import Button from '../components/ui/Button'
+import Card from '../components/ui/Card'
+import {Input} from '../components/ui/Input'
+import {Select} from '../components/ui/Select'
 
 function normalizeError(error) {
     return error?.response?.data?.message || 'No se pudieron cargar los movimientos del sistema.'
@@ -102,24 +106,22 @@ export default function Logs() {
     }
 
     return (
-        <div style={{display: 'grid', gap: 16}}>
-            <section className="card" style={{padding: 20}}>
-                <h1 style={{marginTop: 0, marginBottom: 6}}>Bitácora</h1>
-                <p className="text-muted" style={{marginTop: 0}}>
+        <div className="grid gap-4">
+            <Card className="p-5">
+                <h1 className="mb-1 text-2xl font-bold text-slate-900">Bitácora</h1>
+                <p className="mt-0 text-sm text-slate-500">
                     Movimientos del sistema. Solo usuarios con rol ROOT o ADMIN pueden acceder.
                 </p>
-            </section>
+            </Card>
 
-            <section className="card" style={{padding: 16}}>
-                <div style={{display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr auto auto', gap: 10}}>
-                    <input
-                        className="input"
+            <Card className="p-4">
+                <div className="grid grid-cols-1 gap-2 xl:grid-cols-[2fr_1fr_1fr_1fr_1fr_auto_auto]">
+                    <Input
                         placeholder="Buscar por usuario, ruta o correlación"
                         value={filters.search}
                         onChange={(event) => setFilters((prev) => ({...prev, search: event.target.value}))}
                     />
-                    <select
-                        className="input"
+                    <Select
                         value={filters.method}
                         onChange={(event) => setFilters((prev) => ({...prev, method: event.target.value}))}
                     >
@@ -129,9 +131,8 @@ export default function Logs() {
                         <option value="PUT">PUT</option>
                         <option value="PATCH">PATCH</option>
                         <option value="DELETE">DELETE</option>
-                    </select>
-                    <input
-                        className="input"
+                    </Select>
+                    <Input
                         type="number"
                         min={100}
                         max={599}
@@ -139,67 +140,51 @@ export default function Logs() {
                         value={filters.status}
                         onChange={(event) => setFilters((prev) => ({...prev, status: event.target.value}))}
                     />
-                    <input
-                        className="input"
+                    <Input
                         type="date"
                         value={filters.fromDate}
                         onChange={(event) => setFilters((prev) => ({...prev, fromDate: event.target.value}))}
                     />
-                    <input
-                        className="input"
+                    <Input
                         type="date"
                         value={filters.toDate}
                         onChange={(event) => setFilters((prev) => ({...prev, toDate: event.target.value}))}
                     />
-                    <button type="button" className="btn-primary" onClick={onSearch} disabled={loadingList}>
+                    <Button type="button" onClick={onSearch} disabled={loadingList}>
                         Buscar
-                    </button>
-                    <button type="button" className="btn-ghost" onClick={onClear} disabled={loadingList}>
+                    </Button>
+                    <Button type="button" variant="ghost" onClick={onClear} disabled={loadingList}>
                         Limpiar
-                    </button>
+                    </Button>
                 </div>
 
-                <label
-                    style={{
-                        marginTop: 10,
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: 8,
-                        fontSize: 13,
-                        color: '#334155',
-                    }}
-                >
+                <label className="mt-2.5 inline-flex items-center gap-2 text-xs text-slate-600">
                     <input
                         type="checkbox"
+                        className="h-4 w-4 accent-brand-600"
                         checked={filters.importantOnly}
                         onChange={(event) => setFilters((prev) => ({...prev, importantOnly: event.target.checked}))}
                     />
                     Solo eventos importantes (crear, actualizar, eliminar o fallos)
                 </label>
-            </section>
+            </Card>
 
-            <section
-                style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'minmax(360px, 1fr) minmax(340px, 1fr)',
-                    gap: 16,
-                }}
-            >
-                <article className="card" style={{padding: 16}}>
-                    <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10}}>
-                        <h2 style={{margin: 0, fontSize: 18}}>Movimientos</h2>
-                        <span className="text-muted" style={{fontSize: 13}}>
+            <section className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(360px,1fr)_minmax(340px,1fr)]">
+                <Card as="article" className="p-4">
+                    <div className="mb-2.5 flex items-center justify-between">
+                        <h2 className="m-0 text-lg font-semibold text-slate-900">Movimientos</h2>
+                        <span className="text-xs text-slate-500">
                             {pageData.totalElements} registros
                         </span>
                     </div>
 
-                    {loadingList && <p className="text-muted">Cargando movimientos...</p>}
-                    {!loadingList && listError && <p style={{margin: 0, color: '#b91c1c'}}>{listError}</p>}
+                    {loadingList && <p className="text-sm text-slate-500">Cargando movimientos...</p>}
+                    {!loadingList && listError && <p className="m-0 text-sm text-red-700">{listError}</p>}
 
                     {!loadingList && !listError && (
-                        <div style={{display: 'grid', gap: 8}}>
+                        <div className="grid gap-2">
                             {pageData.items.length === 0 && (
-                                <p className="text-muted" style={{margin: 0}}>
+                                <p className="m-0 text-sm text-slate-500">
                                     No se encontraron movimientos para el filtro seleccionado.
                                 </p>
                             )}
@@ -209,21 +194,18 @@ export default function Logs() {
                                     key={item.id}
                                     type="button"
                                     onClick={() => onSelect(item.id)}
-                                    style={{
-                                        border: selectedId === item.id ? '1px solid #c7d2fe' : '1px solid rgba(2,6,23,0.06)',
-                                        background: selectedId === item.id ? '#eef2ff' : 'white',
-                                        borderRadius: 10,
-                                        padding: 12,
-                                        textAlign: 'left',
-                                        cursor: 'pointer',
-                                    }}
+                                    className={`rounded-lg border px-3 py-2 text-left transition ${
+                                        selectedId === item.id
+                                            ? 'border-brand-300 bg-brand-50'
+                                            : 'border-slate-200 bg-white hover:border-brand-200 hover:bg-brand-50/40'
+                                    }`}
                                 >
-                                    <div style={{display: 'flex', justifyContent: 'space-between', gap: 10}}>
-                                        <strong style={{fontSize: 14, color: methodColor(item.method)}}>{item.method}</strong>
-                                        <span style={{fontSize: 12, color: '#64748b'}}>#{item.correlationId}</span>
+                                    <div className="flex justify-between gap-2.5">
+                                        <strong className="text-sm" style={{color: methodColor(item.method)}}>{item.method}</strong>
+                                        <span className="text-xs text-slate-500">#{item.correlationId}</span>
                                     </div>
-                                    <div style={{fontSize: 13, marginTop: 6, color: '#0f172a'}}>{item.path}</div>
-                                    <div style={{display: 'flex', gap: 14, marginTop: 8, fontSize: 12, color: '#64748b'}}>
+                                    <div className="mt-1.5 text-sm text-slate-900">{item.path}</div>
+                                    <div className="mt-2 flex flex-wrap gap-3.5 text-xs text-slate-500">
                                         <span>{item.username} ({item.role})</span>
                                         <span>HTTP {item.status}</span>
                                         <span>{item.durationMs} ms</span>
@@ -234,43 +216,43 @@ export default function Logs() {
                         </div>
                     )}
 
-                    <div style={{display: 'flex', justifyContent: 'space-between', marginTop: 14}}>
-                        <button
+                    <div className="mt-3.5 flex items-center justify-between">
+                        <Button
                             type="button"
-                            className="btn-ghost"
+                            variant="ghost"
                             disabled={loadingList || pageData.page <= 0}
                             onClick={() => setPageData((prev) => ({...prev, page: prev.page - 1}))}
                         >
                             Anterior
-                        </button>
-                        <span className="text-muted" style={{fontSize: 13}}>
+                        </Button>
+                        <span className="text-xs text-slate-500">
                             Página {pageData.totalPages === 0 ? 0 : pageData.page + 1} de {pageData.totalPages}
                         </span>
-                        <button
+                        <Button
                             type="button"
-                            className="btn-ghost"
+                            variant="ghost"
                             disabled={loadingList || pageData.page + 1 >= pageData.totalPages}
                             onClick={() => setPageData((prev) => ({...prev, page: prev.page + 1}))}
                         >
                             Siguiente
-                        </button>
+                        </Button>
                     </div>
-                </article>
+                </Card>
 
-                <article className="card" style={{padding: 16}}>
-                    <h2 style={{marginTop: 0, fontSize: 18}}>Detalle</h2>
+                <Card as="article" className="p-4">
+                    <h2 className="mb-3 text-lg font-semibold text-slate-900">Detalle</h2>
 
                     {!selectedId && (
-                        <p className="text-muted" style={{margin: 0}}>
+                        <p className="m-0 text-sm text-slate-500">
                             Selecciona un movimiento para ver su informacion detallada.
                         </p>
                     )}
 
-                    {selectedId && loadingDetail && <p className="text-muted">Cargando detalle...</p>}
-                    {selectedId && !loadingDetail && detailError && <p style={{margin: 0, color: '#b91c1c'}}>{detailError}</p>}
+                    {selectedId && loadingDetail && <p className="text-sm text-slate-500">Cargando detalle...</p>}
+                    {selectedId && !loadingDetail && detailError && <p className="m-0 text-sm text-red-700">{detailError}</p>}
 
                     {selectedId && !loadingDetail && !detailError && detail && (
-                        <div style={{display: 'grid', gap: 10, fontSize: 14}}>
+                        <div className="grid gap-2.5 text-sm text-slate-700">
                             <div><strong>ID:</strong> {detail.id}</div>
                             <div><strong>Fecha:</strong> {formatDateTime(detail.occurredAt)}</div>
                             <div><strong>Usuario:</strong> {detail.username}</div>
@@ -282,7 +264,7 @@ export default function Logs() {
                             <div><strong>Correlation ID:</strong> {detail.correlationId}</div>
                         </div>
                     )}
-                </article>
+                </Card>
             </section>
         </div>
     )

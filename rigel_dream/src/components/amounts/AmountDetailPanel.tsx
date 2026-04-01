@@ -1,5 +1,9 @@
 import type {AmountFormValues, AmountItem} from '../../types/amounts'
 import {formatCurrency} from '../dashboard/formatters'
+import Button from '../ui/Button'
+import Card from '../ui/Card'
+import {Input} from '../ui/Input'
+import {Textarea} from '../ui/Textarea'
 
 interface Props {
     amount: AmountItem | null
@@ -43,75 +47,74 @@ export default function AmountDetailPanel({
 }: Props) {
     if (!amount) {
         return (
-            <section className="card" style={{padding: 16}}>
-                <h2 style={{marginTop: 0, fontSize: 18}}>Detalle del importe</h2>
-                <p className="text-muted">Selecciona un importe de la lista para ver su informacion.</p>
-            </section>
+            <Card className="p-4">
+                <h2 className="mb-2 text-lg font-semibold text-slate-900">Detalle del importe</h2>
+                <p className="text-sm text-slate-500">Selecciona un importe de la lista para ver su informacion.</p>
+            </Card>
         )
     }
 
     return (
-        <section className="card" style={{padding: 16}}>
-            <h2 style={{marginTop: 0, fontSize: 18}}>Detalle #{amount.folio}</h2>
+        <Card className="p-4">
+            <h2 className="mb-3 text-lg font-semibold text-slate-900">Detalle #{amount.folio}</h2>
 
             {!editing ? (
-                <div style={{display: 'grid', gap: 8}}>
-                    <p style={{margin: 0}}><strong>Cliente:</strong> {amount.customerName}</p>
-                    <p style={{margin: 0}}><strong>Tipo:</strong> {amount.typeLabel}</p>
-                    <p style={{margin: 0}}><strong>Estado:</strong> {STATUS_LABEL[amount.status] || amount.status}</p>
-                    <p style={{margin: 0}}><strong>Cantidad:</strong> {amount.quantity}</p>
-                    <p style={{margin: 0}}><strong>Total:</strong> {formatCurrency(amount.total)}</p>
-                    <p style={{margin: 0}}><strong>Vencimiento:</strong> {new Date(amount.expirationDate).toLocaleString('es-MX')}</p>
-                    <p style={{margin: 0}}><strong>Registrado por:</strong> {amount.ownerUsername || 'N/A'}</p>
-                    {amount.notes ? <p style={{margin: 0}}><strong>Notas:</strong> {amount.notes}</p> : null}
-                    {amount.buyoutTotal != null ? <p style={{margin: 0}}><strong>Compra:</strong> {formatCurrency(amount.buyoutTotal)}</p> : null}
+                <div className="grid gap-2 text-sm text-slate-700">
+                    <p className="m-0"><strong>Cliente:</strong> {amount.customerName}</p>
+                    <p className="m-0"><strong>Tipo:</strong> {amount.typeLabel}</p>
+                    <p className="m-0"><strong>Estado:</strong> {STATUS_LABEL[amount.status] || amount.status}</p>
+                    <p className="m-0"><strong>Cantidad:</strong> {amount.quantity}</p>
+                    <p className="m-0"><strong>Total:</strong> {formatCurrency(amount.total)}</p>
+                    <p className="m-0"><strong>Vencimiento:</strong> {new Date(amount.expirationDate).toLocaleString('es-MX')}</p>
+                    <p className="m-0"><strong>Registrado por:</strong> {amount.ownerUsername || 'N/A'}</p>
+                    {amount.notes ? <p className="m-0"><strong>Notas:</strong> {amount.notes}</p> : null}
+                    {amount.buyoutTotal != null ? <p className="m-0"><strong>Compra:</strong> {formatCurrency(amount.buyoutTotal)}</p> : null}
                 </div>
             ) : (
-                <div style={{display: 'grid', gap: 10}}>
+                <div className="grid gap-3">
                     <div>
                         <label>Cliente</label>
-                        <input className="input" value={form.customerName} onChange={(e) => onChangeForm('customerName', e.target.value)} />
+                        <Input value={form.customerName} onChange={(e) => onChangeForm('customerName', e.target.value)} />
                     </div>
                     <div>
                         <label>Descripcion</label>
-                        <input className="input" value={form.description} onChange={(e) => onChangeForm('description', e.target.value)} />
+                        <Input value={form.description} onChange={(e) => onChangeForm('description', e.target.value)} />
                     </div>
-                    <div style={{display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 8}}>
-                        <input className="input" type="number" min={1} value={form.quantity} onChange={(e) => onChangeForm('quantity', e.target.value)} />
-                        <input className="input" type="number" min={0} step="0.01" value={form.saleUnitPrice} onChange={(e) => onChangeForm('saleUnitPrice', e.target.value)} />
-                        <input className="input" type="number" min={0} step="0.01" value={form.buyoutUnitPrice} onChange={(e) => onChangeForm('buyoutUnitPrice', e.target.value)} />
+                    <div className="grid grid-cols-1 gap-2 lg:grid-cols-3">
+                        <Input type="number" min={1} value={form.quantity} onChange={(e) => onChangeForm('quantity', e.target.value)} />
+                        <Input type="number" min={0} step="0.01" value={form.saleUnitPrice} onChange={(e) => onChangeForm('saleUnitPrice', e.target.value)} />
+                        <Input type="number" min={0} step="0.01" value={form.buyoutUnitPrice} onChange={(e) => onChangeForm('buyoutUnitPrice', e.target.value)} />
                     </div>
                     <div>
                         <label>Fecha limite</label>
-                        <input className="input" type="datetime-local" value={form.expirationDate} onChange={(e) => onChangeForm('expirationDate', e.target.value)} />
+                        <Input type="datetime-local" value={form.expirationDate} onChange={(e) => onChangeForm('expirationDate', e.target.value)} />
                     </div>
                     <div>
                         <label>Notas</label>
-                        <textarea className="input" rows={3} value={form.notes} onChange={(e) => onChangeForm('notes', e.target.value)} />
+                        <Textarea rows={3} value={form.notes} onChange={(e) => onChangeForm('notes', e.target.value)} />
                     </div>
                 </div>
             )}
 
-            <div style={{display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 12}}>
+            <div className="mt-3 flex flex-wrap gap-2">
                 {isAdmin && !editing ? (
-                    <button type="button" className="btn-primary" onClick={onStartEdit}>Editar</button>
+                    <Button type="button" onClick={onStartEdit}>Editar</Button>
                 ) : null}
                 {isAdmin && editing ? (
                     <>
-                        <button type="button" className="btn-primary" disabled={saving} onClick={onSaveEdit}>Guardar</button>
-                        <button type="button" className="btn-ghost" onClick={onCancelEdit}>Cancelar</button>
+                        <Button type="button" disabled={saving} onClick={onSaveEdit}>Guardar</Button>
+                        <Button type="button" variant="ghost" onClick={onCancelEdit}>Cancelar</Button>
                     </>
                 ) : null}
 
                 {amount.status === 'ACTIVE' ? (
-                    <button type="button" className="btn-ghost" disabled={saving} onClick={onMarkReturned}>Marcar devuelto</button>
+                    <Button type="button" variant="ghost" disabled={saving} onClick={onMarkReturned}>Marcar devuelto</Button>
                 ) : null}
 
                 {amount.status === 'EXPIRED' ? (
                     <>
-                        <input
-                            className="input"
-                            style={{maxWidth: 180}}
+                        <Input
+                            className="max-w-44"
                             type="number"
                             min={0}
                             step="0.01"
@@ -119,19 +122,19 @@ export default function AmountDetailPanel({
                             value={buyoutPrice}
                             onChange={(e) => onChangeBuyoutPrice(e.target.value)}
                         />
-                        <button type="button" className="btn-ghost" disabled={saving} onClick={onMarkBoughtOut}>
+                        <Button type="button" variant="ghost" disabled={saving} onClick={onMarkBoughtOut}>
                             Registrar compra
-                        </button>
+                        </Button>
                     </>
                 ) : null}
 
                 {isAdmin ? (
-                    <button type="button" className="btn-ghost" disabled={saving} onClick={onDelete}>
+                    <Button type="button" variant="danger" disabled={saving} onClick={onDelete}>
                         Eliminar
-                    </button>
+                    </Button>
                 ) : null}
             </div>
-        </section>
+        </Card>
     )
 }
 
