@@ -11,9 +11,9 @@ interface SupplierFieldsGridProps {
 
 export default function SupplierFieldsGrid({value, disabled, isRequired = false, onChange}: SupplierFieldsGridProps) {
     return (
-        <div style={{display: 'grid', gap: 10, marginBottom: 14}}>
+        <div className="mb-3.5 grid gap-2.5">
             <input
-                className="input"
+                className="ui-input"
                 placeholder="Nombre"
                 value={value.name || ''}
                 disabled={disabled}
@@ -21,7 +21,7 @@ export default function SupplierFieldsGrid({value, disabled, isRequired = false,
                 onChange={(e) => onChange('name', e.target.value)}
             />
             <input
-                className="input"
+                className="ui-input"
                 placeholder="Correo"
                 type="email"
                 value={value.contactEmail || ''}
@@ -30,7 +30,7 @@ export default function SupplierFieldsGrid({value, disabled, isRequired = false,
                 onChange={(e) => onChange('contactEmail', e.target.value)}
             />
             <input
-                className="input"
+                className="ui-input"
                 placeholder="Telefono"
                 value={value.phoneNumber || ''}
                 disabled={disabled}
@@ -38,7 +38,7 @@ export default function SupplierFieldsGrid({value, disabled, isRequired = false,
                 onChange={(e) => onChange('phoneNumber', e.target.value)}
             />
             <input
-                className="input"
+                className="ui-input"
                 placeholder="Direccion"
                 value={value.address || ''}
                 disabled={disabled}

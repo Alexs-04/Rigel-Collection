@@ -9,15 +9,6 @@
         font-weight: 400;
         color: #0f172a;
         background-color: #f8fafc;
-
-        /* Legacy tokens used by not-yet-migrated pages/components. */
-        --bg: #f8fafc;
-        --surface: #ffffff;
-        --text: #0f172a;
-        --muted: #64748b;
-        --border: #e2e8f0;
-        --accent: #6366f1;
-        --active-bg: #eef2ff;
     }
 
     html, body, #root {
@@ -69,29 +60,42 @@
         @apply ui-btn border border-red-200 bg-red-50 text-red-700 hover:bg-red-100;
     }
 
-    /* Legacy compatibility while pages are migrating. */
-    .card {
-        @apply ui-card p-7;
+    .supplier-detail-card,
+    .product-detail-card {
+        transition: box-shadow 180ms ease, border-color 180ms ease;
     }
 
-    .card-compact {
-        @apply ui-card p-3;
+    .supplier-detail-body,
+    .product-detail-body {
+        max-height: 0;
+        opacity: 0;
+        overflow: hidden;
+        transform: translateY(-6px);
+        transition: max-height 180ms ease, opacity 180ms ease, transform 180ms ease;
     }
 
-    .input {
-        @apply ui-input;
+    .supplier-detail-body.is-open {
+        max-height: 1200px;
+        opacity: 1;
+        transform: translateY(0);
     }
 
-    .btn-primary {
-        @apply ui-btn-primary;
+    .product-detail-body.is-open {
+        max-height: 1400px;
+        opacity: 1;
+        transform: translateY(0);
     }
 
-    .btn-ghost {
-        @apply ui-btn-ghost;
-    }
-
-    .text-muted {
-        @apply text-slate-500;
+    @media (prefers-reduced-motion: reduce) {
+        .supplier-detail-card,
+        .supplier-detail-body,
+        .supplier-detail-body.is-open,
+        .product-detail-card,
+        .product-detail-body,
+        .product-detail-body.is-open {
+            transition: none;
+            transform: none;
+        }
     }
 }
 

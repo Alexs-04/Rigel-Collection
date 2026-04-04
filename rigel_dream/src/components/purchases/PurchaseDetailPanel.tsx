@@ -7,17 +7,17 @@ interface PurchaseDetailPanelProps {
 
 export default function PurchaseDetailPanel({purchase}: PurchaseDetailPanelProps) {
     return (
-        <section className="card" style={{padding: 16}}>
-            <h2 style={{marginTop: 0, fontSize: 18}}>Detalle de compra</h2>
+        <section className="ui-card p-4">
+            <h2 className="mt-0 text-lg font-semibold text-slate-900">Detalle de compra</h2>
 
             {!purchase && (
-                <p className="text-muted" style={{marginTop: 0}}>
+                <p className="mt-0 text-sm text-slate-500">
                     Selecciona una compra para ver su informacion.
                 </p>
             )}
 
             {purchase && (
-                <div style={{display: 'grid', gap: 8}}>
+                <div className="grid gap-2 text-sm text-slate-700">
                     <div><strong>Codigo:</strong> {purchase.code}</div>
                     <div><strong>Fecha:</strong> {purchase.purchaseDate}</div>
                     <div><strong>Producto:</strong> {purchase.productName}</div>

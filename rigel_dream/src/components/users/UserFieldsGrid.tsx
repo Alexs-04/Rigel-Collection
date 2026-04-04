@@ -20,9 +20,9 @@ export default function UserFieldsGrid({
     onChange,
 }: UserFieldsGridProps) {
     return (
-        <div style={{display: 'grid', gap: 10, marginBottom: 14}}>
+        <div className="mb-3.5 grid gap-2.5">
             <input
-                className="input"
+                className="ui-input"
                 placeholder="Nombre"
                 value={value.name || ''}
                 disabled={disabled}
@@ -30,7 +30,7 @@ export default function UserFieldsGrid({
                 onChange={(e) => onChange('name', e.target.value)}
             />
             <input
-                className="input"
+                className="ui-input"
                 placeholder="Usuario"
                 value={value.username || ''}
                 disabled={disabled}
@@ -38,7 +38,7 @@ export default function UserFieldsGrid({
                 onChange={(e) => onChange('username', e.target.value)}
             />
             <input
-                className="input"
+                className="ui-input"
                 placeholder="Correo"
                 type="email"
                 value={value.email || ''}
@@ -47,14 +47,14 @@ export default function UserFieldsGrid({
                 onChange={(e) => onChange('email', e.target.value)}
             />
             <input
-                className="input"
+                className="ui-input"
                 placeholder="Telefono"
                 value={value.phoneNumber || ''}
                 disabled={disabled}
                 onChange={(e) => onChange('phoneNumber', e.target.value)}
             />
             <select
-                className="input"
+                className="ui-input"
                 value={(value.role || 'USER') as UserRole}
                 disabled={disabled}
                 onChange={(e) => onChange('role', e.target.value)}
@@ -66,7 +66,7 @@ export default function UserFieldsGrid({
 
             {showPassword && (
                 <input
-                    className="input"
+                    className="ui-input"
                     placeholder={passwordPlaceholder}
                     type="password"
                     value={value.password || ''}

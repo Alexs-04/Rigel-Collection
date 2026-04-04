@@ -38,10 +38,10 @@ export default function Products() {
     } = useProductsPageState({isAdmin})
 
     return (
-        <div style={{display: 'grid', gap: 16}}>
-            <section className="card" style={{padding: 20}}>
-                <h1 style={{marginTop: 0, marginBottom: 6}}>Productos</h1>
-                <p className="text-muted" style={{marginTop: 0}}>
+        <div className="grid gap-4">
+            <section className="ui-card p-5">
+                <h1 className="mb-1.5 mt-0 text-2xl font-semibold text-slate-900">Productos</h1>
+                <p className="mt-0 text-sm text-slate-500">
                     Consulta el catalogo y administra productos con proveedores previamente registrados. El inventario y
                     los lotes se registran desde Compras.
                 </p>
@@ -58,17 +58,17 @@ export default function Products() {
                 onSubmit={addProduct}
             />
 
-            <section className="card" style={{padding: 16}}>
-                <h2 style={{marginTop: 0, fontSize: 18}}> Búsqueda</h2>
+            <section className="ui-card p-4">
+                <h2 className="mb-3 mt-0 text-lg font-semibold text-slate-900">Busqueda</h2>
                 <input
-                    className="input"
+                    className="ui-input"
                     placeholder="Buscar por nombre, código o categoría"
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                 />
             </section>
 
-            <section style={{display: 'grid', gridTemplateColumns: 'minmax(280px, 1fr) minmax(380px, 1.2fr)', gap: 16}}>
+            <section className="grid gap-4 lg:grid-cols-[minmax(280px,1fr)_minmax(380px,1.2fr)]">
                 <ProductsListPanel
                     loadingList={loadingList}
                     listError={listError}

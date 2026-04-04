@@ -38,10 +38,10 @@ export default function Suppliers() {
     } = useSuppliersPageState({isAdmin})
 
     return (
-        <div style={{display: 'grid', gap: 16}}>
-            <section className="card" style={{padding: 20}}>
-                <h1 style={{marginTop: 0, marginBottom: 6}}>Proveedores</h1>
-                <p className="text-muted" style={{marginTop: 0}}>
+        <div className="grid gap-4">
+            <section className="ui-card p-5">
+                <h1 className="mb-1.5 mt-0 text-2xl font-semibold text-slate-900">Proveedores</h1>
+                <p className="mt-0 text-sm text-slate-500">
                     Consulta proveedores disponibles y revisa sus productos asociados.
                 </p>
             </section>
@@ -56,7 +56,7 @@ export default function Suppliers() {
                 onSubmit={addSupplier}
             />
 
-            <section style={{display: 'grid', gridTemplateColumns: 'minmax(280px, 1fr) minmax(360px, 1.2fr)', gap: 16}}>
+            <section className="grid gap-4 lg:grid-cols-[minmax(280px,1fr)_minmax(360px,1.2fr)]">
                 <SuppliersListPanel
                     loadingList={loadingList}
                     listError={listError}

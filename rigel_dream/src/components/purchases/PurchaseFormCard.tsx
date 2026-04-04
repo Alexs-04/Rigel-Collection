@@ -23,27 +23,27 @@ export default function PurchaseFormCard({
     onSubmit,
 }: PurchaseFormCardProps) {
     return (
-        <section className="card" style={{padding: 20}}>
-            <h2 style={{marginTop: 0, marginBottom: 12, fontSize: 18}}>Registrar compra</h2>
+        <section className="ui-card p-5">
+            <h2 className="mb-3 mt-0 text-lg font-semibold text-slate-900">Registrar compra</h2>
 
-            <form onSubmit={onSubmit} style={{display: 'grid', gap: 10}}>
-                <select className="input" value={form.productName} onChange={(e) => onChange('productName', e.target.value)} required>
+            <form onSubmit={onSubmit} className="grid gap-2.5">
+                <select className="ui-input" value={form.productName} onChange={(e) => onChange('productName', e.target.value)} required>
                     <option value="">Selecciona producto</option>
                     {products.map((product) => (
                         <option key={product.name} value={product.name}>{product.name}</option>
                     ))}
                 </select>
 
-                <select className="input" value={form.supplierName} onChange={(e) => onChange('supplierName', e.target.value)} required>
+                <select className="ui-input" value={form.supplierName} onChange={(e) => onChange('supplierName', e.target.value)} required>
                     <option value="">Selecciona proveedor</option>
                     {suppliers.map((supplier) => (
                         <option key={`${form.productName}-${supplier.name}`} value={supplier.name}>{supplier.name}</option>
                     ))}
                 </select>
 
-                <div style={{display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 10}}>
+                <div className="grid gap-2.5 sm:grid-cols-2">
                     <input
-                        className="input"
+                        className="ui-input"
                         type="number"
                         min="1"
                         step="1"
@@ -53,7 +53,7 @@ export default function PurchaseFormCard({
                         required
                     />
                     <input
-                        className="input"
+                        className="ui-input"
                         type="number"
                         min="0"
                         step="0.01"
@@ -64,10 +64,10 @@ export default function PurchaseFormCard({
                     />
                 </div>
 
-                <input className="input" type="date" value={form.purchaseDate} onChange={(e) => onChange('purchaseDate', e.target.value)} required />
-                <input className="input" placeholder="Notas" value={form.notes} onChange={(e) => onChange('notes', e.target.value)} />
+                <input className="ui-input" type="date" value={form.purchaseDate} onChange={(e) => onChange('purchaseDate', e.target.value)} required />
+                <input className="ui-input" placeholder="Notas" value={form.notes} onChange={(e) => onChange('notes', e.target.value)} />
 
-                <label style={{display: 'flex', alignItems: 'center', gap: 8, marginBottom: 0}}>
+                <label className="mb-0 flex items-center gap-2 text-sm text-slate-600">
                     <input
                         type="checkbox"
                         checked={form.useExistingBatch}
@@ -77,7 +77,7 @@ export default function PurchaseFormCard({
                 </label>
 
                 {form.useExistingBatch ? (
-                    <select className="input" value={form.batchId} onChange={(e) => onChange('batchId', e.target.value)}>
+                    <select className="ui-input" value={form.batchId} onChange={(e) => onChange('batchId', e.target.value)}>
                         <option value="">Selecciona lote</option>
                         {batches.map((batch) => (
                             <option key={batch.id} value={String(batch.id)}>
@@ -87,13 +87,13 @@ export default function PurchaseFormCard({
                     </select>
                 ) : (
                     <>
-                        <input className="input" placeholder="Codigo lote" value={form.batchCode} onChange={(e) => onChange('batchCode', e.target.value)} required />
-                        <div style={{display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 10}}>
-                            <input className="input" type="date" value={form.receptionDate} onChange={(e) => onChange('receptionDate', e.target.value)} required />
-                            <input className="input" type="date" value={form.expirationDate} onChange={(e) => onChange('expirationDate', e.target.value)} required />
+                        <input className="ui-input" placeholder="Codigo lote" value={form.batchCode} onChange={(e) => onChange('batchCode', e.target.value)} required />
+                        <div className="grid gap-2.5 sm:grid-cols-2">
+                            <input className="ui-input" type="date" value={form.receptionDate} onChange={(e) => onChange('receptionDate', e.target.value)} required />
+                            <input className="ui-input" type="date" value={form.expirationDate} onChange={(e) => onChange('expirationDate', e.target.value)} required />
                         </div>
                         <input
-                            className="input"
+                            className="ui-input"
                             type="number"
                             min="0"
                             step="0.01"
@@ -105,17 +105,17 @@ export default function PurchaseFormCard({
                     </>
                 )}
 
-                <label style={{display: 'flex', alignItems: 'center', gap: 8, marginBottom: 0}}>
+                <label className="mb-0 flex items-center gap-2 text-sm text-slate-600">
                     <input type="checkbox" checked={form.available} onChange={(e) => onChange('available', e.target.checked)} />
                     Disponible en piso de ventas
                 </label>
 
-                <button className="btn-primary" type="submit" disabled={saving || products.length === 0}>
+                <button className="ui-btn-primary" type="submit" disabled={saving || products.length === 0}>
                     {saving ? 'Guardando...' : 'Registrar compra'}
                 </button>
             </form>
 
-            {formMessage && <p className="text-muted" style={{marginBottom: 0}}>{formMessage}</p>}
+            {formMessage && <p className="mb-0 text-sm text-slate-500">{formMessage}</p>}
         </section>
     )
 }

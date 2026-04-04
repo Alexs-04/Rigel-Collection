@@ -3,9 +3,9 @@ import {CATEGORY_OPTIONS_ES} from '../../utils/productPresentation.js'
 
 export default function ProductFieldsGrid({value, onChange, suppliers, disabled, isRequired}) {
     return (
-        <div style={{display: 'grid', gap: 10, marginBottom: 14}}>
+        <div className="mb-3.5 grid gap-2.5">
             <input
-                className="input"
+                className="ui-input"
                 placeholder="Nombre"
                 value={value?.name || ''}
                 disabled={disabled}
@@ -13,7 +13,7 @@ export default function ProductFieldsGrid({value, onChange, suppliers, disabled,
                 onChange={(e) => onChange('name', e.target.value)}
             />
             <input
-                className="input"
+                className="ui-input"
                 placeholder="Codigo de barras"
                 value={value?.barcode || ''}
                 disabled={disabled}
@@ -21,7 +21,7 @@ export default function ProductFieldsGrid({value, onChange, suppliers, disabled,
                 onChange={(e) => onChange('barcode', e.target.value)}
             />
             <input
-                className="input"
+                className="ui-input"
                 placeholder="Descripcion"
                 value={value?.description || ''}
                 disabled={disabled}
@@ -29,7 +29,7 @@ export default function ProductFieldsGrid({value, onChange, suppliers, disabled,
                 onChange={(e) => onChange('description', e.target.value)}
             />
             <select
-                className="input"
+                className="ui-input"
                 value={value?.category || 'OTHERS'}
                 disabled={disabled}
                 onChange={(e) => onChange('category', e.target.value)}
@@ -39,7 +39,7 @@ export default function ProductFieldsGrid({value, onChange, suppliers, disabled,
                 ))}
             </select>
             <input
-                className="input"
+                className="ui-input"
                 placeholder="Precio de venta"
                 type="number"
                 min="0"
@@ -50,14 +50,14 @@ export default function ProductFieldsGrid({value, onChange, suppliers, disabled,
                 onChange={(e) => onChange('price', e.target.value)}
             />
             <input
-                className="input"
+                className="ui-input"
                 placeholder="URL de imagen"
                 value={value?.imageUrl || ''}
                 disabled={disabled}
                 onChange={(e) => onChange('imageUrl', e.target.value)}
             />
             <select
-                className="input"
+                className="ui-input"
                 value={value?.supplierName || ''}
                 disabled={disabled}
                 required={isRequired}
@@ -69,7 +69,7 @@ export default function ProductFieldsGrid({value, onChange, suppliers, disabled,
                 ))}
             </select>
             <input
-                className="input"
+                className="ui-input"
                 placeholder="Precio con proveedor"
                 type="number"
                 min="0"
