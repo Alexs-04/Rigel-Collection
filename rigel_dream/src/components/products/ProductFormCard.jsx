@@ -13,8 +13,8 @@ export default function ProductFormCard({
 }) {
     if (!isAdmin) {
         return (
-            <section className="card" style={{padding: 16}}>
-                <p className="text-muted" style={{margin: 0}}>
+            <section className="ui-card p-4">
+                <p className="m-0 text-sm text-slate-500">
                     Tu rol ({userRole || 'USER'}) permite consulta. Solo administradores pueden agregar, editar o
                     eliminar productos.
                 </p>
@@ -23,12 +23,12 @@ export default function ProductFormCard({
     }
 
     return (
-        <section className="card" style={{padding: 20}}>
-            <h2 style={{marginTop: 0, marginBottom: 12, fontSize: 18}}>Agregar producto</h2>
-            <p className="text-muted" style={{marginTop: 0, marginBottom: 12}}>
+        <section className="ui-card p-5">
+            <h2 className="mb-3 mt-0 text-lg font-semibold text-slate-900">Agregar producto</h2>
+            <p className="mb-3 mt-0 text-sm text-slate-500">
                 Registra solo los datos esenciales del catalogo. Las cantidades de inventario se registran desde Compras.
             </p>
-            <form onSubmit={onSubmit} style={{display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 12}}>
+            <form onSubmit={onSubmit} className="grid gap-3 sm:grid-cols-2">
                 <ProductFieldsGrid
                     value={form}
                     suppliers={suppliers}
@@ -37,19 +37,19 @@ export default function ProductFormCard({
                     onChange={onChangeForm}
                 />
 
-                <div style={{gridColumn: '1 / -1'}}>
-                    <button className="btn-primary" type="submit" disabled={saving || suppliers.length === 0}>
+                <div className="sm:col-span-2">
+                    <button className="ui-btn-primary" type="submit" disabled={saving || suppliers.length === 0}>
                         {saving ? 'Guardando...' : 'Agregar producto'}
                     </button>
                 </div>
             </form>
 
             {suppliers.length === 0 && (
-                <p className="text-muted" style={{marginBottom: 0}}>
+                <p className="mb-0 text-sm text-slate-500">
                     Debes registrar al menos un proveedor para crear productos.
                 </p>
             )}
-            {formMessage && <p className="text-muted" style={{marginBottom: 0}}>{formMessage}</p>}
+            {formMessage && <p className="mb-0 text-sm text-slate-500">{formMessage}</p>}
         </section>
     )
 }

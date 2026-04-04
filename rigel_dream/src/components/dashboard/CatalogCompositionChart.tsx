@@ -1,5 +1,6 @@
 import {formatNumber, percentage} from './formatters'
 import type {DashboardStats} from '../../types/dashboard'
+import Card from '../ui/Card'
 
 interface CatalogCompositionChartProps {
     stats?: DashboardStats
@@ -16,9 +17,9 @@ export default function CatalogCompositionChart({stats}: CatalogCompositionChart
     const total = slices.reduce((acc, item) => acc + item.value, 0)
 
     return (
-        <section className="card" style={{padding: 16}}>
-            <h2 style={{marginTop: 0, marginBottom: 12, fontSize: 18}}>Composicion del sistema</h2>
-            <div style={{height: 14, borderRadius: 999, overflow: 'hidden', display: 'flex', background: 'rgba(2, 6, 23, 0.08)'}}>
+        <Card className="p-4">
+            <h2 className="mb-3 text-lg font-semibold text-slate-900">Composicion del sistema</h2>
+            <div className="flex h-3.5 overflow-hidden rounded-full bg-slate-200">
                 {slices.map((item) => (
                     <div
                         key={item.label}
@@ -32,18 +33,18 @@ export default function CatalogCompositionChart({stats}: CatalogCompositionChart
                 ))}
             </div>
 
-            <div style={{display: 'grid', gap: 8, marginTop: 12}}>
+            <div className="mt-3 grid gap-2">
                 {slices.map((item) => (
-                    <div key={item.label} style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
-                        <div style={{display: 'inline-flex', alignItems: 'center', gap: 8}}>
-                            <span style={{display: 'inline-block', width: 10, height: 10, borderRadius: 999, background: item.color}}/>
-                            <span style={{fontSize: 13}}>{item.label}</span>
+                    <div key={item.label} className="flex items-center justify-between">
+                        <div className="inline-flex items-center gap-2">
+                            <span className="inline-block h-2.5 w-2.5 rounded-full" style={{background: item.color}}/>
+                            <span className="text-xs text-slate-700">{item.label}</span>
                         </div>
-                        <strong style={{fontSize: 13}}>{formatNumber(item.value)}</strong>
+                        <strong className="text-xs text-slate-900">{formatNumber(item.value)}</strong>
                     </div>
                 ))}
             </div>
-        </section>
+        </Card>
     )
 }
 

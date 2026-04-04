@@ -37,17 +37,17 @@ export default function UserDetailPanel({
     onToggleUserStatus,
 }: UserDetailPanelProps) {
     return (
-        <div className="card supplier-detail-card" style={{padding: 16}}>
-            <h2 style={{marginTop: 0, fontSize: 18}}>Detalle del usuario</h2>
+        <div className="ui-card supplier-detail-card p-4">
+            <h2 className="mt-0 text-lg font-semibold text-slate-900">Detalle del usuario</h2>
             {!selectedId && !isCollapsingDetail && (
-                <p className="text-muted">Selecciona un usuario para ver su informacion.</p>
+                <p className="text-sm text-slate-500">Selecciona un usuario para ver su informacion.</p>
             )}
 
             <div className={`supplier-detail-body ${detailExpanded ? 'is-open' : ''}`}>
                 {showDetailContent && (
                     <>
-                        {loadingDetail && <p className="text-muted">Cargando detalle...</p>}
-                        {detailError && <p className="text-muted">{detailError}</p>}
+                        {loadingDetail && <p className="text-sm text-slate-500">Cargando detalle...</p>}
+                        {detailError && <p className="text-sm text-slate-500">{detailError}</p>}
 
                         {detail && !loadingDetail && (
                             <>
@@ -59,25 +59,25 @@ export default function UserDetailPanel({
                                     onChange={onChangeDetail}
                                 />
 
-                                <input className="input" value={detail.active ? 'Activo' : 'Inactivo'} disabled />
+                                <input className="ui-input" value={detail.active ? 'Activo' : 'Inactivo'} disabled />
 
-                                <div style={{display: 'flex', gap: 8, marginTop: 12, marginBottom: 12}}>
+                                <div className="my-3 flex flex-wrap gap-2">
                                     {!editing && (
-                                        <button className="btn-primary" type="button" onClick={onStartEdit}>
+                                        <button className="ui-btn-primary" type="button" onClick={onStartEdit}>
                                             Editar
                                         </button>
                                     )}
                                     {editing && (
-                                        <button className="btn-primary" type="button" disabled={saving} onClick={onSaveChanges}>
+                                        <button className="ui-btn-primary" type="button" disabled={saving} onClick={onSaveChanges}>
                                             Guardar cambios
                                         </button>
                                     )}
                                     {editing && (
-                                        <button className="btn-ghost" type="button" onClick={onCancelEdit}>
+                                        <button className="ui-btn-ghost" type="button" onClick={onCancelEdit}>
                                             Cancelar
                                         </button>
                                     )}
-                                    <button className="btn-ghost" type="button" disabled={saving} onClick={onToggleUserStatus}>
+                                    <button className="ui-btn-ghost" type="button" disabled={saving} onClick={onToggleUserStatus}>
                                         {detail.active ? 'Desactivar' : 'Activar'}
                                     </button>
                                 </div>

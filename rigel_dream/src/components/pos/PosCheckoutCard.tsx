@@ -29,23 +29,23 @@ export default function PosCheckoutCard({
     onSubmit,
 }: PosCheckoutCardProps) {
     return (
-        <section className="card" style={{padding: 16, display: 'grid', gap: 12}}>
-            <h2 style={{margin: 0, fontSize: 18}}>Cobro</h2>
+        <section className="ui-card grid gap-3 p-4">
+            <h2 className="m-0 text-lg font-semibold text-slate-900">Cobro</h2>
 
-            <label style={{marginBottom: 0}}>
+            <label className="mb-0">
                 Descripcion de venta
                 <input
-                    className="input"
+                    className="ui-input"
                     placeholder="Ej. Venta mostrador turno matutino"
                     value={description}
                     onChange={(event) => onDescriptionChange(event.target.value)}
                 />
             </label>
 
-            <label style={{marginBottom: 0}}>
+            <label className="mb-0">
                 Metodo de pago
                 <select
-                    className="input"
+                    className="ui-input"
                     value={methodPayment}
                     onChange={(event) => onMethodPaymentChange(event.target.value as MethodPayment)}
                 >
@@ -57,40 +57,32 @@ export default function PosCheckoutCard({
                 </select>
             </label>
 
-            <div
-                style={{
-                    border: '1px solid rgba(2, 6, 23, 0.08)',
-                    borderRadius: 10,
-                    padding: 12,
-                    display: 'grid',
-                    gap: 6,
-                }}
-            >
-                <div style={{display: 'flex', justifyContent: 'space-between'}}>
-                    <span className="text-muted">Piezas</span>
+            <div className="grid gap-1.5 rounded-lg border border-slate-200 p-3">
+                <div className="flex justify-between">
+                    <span className="text-sm text-slate-500">Piezas</span>
                     <strong>{totals.items}</strong>
                 </div>
-                <div style={{display: 'flex', justifyContent: 'space-between'}}>
-                    <span className="text-muted">Subtotal</span>
+                <div className="flex justify-between">
+                    <span className="text-sm text-slate-500">Subtotal</span>
                     <strong>{formatPriceMxn(totals.subtotal)}</strong>
                 </div>
-                <div style={{display: 'flex', justifyContent: 'space-between'}}>
-                    <span className="text-muted">Descuento</span>
+                <div className="flex justify-between">
+                    <span className="text-sm text-slate-500">Descuento</span>
                     <strong>{formatPriceMxn(totals.discount)}</strong>
                 </div>
-                <div style={{display: 'flex', justifyContent: 'space-between', fontSize: 18}}>
+                <div className="flex justify-between text-lg font-semibold text-slate-900">
                     <span>Total</span>
                     <strong>{formatPriceMxn(totals.total)}</strong>
                 </div>
             </div>
 
             {message && (
-                <p style={{margin: 0, color: message.includes('correctamente') ? '#15803d' : '#dc2626'}}>
+                <p className={`m-0 text-sm ${message.includes('correctamente') ? 'text-emerald-700' : 'text-red-600'}`}>
                     {message}
                 </p>
             )}
 
-            <button className="btn-primary" type="button" onClick={onSubmit} disabled={submitting}>
+            <button className="ui-btn-primary" type="button" onClick={onSubmit} disabled={submitting}>
                 {submitting ? 'Procesando...' : 'Cobrar'}
             </button>
         </section>

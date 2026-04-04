@@ -15,60 +15,54 @@ export default function PosCartPanel({
     onClear,
 }: PosCartPanelProps) {
     return (
-        <section className="card" style={{padding: 16, display: 'grid', gap: 12}}>
-            <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
-                <h2 style={{margin: 0, fontSize: 18}}>Carrito</h2>
-                <button className="btn-ghost" type="button" onClick={onClear} disabled={items.length === 0}>
+        <section className="ui-card grid gap-3 p-4">
+            <div className="flex items-center justify-between">
+                <h2 className="m-0 text-lg font-semibold text-slate-900">Carrito</h2>
+                <button className="ui-btn-ghost" type="button" onClick={onClear} disabled={items.length === 0}>
                     Limpiar
                 </button>
             </div>
 
             {items.length === 0 && (
-                <p className="text-muted" style={{margin: 0}}>
+                <p className="m-0 text-sm text-slate-500">
                     Aun no hay productos en el carrito.
                 </p>
             )}
 
             {items.length > 0 && (
-                <div style={{display: 'grid', gap: 10, maxHeight: 380, overflowY: 'auto', paddingRight: 4}}>
+                <div className="grid max-h-[23.75rem] gap-2.5 overflow-y-auto pr-1">
                     {items.map((item) => {
                         const lineTotal = Math.max(0, item.quantity * item.unitPrice - item.discount)
                         return (
                             <article
                                 key={item.barcode}
-                                style={{
-                                    border: '1px solid rgba(2, 6, 23, 0.08)',
-                                    borderRadius: 10,
-                                    padding: 12,
-                                    display: 'grid',
-                                    gap: 10,
-                                }}
+                                className="grid gap-2.5 rounded-lg border border-slate-200 p-3"
                             >
-                                <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12}}>
+                                <div className="flex items-center justify-between gap-3">
                                     <div>
-                                        <strong>{item.productName}</strong>
-                                        <p className="text-muted" style={{margin: 0, fontSize: 12}}>{item.barcode}</p>
+                                        <strong className="text-slate-900">{item.productName}</strong>
+                                        <p className="m-0 text-xs text-slate-500">{item.barcode}</p>
                                     </div>
-                                    <button className="btn-ghost" type="button" onClick={() => onRemoveItem(item.barcode)}>
+                                    <button className="ui-btn-ghost" type="button" onClick={() => onRemoveItem(item.barcode)}>
                                         Quitar
                                     </button>
                                 </div>
 
-                                <div style={{display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 8}}>
-                                    <label style={{marginBottom: 0}}>
+                                <div className="grid gap-2 sm:grid-cols-3">
+                                    <label className="mb-0">
                                         Cantidad
                                         <input
-                                            className="input"
+                                            className="ui-input"
                                             type="number"
                                             min={1}
                                             value={item.quantity}
                                             onChange={(event) => onUpdateItem(item.barcode, 'quantity', Number(event.target.value))}
                                         />
                                     </label>
-                                    <label style={{marginBottom: 0}}>
+                                    <label className="mb-0">
                                         Precio unitario
                                         <input
-                                            className="input"
+                                            className="ui-input"
                                             type="number"
                                             min={0}
                                             step="0.01"
@@ -76,10 +70,10 @@ export default function PosCartPanel({
                                             onChange={(event) => onUpdateItem(item.barcode, 'unitPrice', Number(event.target.value))}
                                         />
                                     </label>
-                                    <label style={{marginBottom: 0}}>
+                                    <label className="mb-0">
                                         Descuento
                                         <input
-                                            className="input"
+                                            className="ui-input"
                                             type="number"
                                             min={0}
                                             step="0.01"
@@ -89,11 +83,11 @@ export default function PosCartPanel({
                                     </label>
                                 </div>
 
-                                <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
-                                    <span className="text-muted" style={{fontSize: 13}}>
+                                <div className="flex items-center justify-between">
+                                    <span className="text-xs text-slate-500">
                                         {item.quantity} x {formatPriceMxn(item.unitPrice)} - {formatPriceMxn(item.discount)}
                                     </span>
-                                    <strong>{formatPriceMxn(lineTotal)}</strong>
+                                    <strong className="text-slate-900">{formatPriceMxn(lineTotal)}</strong>
                                 </div>
                             </article>
                         )

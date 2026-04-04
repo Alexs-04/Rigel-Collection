@@ -5,6 +5,7 @@ import AmountDetailPanel from '../components/amounts/AmountDetailPanel'
 import AmountsFormCard from '../components/amounts/AmountsFormCard'
 import AmountsListPanel from '../components/amounts/AmountsListPanel'
 import {useAmountsPageState} from '../hooks/amounts/useAmountsPageState'
+import Card from '../components/ui/Card'
 
 export default function Amounts() {
     const {user} = useContext(AuthContext) as AuthContextValue
@@ -38,16 +39,16 @@ export default function Amounts() {
     } = useAmountsPageState(isAdmin)
 
     return (
-        <div style={{display: 'grid', gap: 16}}>
-            <section className="card" style={{padding: 20}}>
-                <h1 style={{marginTop: 0, marginBottom: 6}}>Importes</h1>
-                <p className="text-muted" style={{marginTop: 0}}>
+        <div className="grid gap-4">
+            <Card className="p-5">
+                <h1 className="mb-1 text-2xl font-bold text-slate-900">Importes</h1>
+                <p className="mt-0 text-sm text-slate-500">
                     Registra importes de envases no retornables, controla vencimiento y gestiona devoluciones o compras.
                 </p>
-                <p className="text-muted" style={{marginBottom: 0}}>
+                <p className="mb-0 text-sm text-slate-500">
                     Total de registros: {allAmounts.length}
                 </p>
-            </section>
+            </Card>
 
             <AmountsFormCard
                 form={form}
@@ -58,7 +59,7 @@ export default function Amounts() {
                 onSubmit={submitCreate}
             />
 
-            <section style={{display: 'grid', gridTemplateColumns: 'minmax(320px, 1fr) minmax(360px, 1.1fr)', gap: 16}}>
+            <section className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(320px,1fr)_minmax(360px,1.1fr)]">
                 <AmountsListPanel
                     loading={loading}
                     error={error}

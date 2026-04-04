@@ -25,7 +25,7 @@ export default function LoginForm() {
         } catch (err) {
             const status = err?.response?.status
             if (status === 401 || status === 403) {
-                setError(err?.response?.data?.message || 'Tu cuenta no puede iniciar sesion en este momento')
+                setError(err?.response?.data?.message || 'Tu cuenta no puede iniciar sesión en este momento')
             } else {
                 setError(err?.response?.data?.message || 'Error al iniciar sesión')
             }
@@ -36,31 +36,25 @@ export default function LoginForm() {
 
     return (
         <div className="center-screen bg-gradient">
-            <div style={{width: '100%', maxWidth: 420}}>
-                <div className="card">
-                    <div className="brand" style={{marginBottom: 12}}>
-                        <div className="logo">R</div>
-                        <div className="title">Rigel</div>
+            <div className="w-full max-w-[420px]">
+                <div className="ui-card p-7">
+                    <div className="mb-3 flex items-center gap-2">
+                        <div className="grid h-8 w-8 place-items-center rounded-lg bg-brand-600 text-sm font-bold text-white">R</div>
+                        <div className="text-lg font-semibold text-slate-900">Rigel</div>
                     </div>
 
-                    <h2 style={{fontSize: 20, marginBottom: 6}}>Bienvenido de vuelta</h2>
-                    <p style={{color: 'var(--muted)', marginBottom: 16}}>Ingresa con tu cuenta para continuar</p>
+                    <h2 className="mb-1.5 text-xl font-semibold text-slate-900">Bienvenido de vuelta</h2>
+                    <p className="mb-4 text-sm text-slate-500">Ingresa con tu cuenta para continuar</p>
 
-                    <form onSubmit={handleSubmit} style={{display: 'grid', gap: 12}}>
+                    <form onSubmit={handleSubmit} className="grid gap-3">
                         <div>
                             <label>Email</label>
-                            <div style={{display: 'flex', gap: 8, alignItems: 'center'}}>
-                                <div style={{
-                                    display: 'inline-flex',
-                                    alignItems: 'center',
-                                    padding: 8,
-                                    borderRadius: 8,
-                                    background: '#f3f4f6'
-                                }}>
-                                    <User style={{width: 16, height: 16, color: 'var(--muted)'}}/>
+                            <div className="flex items-center gap-2">
+                                <div className="inline-flex items-center rounded-lg bg-slate-100 p-2">
+                                    <User className="h-4 w-4 text-slate-500"/>
                                 </div>
                                 <input
-                                    className="input"
+                                    className="ui-input"
                                     type="email"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
@@ -71,18 +65,12 @@ export default function LoginForm() {
 
                         <div>
                             <label>Contraseña</label>
-                            <div style={{display: 'flex', gap: 8, alignItems: 'center'}}>
-                                <div style={{
-                                    display: 'inline-flex',
-                                    alignItems: 'center',
-                                    padding: 8,
-                                    borderRadius: 8,
-                                    background: '#f3f4f6'
-                                }}>
-                                    <Lock style={{width: 16, height: 16, color: 'var(--muted)'}}/>
+                            <div className="flex items-center gap-2">
+                                <div className="inline-flex items-center rounded-lg bg-slate-100 p-2">
+                                    <Lock className="h-4 w-4 text-slate-500"/>
                                 </div>
                                 <input
-                                    className="input"
+                                    className="ui-input"
                                     type="password"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
@@ -91,13 +79,13 @@ export default function LoginForm() {
                             </div>
                         </div>
 
-                        {error && <div style={{color: '#ef4444', fontSize: 13}}>{error}</div>}
+                        {error && <div className="text-sm text-red-500">{error}</div>}
 
-                        <div style={{display: 'flex', gap: 12, alignItems: 'center'}}>
-                            <button type="submit" disabled={loading} className="btn-primary" style={{flex: 1}}>
+                        <div className="flex items-center gap-3">
+                            <button type="submit" disabled={loading} className="ui-btn-primary flex-1">
                                 {loading ? 'Ingresando...' : 'Ingresar'}
                             </button>
-                            <button type="button" className="btn-ghost" onClick={() => {
+                            <button type="button" className="ui-btn-ghost" onClick={() => {
                                 setEmail('');
                                 setPassword('')
                             }}>
@@ -105,20 +93,15 @@ export default function LoginForm() {
                             </button>
                         </div>
 
-                        <div style={{
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            color: 'var(--muted)',
-                            fontSize: 13
-                        }}>
+                        <div className="flex justify-between text-xs text-slate-500">
                             <div></div>
-                            <a style={{color: 'var(--accent-600)', textDecoration: 'none'}} href="#">¿Olvidaste tu
+                            <a className="text-brand-600 no-underline hover:text-brand-700" href="#">¿Olvidaste tu
                                 contraseña?</a>
                         </div>
                     </form>
                 </div>
 
-                <div style={{marginTop: 12, textAlign: 'center', color: 'var(--muted)', fontSize: 13}}>
+                <div className="mt-3 text-center text-xs text-slate-500">
                     © {new Date().getFullYear()} Rigel
                 </div>
             </div>
