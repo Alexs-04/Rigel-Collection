@@ -24,15 +24,24 @@ export default function Products() {
         loadingDetail,
         detailError,
         editing,
+        managingSuppliers,
+        relationForm,
+        relationMessage,
+        relationSaving,
+        availableSuppliersForDetail,
         isCollapsingDetail,
         detailExpanded,
         showDetailContent,
         setEditing,
+        setManagingSuppliers,
         onChangeForm,
         onChangeDetail,
+        onChangeRelationForm,
         addProduct,
         saveChanges,
         deleteProduct,
+        addSupplierRelation,
+        removeSupplierRelation,
         handleProductClick,
         loadDetail,
     } = useProductsPageState({isAdmin})
@@ -97,6 +106,15 @@ export default function Products() {
                     }}
                     onSaveChanges={saveChanges}
                     onDeleteProduct={deleteProduct}
+                    managingSuppliers={managingSuppliers}
+                    relationForm={relationForm}
+                    relationMessage={relationMessage}
+                    relationSaving={relationSaving}
+                    availableSuppliers={availableSuppliersForDetail}
+                    onToggleManageSuppliers={() => setManagingSuppliers((prev) => !prev)}
+                    onChangeRelationForm={onChangeRelationForm}
+                    onAddSupplier={addSupplierRelation}
+                    onRemoveSupplier={removeSupplierRelation}
                 />
             </section>
         </div>

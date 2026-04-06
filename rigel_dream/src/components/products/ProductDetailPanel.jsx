@@ -19,6 +19,15 @@ export default function ProductDetailPanel({
     onCancelEdit,
     onSaveChanges,
     onDeleteProduct,
+    managingSuppliers,
+    relationForm,
+    relationMessage,
+    relationSaving,
+    availableSuppliers,
+    onToggleManageSuppliers,
+    onChangeRelationForm,
+    onAddSupplier,
+    onRemoveSupplier,
 }) {
     return (
         <div className="ui-card product-detail-card p-4">
@@ -60,6 +69,11 @@ export default function ProductDetailPanel({
                                                 Cancelar
                                             </button>
                                         )}
+                                        {!editing && (
+                                            <button className="ui-btn-ghost" type="button" onClick={onToggleManageSuppliers}>
+                                                {managingSuppliers ? 'Cerrar gestion de proveedores' : 'Gestionar proveedores'}
+                                            </button>
+                                        )}
                                         <button className="ui-btn-ghost" type="button" onClick={onDeleteProduct}>
                                             Eliminar
                                         </button>
@@ -78,6 +92,16 @@ export default function ProductDetailPanel({
                                                 <div className="text-xs text-slate-500">
                                                     Precio proveedor: {formatPriceMxn(supplier.supplyPrice)}
                                                 </div>
+                                                {isAdmin && managingSuppliers && (
+                                                    <button
+                                                        type="button"
+                                                        className="ui-btn-ghost mt-2"
+                                                        disabled={relationSaving}
+                                                        onClick={() => onRemoveSupplier(supplier.name)}
+                                                    >
+                                                        Quitar proveedor
+                                                    </button>
+                                                )}
 
                                                 {Array.isArray(supplier.batches) && supplier.batches.length > 0 && (
                                                     <div className="mt-2 grid gap-1.5">
@@ -95,6 +119,48 @@ export default function ProductDetailPanel({
                                     <p className="mt-0 text-sm text-slate-500">
                                         Este producto no tiene proveedores asociados.
                                     </p>
+                                )}
+
+                                {isAdmin && managingSuppliers && (
+                                    <div className="mt-4 rounded-xl border border-slate-200 p-3">
+                                        <h4 className="mb-2 mt-0 text-sm font-semibold text-slate-900">
+                                            Asociar nuevo proveedor
+                                        </h4>
+                                        <div className="grid gap-2 md:grid-cols-2">
+                                            <select
+                                                className="ui-select"
+                                                value={relationForm.supplierName}
+                                                onChange={(e) => onChangeRelationForm('supplierName', e.target.value)}
+                                            >
+                                                <option value="">Selecciona proveedor</option>
+                                                {availableSuppliers.map((supplier) => (
+                                                    <option key={supplier.name} value={supplier.name}>
+                                                        {supplier.name}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                            <input
+                                                className="ui-input"
+                                                type="number"
+                                                min="0"
+                                                step="0.01"
+                                                placeholder="Precio proveedor"
+                                                value={relationForm.supplierPrice}
+                                                onChange={(e) => onChangeRelationForm('supplierPrice', e.target.value)}
+                                            />
+                                        </div>
+                                        <div className="mt-2 flex flex-wrap gap-2">
+                                            <button
+                                                type="button"
+                                                className="ui-btn-primary"
+                                                disabled={relationSaving || !availableSuppliers.length}
+                                                onClick={onAddSupplier}
+                                            >
+                                                Agregar proveedor
+                                            </button>
+                                        </div>
+                                        {relationMessage && <p className="mb-0 mt-2 text-sm text-slate-500">{relationMessage}</p>}
+                                    </div>
                                 )}
                             </>
                         )}
