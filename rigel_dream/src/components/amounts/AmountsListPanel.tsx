@@ -1,5 +1,7 @@
 import type {AmountItem} from '../../types/amounts'
 import {formatCurrency} from '../dashboard/formatters'
+import Card from '../ui/Card'
+import {Input} from '../ui/Input'
 
 interface Props {
     loading: boolean
@@ -28,47 +30,43 @@ export default function AmountsListPanel({
     onSelect,
 }: Props) {
     return (
-        <section className="card" style={{padding: 16}}>
-            <h2 style={{marginTop: 0, fontSize: 18}}>Importes registrados</h2>
-            <input
-                className="input"
+        <Card className="p-4">
+            <h2 className="mb-3 text-lg font-semibold text-slate-900">Importes registrados</h2>
+            <Input
                 placeholder="Buscar por folio, cliente, tipo o estado"
                 value={search}
                 onChange={(e) => onSearchChange(e.target.value)}
-                style={{marginBottom: 12}}
+                className="mb-3"
             />
 
-            {loading ? <p className="text-muted">Cargando importes...</p> : null}
-            {error ? <p style={{color: '#b91c1c'}}>{error}</p> : null}
+            {loading ? <p className="text-sm text-slate-500">Cargando importes...</p> : null}
+            {error ? <p className="text-sm text-red-700">{error}</p> : null}
 
-            {!loading && !error && amounts.length === 0 ? <p className="text-muted">Sin importes registrados.</p> : null}
+            {!loading && !error && amounts.length === 0 ? <p className="text-sm text-slate-500">Sin importes registrados.</p> : null}
 
-            <div style={{display: 'grid', gap: 8}}>
+            <div className="grid gap-2">
                 {amounts.map((item) => {
                     const selected = selectedFolio === item.folio
                     return (
                         <button
                             key={item.folio}
                             type="button"
-                            className="btn-ghost"
-                            style={{
-                                width: '100%',
-                                textAlign: 'left',
-                                border: `1px solid ${selected ? '#6366f1' : 'rgba(2, 6, 23, 0.08)'}`,
-                                background: selected ? '#eef2ff' : '#fff',
-                                padding: 12,
-                            }}
+                            className={`w-full rounded-lg border px-3 py-2 text-left transition ${
+                                selected
+                                    ? 'border-brand-300 bg-brand-50'
+                                    : 'border-slate-200 bg-white hover:border-brand-200 hover:bg-brand-50/40'
+                            }`}
                             onClick={() => onSelect(item.folio)}
                         >
-                            <strong>#{item.folio} - {item.customerName}</strong>
-                            <div className="text-muted" style={{fontSize: 13}}>
+                            <strong className="text-sm text-slate-900">#{item.folio} - {item.customerName}</strong>
+                            <div className="text-xs text-slate-500">
                                 {item.typeLabel} · {STATUS_LABEL[item.status] || item.status} · {formatCurrency(item.total)}
                             </div>
                         </button>
                     )
                 })}
             </div>
-        </section>
+        </Card>
     )
 }
 

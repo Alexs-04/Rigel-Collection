@@ -16,32 +16,28 @@ export default function SuppliersListPanel({
     onSupplierClick,
 }: SuppliersListPanelProps) {
     return (
-        <div className="card" style={{padding: 16}}>
-            <h2 style={{marginTop: 0, fontSize: 18}}>Lista de proveedores</h2>
-            {loadingList && <p className="text-muted">Cargando proveedores...</p>}
-            {!loadingList && listError && <p className="text-muted">{listError}</p>}
+        <div className="ui-card p-4">
+            <h2 className="mt-0 text-lg font-semibold text-slate-900">Lista de proveedores</h2>
+            {loadingList && <p className="text-sm text-slate-500">Cargando proveedores...</p>}
+            {!loadingList && listError && <p className="text-sm text-slate-500">{listError}</p>}
             {!loadingList && !listError && suppliers.length === 0 && (
-                <p className="text-muted">No hay proveedores registrados.</p>
+                <p className="text-sm text-slate-500">No hay proveedores registrados.</p>
             )}
 
-            <div style={{display: 'grid', gap: 8}}>
+            <div className="grid gap-2">
                 {suppliers.map((supplier) => (
                     <button
                         key={supplier.name}
                         type="button"
                         onClick={() => onSupplierClick(supplier.name)}
-                        style={{
-                            textAlign: 'left',
-                            border: selectedName === supplier.name ? '1px solid var(--accent)' : '1px solid var(--border)',
-                            borderRadius: 8,
-                            background: selectedName === supplier.name ? 'var(--active-bg)' : 'white',
-                            padding: 12,
-                            cursor: 'pointer',
-                            color: 'inherit',
-                        }}
+                        className={`rounded-lg border p-3 text-left text-inherit transition ${
+                            selectedName === supplier.name
+                                ? 'border-brand-500 bg-brand-50'
+                                : 'border-slate-200 bg-white hover:border-brand-200'
+                        }`}
                     >
-                        <div style={{fontWeight: 600}}>{supplier.name}</div>
-                        <div className="text-muted" style={{fontSize: 13}}>{supplier.contactEmail}</div>
+                        <div className="font-semibold text-slate-900">{supplier.name}</div>
+                        <div className="text-xs text-slate-500">{supplier.contactEmail}</div>
                     </button>
                 ))}
             </div>

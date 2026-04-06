@@ -1,143 +1,126 @@
-/* Tailwind removed due to environment; using minimal custom CSS */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-:root {
-    font-family: system-ui, Inter, Avenir, Helvetica, Arial, sans-serif;
-    line-height: 1.5;
-    font-weight: 400;
-
-    color-scheme: dark;
-    color: #e6eef8;
-    background-color: #071329;
-}
-
-/* Reset básico */
-html, body, #root {
-    height: 100%;
-}
-
-body {
-    margin: 0;
-}
-
-/* Layout helpers */
-.app-flex {
-    display: flex;
-    height: 100vh;
-}
-
-.sidebar {
-    width: 16rem;
-    background: #071329;
-    color: #f8fafc;
-    padding: 0.75rem;
-    display: flex;
-    flex-direction: column;
-    box-sizing: border-box;
-}
-
-.sidebar a {
-    color: #e6eef8;
-    text-decoration: none;
-    display: block;
-}
-
-.sidebar a.active, .sidebar a:hover {
-    background: rgba(255, 255, 255, 0.03);
-}
-
-.main {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    background: linear-gradient(180deg, #071329 0%, #041022 100%);
-    color: #f8fafc;
-}
-
-.topbar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0.5rem 1rem;
-    background: rgba(11, 18, 32, 0.6);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
-}
-
-.content {
-    padding: 1.5rem;
-    overflow: auto;
-}
-
-/* Login helpers */
-.center-screen {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.bg-gradient {
-    background: linear-gradient(180deg, #071329 0%, #04203a 100%);
-}
-
-/* Card */
-.card {
-    background: linear-gradient(180deg, #ffffff 0%, #f3f4f6 100%);
-    color: #0b1220;
-    padding: 1.25rem;
-    border-radius: 12px;
-    box-shadow: 0 8px 30px rgba(2, 6, 23, 0.6);
-    border: 1px solid rgba(2, 6, 23, 0.08);
-}
-
-/* Inputs/buttons */
-.input {
-    width: 100%;
-    padding: 0.6rem 0.75rem;
-    border-radius: 8px;
-    background: #fff;
-    border: 1px solid #cbd5e1;
-    color: #0b1220;
-    box-sizing: border-box;
-}
-
-.input:focus {
-    outline: 2px solid rgba(79, 70, 229, 0.12);
-    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.06);
-}
-
-.btn-primary {
-    background: linear-gradient(90deg, #4338ca, #7c3aed);
-    color: white;
-    border: none;
-    padding: 0.6rem 1rem;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: 600;
-}
-
-.btn-primary:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-}
-
-/* Cards small */
-.card-compact {
-    padding: 0.75rem;
-    border-radius: 10px;
-}
-
-/* Misc */
-.text-muted {
-    color: #6b7280;
-}
-
-button {
-    font-family: inherit;
-}
-
-@media (prefers-color-scheme: light) {
+@layer base {
     :root {
-        color: #213547;
-        background-color: #ffffff;
+        font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+        line-height: 1.5;
+        font-weight: 400;
+        color: #0f172a;
+        background-color: #f8fafc;
+    }
+
+    html, body, #root {
+        @apply h-full;
+    }
+
+    body {
+        @apply m-0 bg-app-bg text-app-text antialiased;
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+        font-family: inherit;
+    }
+
+    label {
+        @apply mb-1.5 block text-xs font-medium text-slate-500;
+    }
+}
+
+@layer components {
+    .ui-card {
+        @apply rounded-app border border-app-border bg-app-surface shadow-card;
+    }
+
+    .ui-input {
+        @apply w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition;
+    }
+
+    .ui-input:focus {
+        @apply border-brand-500 ring-4 ring-brand-500/10;
+    }
+
+    .ui-btn {
+        @apply inline-flex items-center justify-center gap-2 rounded-lg px-3.5 py-2 text-sm font-semibold transition;
+    }
+
+    .ui-btn-primary {
+        @apply ui-btn border border-brand-500/30 bg-gradient-to-r from-brand-600 to-brand-500 text-white shadow-soft hover:from-brand-700 hover:to-brand-600 disabled:cursor-not-allowed disabled:opacity-60;
+    }
+
+    .ui-btn-ghost {
+        @apply ui-btn border border-slate-200 bg-white text-slate-700 hover:border-brand-200 hover:bg-brand-50;
+    }
+
+    .ui-btn-danger {
+        @apply ui-btn border border-red-200 bg-red-50 text-red-700 hover:bg-red-100;
+    }
+
+    .supplier-detail-card,
+    .product-detail-card {
+        transition: box-shadow 180ms ease, border-color 180ms ease;
+    }
+
+    .supplier-detail-body,
+    .product-detail-body {
+        max-height: 0;
+        opacity: 0;
+        overflow: hidden;
+        transform: translateY(-6px);
+        transition: max-height 180ms ease, opacity 180ms ease, transform 180ms ease;
+    }
+
+    .supplier-detail-body.is-open {
+        max-height: 1200px;
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .product-detail-body.is-open {
+        max-height: 1400px;
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .supplier-detail-card,
+        .supplier-detail-body,
+        .supplier-detail-body.is-open,
+        .product-detail-card,
+        .product-detail-body,
+        .product-detail-body.is-open {
+            transition: none;
+            transform: none;
+        }
+    }
+}
+
+@layer utilities {
+    .app-flex {
+        @apply flex min-h-screen;
+    }
+
+    .main {
+        @apply flex min-h-screen flex-1 flex-col;
+    }
+
+    .topbar {
+        @apply flex h-14 items-center border-b border-app-border bg-white px-4;
+    }
+
+    .content {
+        @apply flex-1 p-5;
+    }
+
+    .center-screen {
+        @apply grid min-h-screen place-items-center p-6;
+    }
+
+    .bg-gradient {
+        @apply bg-gradient-to-b from-brand-50 to-slate-50;
     }
 }

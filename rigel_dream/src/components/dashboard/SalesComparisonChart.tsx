@@ -1,5 +1,6 @@
 import {formatCurrency} from './formatters'
 import type {DashboardSalesSummary} from '../../types/dashboard'
+import Card from '../ui/Card'
 
 interface SalesComparisonChartProps {
     sales?: DashboardSalesSummary
@@ -15,33 +16,31 @@ export default function SalesComparisonChart({sales}: SalesComparisonChartProps)
     const maxValue = Math.max(...values.map((item) => item.value), 0)
 
     return (
-        <section className="card" style={{padding: 16}}>
-            <h2 style={{marginTop: 0, marginBottom: 12, fontSize: 18}}>Comparativo de ventas</h2>
-            <div style={{display: 'grid', gap: 10}}>
+        <Card className="p-4">
+            <h2 className="mb-3 text-lg font-semibold text-slate-900">Comparativo de ventas</h2>
+            <div className="grid gap-3">
                 {values.map((item) => {
                     const width = maxValue > 0 ? (item.value / maxValue) * 100 : 0
                     return (
                         <div key={item.label}>
-                            <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: 4}}>
-                                <span style={{fontSize: 13}}>{item.label}</span>
-                                <strong style={{fontSize: 13}}>{formatCurrency(item.value)}</strong>
+                            <div className="mb-1 flex justify-between">
+                                <span className="text-xs text-slate-600">{item.label}</span>
+                                <strong className="text-xs text-slate-900">{formatCurrency(item.value)}</strong>
                             </div>
-                            <div style={{height: 10, borderRadius: 999, background: 'rgba(2, 6, 23, 0.08)', overflow: 'hidden'}}>
+                            <div className="h-2.5 overflow-hidden rounded-full bg-slate-200">
                                 <div
                                     style={{
                                         width: `${width}%`,
-                                        height: '100%',
-                                        borderRadius: 999,
                                         background: item.color,
-                                        transition: 'width 180ms ease',
                                     }}
+                                    className="h-full rounded-full transition-[width] duration-200"
                                 />
                             </div>
                         </div>
                     )
                 })}
             </div>
-        </section>
+        </Card>
     )
 }
 

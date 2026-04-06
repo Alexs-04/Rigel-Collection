@@ -36,25 +36,25 @@ export default function POS() {
     } = usePosPageState(user?.username || '')
 
     return (
-        <div style={{display: 'grid', gap: 16}}>
-            <section className="card" style={{padding: 20}}>
-                <h1 style={{marginTop: 0, marginBottom: 6}}>Punto de venta</h1>
-                <p className="text-muted" style={{marginTop: 0}}>
+        <div className="grid gap-4">
+            <section className="ui-card p-5">
+                <h1 className="mb-1.5 mt-0 text-2xl font-semibold text-slate-900">Punto de venta</h1>
+                <p className="mt-0 text-sm text-slate-500">
                     Registra ventas en tiempo real y sincroniza tickets con el backend.
                 </p>
             </section>
 
             {!canAccessPos && (
-                <section className="card" style={{padding: 16}}>
-                    <p className="text-muted" style={{margin: 0}}>
+                <section className="ui-card p-4">
+                    <p className="m-0 text-sm text-slate-500">
                         Acceso denegado. El rol SUPPLIER no tiene acceso al punto de venta.
                     </p>
                 </section>
             )}
 
             {canAccessPos && (
-                <section style={{display: 'grid', gridTemplateColumns: 'minmax(320px, 1.1fr) minmax(360px, 1fr)', gap: 16}}>
-                    <div style={{display: 'grid', gap: 16}}>
+                <section className="grid gap-4 xl:grid-cols-[minmax(320px,1.1fr)_minmax(360px,1fr)]">
+                    <div className="grid gap-4">
                         <PosCatalogPanel
                             search={search}
                             onSearchChange={setSearch}
@@ -67,7 +67,7 @@ export default function POS() {
                         <PosTicketsPanel tickets={tickets} onReload={reload} loading={loadingData} />
                     </div>
 
-                    <div style={{display: 'grid', gap: 16}}>
+                    <div className="grid gap-4">
                         <PosCartPanel
                             items={cart}
                             onUpdateItem={updateCartItem}

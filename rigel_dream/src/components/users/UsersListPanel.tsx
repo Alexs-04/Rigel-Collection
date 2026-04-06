@@ -20,43 +20,38 @@ export default function UsersListPanel({
     onUserClick,
 }: UsersListPanelProps) {
     return (
-        <div className="card" style={{padding: 16}}>
-            <h2 style={{marginTop: 0, fontSize: 18}}>Lista de usuarios</h2>
+        <div className="ui-card p-4">
+            <h2 className="mt-0 text-lg font-semibold text-slate-900">Lista de usuarios</h2>
             <input
-                className="input"
+                className="ui-input mb-3"
                 placeholder="Buscar por nombre, usuario o correo"
                 value={search}
                 onChange={(e) => onSearchChange(e.target.value)}
-                style={{marginBottom: 12}}
             />
 
-            {loadingList && <p className="text-muted">Cargando usuarios...</p>}
-            {!loadingList && listError && <p className="text-muted">{listError}</p>}
+            {loadingList && <p className="text-sm text-slate-500">Cargando usuarios...</p>}
+            {!loadingList && listError && <p className="text-sm text-slate-500">{listError}</p>}
             {!loadingList && !listError && users.length === 0 && (
-                <p className="text-muted">No hay usuarios registrados.</p>
+                <p className="text-sm text-slate-500">No hay usuarios registrados.</p>
             )}
 
-            <div style={{display: 'grid', gap: 8}}>
+            <div className="grid gap-2">
                 {users.map((item) => (
                     <button
                         key={item.id}
                         type="button"
                         onClick={() => onUserClick(item)}
-                        style={{
-                            textAlign: 'left',
-                            border: selectedId === item.id ? '1px solid var(--accent)' : '1px solid var(--border)',
-                            borderRadius: 8,
-                            background: selectedId === item.id ? 'var(--active-bg)' : 'white',
-                            padding: 12,
-                            cursor: 'pointer',
-                            color: 'inherit',
-                        }}
+                        className={`rounded-lg border p-3 text-left text-inherit transition ${
+                            selectedId === item.id
+                                ? 'border-brand-500 bg-brand-50'
+                                : 'border-slate-200 bg-white hover:border-brand-200'
+                        }`}
                     >
-                        <div style={{display: 'flex', justifyContent: 'space-between', gap: 8}}>
-                            <strong>{item.username}</strong>
-                            <span className="text-muted" style={{fontSize: 12}}>{item.active ? 'Activo' : 'Inactivo'}</span>
+                        <div className="flex justify-between gap-2">
+                            <strong className="text-slate-900">{item.username}</strong>
+                            <span className="text-xs text-slate-500">{item.active ? 'Activo' : 'Inactivo'}</span>
                         </div>
-                        <div className="text-muted" style={{fontSize: 13}}>{item.email}</div>
+                        <div className="text-xs text-slate-500">{item.email}</div>
                     </button>
                 ))}
             </div>

@@ -10,50 +10,44 @@ interface PosTicketsPanelProps {
 
 export default function PosTicketsPanel({tickets, onReload, loading}: PosTicketsPanelProps) {
     return (
-        <section className="card" style={{padding: 16, display: 'grid', gap: 12}}>
-            <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
-                <h2 style={{margin: 0, fontSize: 18}}>Ventas recientes</h2>
-                <button className="btn-ghost" type="button" onClick={onReload} disabled={loading}>
+        <section className="ui-card grid gap-3 p-4">
+            <div className="flex items-center justify-between">
+                <h2 className="m-0 text-lg font-semibold text-slate-900">Ventas recientes</h2>
+                <button className="ui-btn-ghost" type="button" onClick={onReload} disabled={loading}>
                     Actualizar
                 </button>
             </div>
 
             {tickets.length === 0 && (
-                <p className="text-muted" style={{margin: 0}}>
+                <p className="m-0 text-sm text-slate-500">
                     Aun no hay tickets registrados.
                 </p>
             )}
 
             {tickets.length > 0 && (
-                <div style={{display: 'grid', gap: 10, maxHeight: 380, overflowY: 'auto', paddingRight: 4}}>
+                <div className="grid max-h-[23.75rem] gap-2.5 overflow-y-auto pr-1">
                     {tickets.map((ticket) => (
                         <article
                             key={ticket.barcode}
-                            style={{
-                                border: '1px solid rgba(2, 6, 23, 0.08)',
-                                borderRadius: 10,
-                                padding: 12,
-                                display: 'grid',
-                                gap: 8,
-                            }}
+                            className="grid gap-2 rounded-lg border border-slate-200 p-3"
                         >
-                            <div style={{display: 'flex', justifyContent: 'space-between', gap: 8}}>
+                            <div className="flex justify-between gap-2">
                                 <div>
-                                    <strong>{ticket.barcode}</strong>
-                                    <p className="text-muted" style={{margin: 0, fontSize: 12}}>
+                                    <strong className="text-slate-900">{ticket.barcode}</strong>
+                                    <p className="m-0 text-xs text-slate-500">
                                         {ticket.consumer} - {ticket.dateAndTime}
                                     </p>
                                 </div>
-                                <strong>{formatPriceMxn(ticket.totalAmount)}</strong>
+                                <strong className="text-slate-900">{formatPriceMxn(ticket.totalAmount)}</strong>
                             </div>
 
                             {ticket.description && (
-                                <p className="text-muted" style={{margin: 0, fontSize: 13}}>
+                                <p className="m-0 text-xs text-slate-500">
                                     {ticket.description}
                                 </p>
                             )}
 
-                            <small className="text-muted" style={{fontSize: 12}}>
+                            <small className="text-xs text-slate-500">
                                 {ticket.products?.length || 0} linea(s) de producto - Pago: {toPaymentLabel(ticket.payment)}
                             </small>
                         </article>

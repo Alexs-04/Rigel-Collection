@@ -1,5 +1,6 @@
 import {formatNumber} from './formatters'
 import type {DashboardTopItem} from '../../types/dashboard'
+import Card from '../ui/Card'
 
 interface TopListProps {
     title: string
@@ -11,41 +12,31 @@ export default function TopList({title, data, emptyText}: TopListProps) {
     const maxTotal = Math.max(...data.map((item) => Number(item.total || 0)), 0)
 
     return (
-        <section className="card" style={{padding: 16}}>
-            <h2 style={{marginTop: 0, marginBottom: 12, fontSize: 18}}>{title}</h2>
-            {!data.length && <p className="text-muted" style={{margin: 0}}>{emptyText}</p>}
+        <Card className="p-4">
+            <h2 className="mb-3 text-lg font-semibold text-slate-900">{title}</h2>
+            {!data.length && <p className="m-0 text-sm text-slate-500">{emptyText}</p>}
             {!!data.length && (
-                <div style={{display: 'grid', gap: 10}}>
+                <div className="grid gap-3">
                     {data.map((item, index) => (
                         <div key={`${item.name}-${index}`}>
-                            <div
-                                style={{
-                                    display: 'flex',
-                                    justifyContent: 'space-between',
-                                    alignItems: 'center',
-                                    padding: '10px 12px',
-                                    border: '1px solid rgba(2, 6, 23, 0.08)',
-                                    borderRadius: 8,
-                                }}
-                            >
-                                <span>{item.name}</span>
-                                <strong>{formatNumber(item.total)}</strong>
+                            <div className="flex items-center justify-between rounded-lg border border-slate-200 px-3 py-2">
+                                <span className="text-sm text-slate-700">{item.name}</span>
+                                <strong className="text-sm text-slate-900">{formatNumber(item.total)}</strong>
                             </div>
-                            <div style={{height: 6, marginTop: 8, borderRadius: 999, background: 'rgba(2, 6, 23, 0.08)', overflow: 'hidden'}}>
+                            <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-slate-200">
                                 <div
                                     style={{
-                                        height: '100%',
                                         width: `${maxTotal > 0 ? (Number(item.total || 0) / maxTotal) * 100 : 0}%`,
-                                        borderRadius: 999,
                                         background: '#6366f1',
                                     }}
+                                    className="h-full rounded-full"
                                 />
                             </div>
                         </div>
                     ))}
                 </div>
             )}
-        </section>
+        </Card>
     )
 }
 

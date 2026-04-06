@@ -23,8 +23,8 @@ export default function SupplierFormCard({
 }: SupplierFormCardProps) {
     if (!isAdmin) {
         return (
-            <section className="card" style={{padding: 16}}>
-                <p className="text-muted" style={{margin: 0}}>
+            <section className="ui-card p-4">
+                <p className="m-0 text-sm text-slate-500">
                     Tu rol ({userRole || 'USER'}) permite consulta. Solo administradores pueden agregar, editar o
                     eliminar proveedores.
                 </p>
@@ -33,18 +33,18 @@ export default function SupplierFormCard({
     }
 
     return (
-        <section className="card" style={{padding: 20}}>
-            <h2 style={{marginTop: 0, marginBottom: 12, fontSize: 18}}>Agregar proveedor</h2>
-            <form onSubmit={onSubmit} style={{display: 'grid', gap: 12}}>
+        <section className="ui-card p-5">
+            <h2 className="mb-3 mt-0 text-lg font-semibold text-slate-900">Agregar proveedor</h2>
+            <form onSubmit={onSubmit} className="grid gap-3">
                 <SupplierFieldsGrid value={form} disabled={false} isRequired={true} onChange={onChangeForm} />
 
                 <div>
-                    <button className="btn-primary" type="submit" disabled={saving}>
+                    <button className="ui-btn-primary" type="submit" disabled={saving}>
                         {saving ? 'Guardando...' : 'Agregar proveedor'}
                     </button>
                 </div>
             </form>
-            {formMessage && <p className="text-muted" style={{marginBottom: 0}}>{formMessage}</p>}
+            {formMessage && <p className="mb-0 text-sm text-slate-500">{formMessage}</p>}
         </section>
     )
 }

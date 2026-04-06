@@ -42,17 +42,17 @@ export default function SupplierDetailPanel({
     onDeleteSupplier,
 }: SupplierDetailPanelProps) {
     return (
-        <div className="card supplier-detail-card" style={{padding: 16}}>
-            <h2 style={{marginTop: 0, fontSize: 18}}>Detalle del proveedor</h2>
+        <div className="ui-card supplier-detail-card p-4">
+            <h2 className="mt-0 text-lg font-semibold text-slate-900">Detalle del proveedor</h2>
             {!selectedName && !isCollapsingDetail && (
-                <p className="text-muted">Selecciona un proveedor para ver su informacion.</p>
+                <p className="text-sm text-slate-500">Selecciona un proveedor para ver su informacion.</p>
             )}
 
             <div className={`supplier-detail-body ${detailExpanded ? 'is-open' : ''}`}>
                 {showDetailContent && (
                     <>
-                        {loadingDetail && <p className="text-muted">Cargando detalle...</p>}
-                        {detailError && <p className="text-muted">{detailError}</p>}
+                        {loadingDetail && <p className="text-sm text-slate-500">Cargando detalle...</p>}
+                        {detailError && <p className="text-sm text-slate-500">{detailError}</p>}
 
                         {detail && !loadingDetail && (
                             <>
@@ -64,29 +64,29 @@ export default function SupplierDetailPanel({
                                 />
 
                                 {isAdmin && (
-                                    <div style={{display: 'flex', gap: 8, marginBottom: 12}}>
+                                    <div className="mb-3 flex flex-wrap gap-2">
                                         {!editing && (
-                                            <button className="btn-primary" type="button" onClick={onStartEdit}>
+                                            <button className="ui-btn-primary" type="button" onClick={onStartEdit}>
                                                 Editar
                                             </button>
                                         )}
                                         {editing && (
-                                            <button className="btn-primary" type="button" disabled={saving} onClick={onSaveChanges}>
+                                            <button className="ui-btn-primary" type="button" disabled={saving} onClick={onSaveChanges}>
                                                 Guardar cambios
                                             </button>
                                         )}
                                         {editing && (
-                                            <button className="btn-ghost" type="button" onClick={onCancelEdit}>
+                                            <button className="ui-btn-ghost" type="button" onClick={onCancelEdit}>
                                                 Cancelar
                                             </button>
                                         )}
-                                        <button className="btn-ghost" type="button" onClick={onDeleteSupplier}>
+                                        <button className="ui-btn-ghost" type="button" onClick={onDeleteSupplier}>
                                             Eliminar
                                         </button>
                                     </div>
                                 )}
 
-                                <h3 style={{marginBottom: 8}}>Productos asociados</h3>
+                                <h3 className="mb-2 text-base font-semibold text-slate-900">Productos asociados</h3>
                                 <SupplierProductsList products={products} />
                             </>
                         )}

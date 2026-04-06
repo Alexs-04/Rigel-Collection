@@ -1,6 +1,5 @@
 import {BrowserRouter, Routes, Route, Navigate} from 'react-router-dom'
 import {useContext, useState} from 'react'
-import './App.css'
 import LoginForm from './components/LoginForm'
 import Sidebar from './layout/Sidebar'
 import Topbar from './layout/Topbar'

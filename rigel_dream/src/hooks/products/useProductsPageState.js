@@ -13,6 +13,11 @@ const initialForm = {
     supplierPrice: '',
 }
 
+const initialRelationForm = {
+    supplierName: '',
+    supplierPrice: '',
+}
+
 function normalizeError(error, fallback) {
     return error?.response?.data?.message || fallback
 }
@@ -70,6 +75,10 @@ export function useProductsPageState({isAdmin}) {
     const [loadingDetail, setLoadingDetail] = useState(false)
     const [detailError, setDetailError] = useState('')
     const [editing, setEditing] = useState(false)
+    const [managingSuppliers, setManagingSuppliers] = useState(false)
+    const [relationForm, setRelationForm] = useState(initialRelationForm)
+    const [relationMessage, setRelationMessage] = useState('')
+    const [relationSaving, setRelationSaving] = useState(false)
 
     const collapseTimeoutRef = useRef(null)
     const detailRequestRef = useRef(0)
@@ -78,6 +87,11 @@ export function useProductsPageState({isAdmin}) {
     const filteredProducts = useMemo(() => {
         return products.filter((product) => matchesSearch(product, search))
     }, [products, search])
+
+    const availableSuppliersForDetail = useMemo(() => {
+        const assigned = new Set((detail?.suppliers || []).map((item) => item?.name).filter(Boolean))
+        return suppliers.filter((supplier) => !assigned.has(supplier?.name))
+    }, [detail, suppliers])
 
     const loadPageData = async () => {
         setLoadingList(true)
@@ -118,6 +132,8 @@ export function useProductsPageState({isAdmin}) {
         setLoadingDetail(true)
         setDetailError('')
         setEditing(false)
+        setManagingSuppliers(false)
+        setRelationMessage('')
 
         await loadDetailSafely({
             requestRef: detailRequestRef,
@@ -164,6 +180,10 @@ export function useProductsPageState({isAdmin}) {
 
     const onChangeDetail = (key, value) => {
         setDetail((prev) => ({...prev, [key]: value}))
+    }
+
+    const onChangeRelationForm = (key, value) => {
+        setRelationForm((prev) => ({...prev, [key]: value}))
     }
 
     const addProduct = async (event) => {
@@ -236,9 +256,81 @@ export function useProductsPageState({isAdmin}) {
         }
     }
 
+    const addSupplierRelation = async () => {
+        if (!detail || !isAdmin) return
+
+        const supplierName = (relationForm.supplierName || '').trim()
+        const supplierPrice = Number(relationForm.supplierPrice)
+
+        if (!supplierName) {
+            setRelationMessage('Selecciona un proveedor para asociarlo al producto.')
+            return
+        }
+        if (Number.isNaN(supplierPrice) || supplierPrice < 0) {
+            setRelationMessage('Ingresa un precio valido para el proveedor.')
+            return
+        }
+
+        setRelationSaving(true)
+        setRelationMessage('')
+        try {
+            await api.put('/product/add-relation', {
+                productName: detail.name,
+                supplierName,
+                price: supplierPrice,
+            })
+            setRelationForm(initialRelationForm)
+            setRelationMessage('Proveedor asociado correctamente.')
+            await loadPageData()
+            await loadDetail(detail.name)
+        } catch (error) {
+            setRelationMessage(normalizeError(error, 'No se pudo asociar el proveedor.'))
+        } finally {
+            setRelationSaving(false)
+        }
+    }
+
+    const removeSupplierRelation = async (supplierName) => {
+        if (!detail || !isAdmin) return
+
+        const confirmed = window.confirm(
+            `Deseas quitar al proveedor ${supplierName} del producto ${detail.name}?`
+        )
+        if (!confirmed) return
+
+        setRelationSaving(true)
+        setRelationMessage('')
+        try {
+            await api.delete(
+                `/product/${encodeURIComponent(detail.name)}/relation/${encodeURIComponent(supplierName)}`
+            )
+            setRelationMessage('Proveedor desasociado correctamente.')
+            await loadPageData()
+            await loadDetail(detail.name)
+        } catch (error) {
+            setRelationMessage(normalizeError(error, 'No se pudo quitar la relacion del proveedor.'))
+        } finally {
+            setRelationSaving(false)
+        }
+    }
+
     useEffect(() => {
         loadPageData()
     }, [])
+
+    useEffect(() => {
+        if (!managingSuppliers) {
+            setRelationForm(initialRelationForm)
+            return
+        }
+
+        const defaultSupplier = availableSuppliersForDetail[0]?.name || ''
+        const defaultPrice = detail?.price ?? ''
+        setRelationForm({
+            supplierName: defaultSupplier,
+            supplierPrice: defaultPrice,
+        })
+    }, [managingSuppliers, availableSuppliersForDetail, detail?.price])
 
     useEffect(() => {
         return () => {
@@ -262,15 +354,24 @@ export function useProductsPageState({isAdmin}) {
         loadingDetail,
         detailError,
         editing,
+        managingSuppliers,
+        relationForm,
+        relationMessage,
+        relationSaving,
+        availableSuppliersForDetail,
         isCollapsingDetail,
         detailExpanded: Boolean(selectedName) || loadingDetail,
         showDetailContent: Boolean(detail || detailError || loadingDetail || isCollapsingDetail),
         setEditing,
         onChangeForm,
         onChangeDetail,
+        onChangeRelationForm,
         addProduct,
         saveChanges,
         deleteProduct,
+        addSupplierRelation,
+        removeSupplierRelation,
+        setManagingSuppliers,
         handleProductClick,
         loadDetail,
     }

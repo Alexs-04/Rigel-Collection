@@ -14,6 +14,7 @@ import com.korebit.rigel.enums.Category
 import com.korebit.rigel.model.extra.ProductSupplier
 import com.korebit.rigel.repository.BatchRepository
 import com.korebit.rigel.repository.ProductRepository
+import com.korebit.rigel.repository.ProductSupplierRepository
 import com.korebit.rigel.repository.SupplierRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -23,6 +24,7 @@ class ProductService(
     private val productRepository: ProductRepository,
     private val supplierRepository: SupplierRepository,
     private val batchRepository: BatchRepository,
+    private val productSupplierRepository: ProductSupplierRepository,
 ) {
 
     @Transactional(readOnly = true)
@@ -81,15 +83,23 @@ class ProductService(
         )
     }
 
+    @Transactional
     fun addRelationToProduct(relation: AddRelationRequest): Response {
-        val product = productRepository.findByName(relation.productName)
-            .orElseThrow { EntityNotFundException("Product with name ${relation.productName} not found") }
+        val productName = relation.productName.safeTrim()
+        val supplierName = relation.supplierName.safeTrim()
 
-        val supplier = supplierRepository.findSupplierByName(relation.supplierName)
-            ?: throw EntityNotFundException("Supplier with name ${relation.supplierName} not found")
+        if (productName.isBlank()) throw IllegalArgumentException("Product name is required")
+        if (supplierName.isBlank()) throw IllegalArgumentException("Supplier name is required")
+        if (relation.price < 0) throw IllegalArgumentException("Supplier price cannot be negative")
 
-        if (product.suppliers.isNotEmpty()) {
-            throw IllegalArgumentException("Product ${product.name} already has a supplier relation. Use product update instead.")
+        val product = productRepository.findByName(productName)
+            .orElseThrow { EntityNotFundException("Product with name $productName not found") }
+
+        val supplier = supplierRepository.findSupplierByName(supplierName)
+            ?: throw EntityNotFundException("Supplier with name $supplierName not found")
+
+        if (product.suppliers.any { it.supplier?.name.equals(supplierName, ignoreCase = true) }) {
+            throw IllegalArgumentException("Supplier $supplierName is already associated with product $productName")
         }
 
         val newRelation = ProductSupplier(
@@ -103,7 +113,47 @@ class ProductService(
 
         return Response(
             success = true,
-            message = "Relation = $relation",
+            message = "Supplier $supplierName was associated with product $productName",
+            status = 200
+        )
+    }
+
+    @Transactional
+    fun removeRelationFromProduct(productName: String, supplierName: String): Response {
+        val normalizedProductName = productName.safeTrim()
+        val normalizedSupplierName = supplierName.safeTrim()
+
+        if (normalizedProductName.isBlank()) throw IllegalArgumentException("Product name is required")
+        if (normalizedSupplierName.isBlank()) throw IllegalArgumentException("Supplier name is required")
+
+        val product = productRepository.findByName(normalizedProductName)
+            .orElseThrow { EntityNotFundException("Product with name $normalizedProductName not found") }
+
+        val relation = productSupplierRepository.findByProduct_NameAndSupplier_Name(
+            normalizedProductName,
+            normalizedSupplierName
+        ) ?: throw EntityNotFundException(
+            "Supplier $normalizedSupplierName is not associated with product $normalizedProductName"
+        )
+
+        if (product.suppliers.size <= 1) {
+            throw IllegalArgumentException("Product must keep at least one supplier associated")
+        }
+
+        if (relation.batches.isNotEmpty() || relation.purchases.isNotEmpty()) {
+            throw IllegalArgumentException(
+                "Cannot remove supplier relation because it has batches or purchases associated"
+            )
+        }
+
+        product.suppliers.removeIf { relationItem ->
+            relationItem.supplier?.name.equals(normalizedSupplierName, ignoreCase = true)
+        }
+        productRepository.save(product)
+
+        return Response(
+            success = true,
+            message = "Supplier $normalizedSupplierName was removed from product $normalizedProductName",
             status = 200
         )
     }
@@ -222,19 +272,9 @@ class ProductService(
 
         if (currentRelationForSupplier != null) {
             currentRelationForSupplier.supplyPrice = normalizedPrice
-            val removableRelations = product.suppliers.filter { relation ->
-                relation !== currentRelationForSupplier && relation.batches.isEmpty()
-            }
-            product.suppliers.removeAll(removableRelations)
             return currentRelationForSupplier
         }
 
-        val blockedRelation = product.suppliers.firstOrNull { it.batches.isNotEmpty() }
-        if (blockedRelation != null) {
-            throw IllegalArgumentException("Cannot change supplier because there are batches linked to the current supplier")
-        }
-
-        product.suppliers.clear()
         val newRelation = ProductSupplier(
             product = product,
             supplier = supplier,

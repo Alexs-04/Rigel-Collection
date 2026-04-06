@@ -52,4 +52,12 @@ class ProductRestController(
     fun addSupplierToProduct(@RequestBody relation : AddRelationRequest): ResponseEntity<Any> {
         return ResponseEntity.ok(productService.addRelationToProduct(relation))
     }
+
+    @DeleteMapping("/{productName}/relation/{supplierName}")
+    fun removeSupplierFromProduct(
+        @PathVariable productName: String,
+        @PathVariable supplierName: String,
+    ): ResponseEntity<Any> {
+        return ResponseEntity.ok(productService.removeRelationFromProduct(productName, supplierName))
+    }
 }
