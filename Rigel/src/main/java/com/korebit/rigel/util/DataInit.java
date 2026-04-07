@@ -18,6 +18,10 @@ public class DataInit implements CommandLineRunner {
         this.passwordEncoder = passwordEncoder;
     }
 
+    /**
+     * @param args Command-line arguments (not used in this method).
+     * {@code @description:} This method is executed at application startup. It checks if a default admin user with the email "arlix@korebit" exists in the database. If not, it creates a new consumer with the role of ROOT, sets the default password to "root" (encoded using the password encoder), and saves it to the repository. If the user already exists, it prints a message indicating that the default admin user already exists and skips creation.
+     */
     @Override
     public void run(String @NonNull ... args) throws IllegalAccessError {
         String defaultEmail = "arlix@korebit";
