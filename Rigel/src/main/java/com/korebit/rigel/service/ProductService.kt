@@ -342,7 +342,7 @@ class ProductService(
         if (receivedAmount == null || receivedAmount <= 0) {
             throw IllegalArgumentException("Batch received amount must be greater than zero")
         }
-        if (remaining < 0 || remaining > receivedAmount) {
+        if (remaining !in 0..receivedAmount) {
             throw IllegalArgumentException("Batch remaining amount must be between 0 and received amount")
         }
         if (price == null) throw IllegalArgumentException("Batch price is required")
