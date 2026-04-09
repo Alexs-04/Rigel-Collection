@@ -8,6 +8,12 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+/**
+ * Seeds baseline application data during startup.
+ *
+ * <p>This initializer ensures a default root user exists for initial access.
+ * If the default account is already present, no changes are applied.</p>
+ */
 @Component
 public class DataInit implements CommandLineRunner {
     private final ConsumerRepository consumerRepository;
@@ -19,8 +25,18 @@ public class DataInit implements CommandLineRunner {
     }
 
     /**
-     * @param args Command-line arguments (not used in this method).
-     * {@code @description:} This method is executed at application startup. It checks if a default admin user with the email "arlix@korebit" exists in the database. If not, it creates a new consumer with the role of ROOT, sets the default password to "root" (encoded using the password encoder), and saves it to the repository. If the user already exists, it prints a message indicating that the default admin user already exists and skips creation.
+     * Creates the default root account when it does not exist.
+     *
+     * <p>Default bootstrap values:</p>
+     * <ul>
+     *   <li>Email: {@code arlix@korebit}</li>
+     *   <li>Username: {@code root}</li>
+     *   <li>Password: {@code root} (stored encoded)</li>
+     *   <li>Role: {@code ROOT}</li>
+     * </ul>
+     *
+     * @param args command-line arguments (unused)
+     * @throws IllegalAccessError if startup initialization cannot complete
      */
     @Override
     public void run(String @NonNull ... args) throws IllegalAccessError {
