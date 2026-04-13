@@ -19,6 +19,10 @@
         @apply m-0 bg-app-bg text-app-text antialiased;
     }
 
+    html.dark body {
+        @apply bg-slate-950 text-slate-100;
+    }
+
     button,
     input,
     select,
@@ -29,15 +33,34 @@
     label {
         @apply mb-1.5 block text-xs font-medium text-slate-500;
     }
+
+    /* Dark mode compatibility layer for legacy light-only title utilities. */
+    html.dark h1,
+    html.dark h2,
+    html.dark h3,
+    html.dark h4,
+    html.dark h5,
+    html.dark h6 {
+        @apply text-slate-100;
+    }
+
+    html.dark .text-slate-900 {
+        @apply text-slate-100;
+    }
+
+    html.dark .text-slate-800,
+    html.dark .text-slate-700 {
+        @apply text-slate-200;
+    }
 }
 
 @layer components {
     .ui-card {
-        @apply rounded-app border border-app-border bg-app-surface shadow-card;
+        @apply rounded-app border border-app-border bg-app-surface shadow-card dark:border-slate-700 dark:bg-slate-900;
     }
 
     .ui-input {
-        @apply w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition;
+        @apply w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100;
     }
 
     .ui-input:focus {
@@ -53,7 +76,7 @@
     }
 
     .ui-btn-ghost {
-        @apply ui-btn border border-slate-200 bg-white text-slate-700 hover:border-brand-200 hover:bg-brand-50;
+        @apply ui-btn border border-slate-200 bg-white text-slate-700 hover:border-brand-200 hover:bg-brand-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:hover:border-brand-400 dark:hover:bg-slate-700;
     }
 
     .ui-btn-danger {
@@ -109,7 +132,7 @@
     }
 
     .topbar {
-        @apply flex h-14 items-center border-b border-app-border bg-white px-4;
+        @apply flex h-14 items-center border-b border-app-border bg-white px-4 dark:border-slate-700 dark:bg-slate-900;
     }
 
     .content {
@@ -121,6 +144,6 @@
     }
 
     .bg-gradient {
-        @apply bg-gradient-to-b from-brand-50 to-slate-50;
+        @apply bg-gradient-to-b from-brand-50 to-slate-50 dark:from-slate-950 dark:to-slate-900;
     }
 }
