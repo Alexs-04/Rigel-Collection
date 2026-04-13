@@ -33,6 +33,25 @@
     label {
         @apply mb-1.5 block text-xs font-medium text-slate-500;
     }
+
+    /* Dark mode compatibility layer for legacy light-only title utilities. */
+    html.dark h1,
+    html.dark h2,
+    html.dark h3,
+    html.dark h4,
+    html.dark h5,
+    html.dark h6 {
+        @apply text-slate-100;
+    }
+
+    html.dark .text-slate-900 {
+        @apply text-slate-100;
+    }
+
+    html.dark .text-slate-800,
+    html.dark .text-slate-700 {
+        @apply text-slate-200;
+    }
 }
 
 @layer components {
