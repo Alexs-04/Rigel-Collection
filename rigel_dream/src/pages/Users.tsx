@@ -40,15 +40,15 @@ export default function Users() {
     return (
         <div className="grid gap-4">
             <section className="ui-card p-5">
-                <h1 className="mb-1.5 mt-0 text-2xl font-semibold text-slate-900">Usuarios</h1>
-                <p className="mt-0 text-sm text-slate-500">
+                <h1 className="ui-title mb-1.5 mt-0 text-2xl font-semibold">Usuarios</h1>
+                <p className="ui-muted mt-0 text-sm">
                     Gestiona cuentas registradas. Solo rol ROOT puede acceder y administrar usuarios.
                 </p>
             </section>
 
             {!isRoot && (
                 <section className="ui-card p-4">
-                    <p className="m-0 text-sm text-slate-500">
+                    <p className="ui-muted m-0 text-sm">
                         Acceso denegado. Esta seccion es exclusiva para usuarios ROOT.
                     </p>
                 </section>

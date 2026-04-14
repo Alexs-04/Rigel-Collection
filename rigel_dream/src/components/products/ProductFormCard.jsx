@@ -14,7 +14,7 @@ export default function ProductFormCard({
     if (!isAdmin) {
         return (
             <section className="ui-card p-4">
-                <p className="m-0 text-sm text-slate-500">
+                <p className="ui-muted m-0 text-sm">
                     Tu rol ({userRole || 'USER'}) permite consulta. Solo administradores pueden agregar, editar o
                     eliminar productos.
                 </p>
@@ -24,8 +24,8 @@ export default function ProductFormCard({
 
     return (
         <section className="ui-card p-5">
-            <h2 className="mb-3 mt-0 text-lg font-semibold text-slate-900">Agregar producto</h2>
-            <p className="mb-3 mt-0 text-sm text-slate-500">
+            <h2 className="ui-title mb-3 mt-0 text-lg font-semibold">Agregar producto</h2>
+            <p className="ui-muted mb-3 mt-0 text-sm">
                 Registra solo los datos esenciales del catalogo. Las cantidades de inventario se registran desde Compras.
             </p>
             <form onSubmit={onSubmit} className="grid gap-3 sm:grid-cols-2">
@@ -45,11 +45,11 @@ export default function ProductFormCard({
             </form>
 
             {suppliers.length === 0 && (
-                <p className="mb-0 text-sm text-slate-500">
+                <p className="ui-muted mb-0 text-sm">
                     Debes registrar al menos un proveedor para crear productos.
                 </p>
             )}
-            {formMessage && <p className="mb-0 text-sm text-slate-500">{formMessage}</p>}
+            {formMessage && <p className="ui-muted mb-0 text-sm">{formMessage}</p>}
         </section>
     )
 }

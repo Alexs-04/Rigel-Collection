@@ -21,7 +21,7 @@ export default function UsersListPanel({
 }: UsersListPanelProps) {
     return (
         <div className="ui-card p-4">
-            <h2 className="mt-0 text-lg font-semibold text-slate-900">Lista de usuarios</h2>
+            <h2 className="ui-title mt-0 text-lg font-semibold">Lista de usuarios</h2>
             <input
                 className="ui-input mb-3"
                 placeholder="Buscar por nombre, usuario o correo"
@@ -29,10 +29,10 @@ export default function UsersListPanel({
                 onChange={(e) => onSearchChange(e.target.value)}
             />
 
-            {loadingList && <p className="text-sm text-slate-500">Cargando usuarios...</p>}
-            {!loadingList && listError && <p className="text-sm text-slate-500">{listError}</p>}
+            {loadingList && <p className="ui-muted text-sm">Cargando usuarios...</p>}
+            {!loadingList && listError && <p className="ui-muted text-sm">{listError}</p>}
             {!loadingList && !listError && users.length === 0 && (
-                <p className="text-sm text-slate-500">No hay usuarios registrados.</p>
+                <p className="ui-muted text-sm">No hay usuarios registrados.</p>
             )}
 
             <div className="grid gap-2">
@@ -41,17 +41,13 @@ export default function UsersListPanel({
                         key={item.id}
                         type="button"
                         onClick={() => onUserClick(item)}
-                        className={`rounded-lg border p-3 text-left text-inherit transition ${
-                            selectedId === item.id
-                                ? 'border-brand-500 bg-brand-50'
-                                : 'border-slate-200 bg-white hover:border-brand-200'
-                        }`}
+                        className={`ui-list-item ${selectedId === item.id ? 'ui-list-item-active' : ''}`}
                     >
                         <div className="flex justify-between gap-2">
-                            <strong className="text-slate-900">{item.username}</strong>
-                            <span className="text-xs text-slate-500">{item.active ? 'Activo' : 'Inactivo'}</span>
+                            <strong className="ui-title">{item.username}</strong>
+                            <span className="ui-muted text-xs">{item.active ? 'Activo' : 'Inactivo'}</span>
                         </div>
-                        <div className="text-xs text-slate-500">{item.email}</div>
+                        <div className="ui-muted text-xs">{item.email}</div>
                     </button>
                 ))}
             </div>
