@@ -8,16 +8,16 @@ interface PurchaseDetailPanelProps {
 export default function PurchaseDetailPanel({purchase}: PurchaseDetailPanelProps) {
     return (
         <section className="ui-card p-4">
-            <h2 className="mt-0 text-lg font-semibold text-slate-900">Detalle de compra</h2>
+            <h2 className="ui-title mt-0 text-lg font-semibold">Detalle de compra</h2>
 
             {!purchase && (
-                <p className="mt-0 text-sm text-slate-500">
+                <p className="ui-muted mt-0 text-sm">
                     Selecciona una compra para ver su informacion.
                 </p>
             )}
 
             {purchase && (
-                <div className="grid gap-2 text-sm text-slate-700">
+                <div className="grid gap-2 text-sm text-slate-700 dark:text-slate-200">
                     <div><strong>Codigo:</strong> {purchase.code}</div>
                     <div><strong>Fecha:</strong> {purchase.purchaseDate}</div>
                     <div><strong>Producto:</strong> {purchase.productName}</div>

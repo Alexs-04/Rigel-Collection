@@ -10,12 +10,12 @@ export default function ProductsListPanel({
 }) {
     return (
         <div className="ui-card p-4">
-            <h2 className="mt-0 text-lg font-semibold text-slate-900">Lista de productos</h2>
+            <h2 className="ui-title mt-0 text-lg font-semibold">Lista de productos</h2>
 
-            {loadingList && <p className="text-sm text-slate-500">Cargando productos...</p>}
-            {!loadingList && listError && <p className="text-sm text-slate-500">{listError}</p>}
+            {loadingList && <p className="ui-muted text-sm">Cargando productos...</p>}
+            {!loadingList && listError && <p className="ui-muted text-sm">{listError}</p>}
             {!loadingList && !listError && products.length === 0 && (
-                <p className="text-sm text-slate-500">
+                <p className="ui-muted text-sm">
                     No se encontraron productos con ese criterio.
                 </p>
             )}
@@ -26,14 +26,10 @@ export default function ProductsListPanel({
                         key={product.barcode || product.name}
                         type="button"
                         onClick={() => onProductClick(product.name)}
-                        className={`rounded-lg border p-3 text-left text-inherit transition ${
-                            selectedName === product.name
-                                ? 'border-brand-500 bg-brand-50'
-                                : 'border-slate-200 bg-white hover:border-brand-200'
-                        }`}
+                        className={`ui-list-item ${selectedName === product.name ? 'ui-list-item-active' : ''}`}
                     >
-                        <div className="font-semibold text-slate-900">{product.name}</div>
-                        <div className="text-xs text-slate-500">
+                        <div className="ui-title font-semibold">{product.name}</div>
+                        <div className="ui-muted text-xs">
                             {toCategoryLabel(product.category || 'OTHERS')} - {formatPriceMxn(product.price)}
                         </div>
                     </button>
