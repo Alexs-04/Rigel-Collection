@@ -14,6 +14,7 @@ import Purchases from "./pages/Purchases.tsx";
 import Inventory from "./pages/Inventory.tsx";
 import Amounts from "./pages/Amounts.tsx";
 import {AuthContext} from './context/AuthContext'
+import DebugPanel from './components/DebugPanel'
 
 function AppLayout({children}) {
     const [collapsed, setCollapsed] = useState(false)
@@ -79,6 +80,7 @@ function App() {
                 <Route path="/login" element={<LoginForm/>}/>
                 <Route path="/*" element={<AppRoutes/>}/>
             </Routes>
+            <DebugPanel/>
         </BrowserRouter>
     )
 }

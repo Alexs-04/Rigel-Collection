@@ -8,7 +8,7 @@ interface SupplierProductsListProps {
 export default function SupplierProductsList({products}: SupplierProductsListProps) {
     if (products.length === 0) {
         return (
-            <p className="mt-0 text-sm text-slate-500">
+            <p className="ui-muted mt-0 text-sm">
                 Este proveedor no tiene productos asociados.
             </p>
         )
@@ -17,9 +17,9 @@ export default function SupplierProductsList({products}: SupplierProductsListPro
     return (
         <div className="grid gap-2">
             {products.map((product) => (
-                <div key={product.name} className="rounded-lg border border-slate-200 p-2.5">
-                    <div className="font-semibold text-slate-900">{product.name}</div>
-                    <div className="text-xs text-slate-500">
+                <div key={product.name} className="ui-subcard">
+                    <div className="ui-title font-semibold">{product.name}</div>
+                    <div className="ui-muted text-xs">
                         {formatPriceMxn(product.price)} - Stock: {product.stock}
                     </div>
                 </div>

@@ -24,7 +24,7 @@ export default function SupplierFormCard({
     if (!isAdmin) {
         return (
             <section className="ui-card p-4">
-                <p className="m-0 text-sm text-slate-500">
+                <p className="ui-muted m-0 text-sm">
                     Tu rol ({userRole || 'USER'}) permite consulta. Solo administradores pueden agregar, editar o
                     eliminar proveedores.
                 </p>
@@ -34,7 +34,7 @@ export default function SupplierFormCard({
 
     return (
         <section className="ui-card p-5">
-            <h2 className="mb-3 mt-0 text-lg font-semibold text-slate-900">Agregar proveedor</h2>
+            <h2 className="ui-title mb-3 mt-0 text-lg font-semibold">Agregar proveedor</h2>
             <form onSubmit={onSubmit} className="grid gap-3">
                 <SupplierFieldsGrid value={form} disabled={false} isRequired={true} onChange={onChangeForm} />
 
@@ -44,7 +44,7 @@ export default function SupplierFormCard({
                     </button>
                 </div>
             </form>
-            {formMessage && <p className="mb-0 text-sm text-slate-500">{formMessage}</p>}
+            {formMessage && <p className="ui-muted mb-0 text-sm">{formMessage}</p>}
         </section>
     )
 }

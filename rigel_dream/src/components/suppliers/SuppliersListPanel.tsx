@@ -17,11 +17,11 @@ export default function SuppliersListPanel({
 }: SuppliersListPanelProps) {
     return (
         <div className="ui-card p-4">
-            <h2 className="mt-0 text-lg font-semibold text-slate-900">Lista de proveedores</h2>
-            {loadingList && <p className="text-sm text-slate-500">Cargando proveedores...</p>}
-            {!loadingList && listError && <p className="text-sm text-slate-500">{listError}</p>}
+            <h2 className="ui-title mt-0 text-lg font-semibold">Lista de proveedores</h2>
+            {loadingList && <p className="ui-muted text-sm">Cargando proveedores...</p>}
+            {!loadingList && listError && <p className="ui-muted text-sm">{listError}</p>}
             {!loadingList && !listError && suppliers.length === 0 && (
-                <p className="text-sm text-slate-500">No hay proveedores registrados.</p>
+                <p className="ui-muted text-sm">No hay proveedores registrados.</p>
             )}
 
             <div className="grid gap-2">
@@ -30,14 +30,10 @@ export default function SuppliersListPanel({
                         key={supplier.name}
                         type="button"
                         onClick={() => onSupplierClick(supplier.name)}
-                        className={`rounded-lg border p-3 text-left text-inherit transition ${
-                            selectedName === supplier.name
-                                ? 'border-brand-500 bg-brand-50'
-                                : 'border-slate-200 bg-white hover:border-brand-200'
-                        }`}
+                        className={`ui-list-item ${selectedName === supplier.name ? 'ui-list-item-active' : ''}`}
                     >
-                        <div className="font-semibold text-slate-900">{supplier.name}</div>
-                        <div className="text-xs text-slate-500">{supplier.contactEmail}</div>
+                        <div className="ui-title font-semibold">{supplier.name}</div>
+                        <div className="ui-muted text-xs">{supplier.contactEmail}</div>
                     </button>
                 ))}
             </div>

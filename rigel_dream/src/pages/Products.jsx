@@ -49,8 +49,8 @@ export default function Products() {
     return (
         <div className="grid gap-4">
             <section className="ui-card p-5">
-                <h1 className="mb-1.5 mt-0 text-2xl font-semibold text-slate-900">Productos</h1>
-                <p className="mt-0 text-sm text-slate-500">
+                <h1 className="ui-title mb-1.5 mt-0 text-2xl font-semibold">Productos</h1>
+                <p className="ui-muted mt-0 text-sm">
                     Consulta el catalogo y administra productos con proveedores previamente registrados. El inventario y
                     los lotes se registran desde Compras.
                 </p>
@@ -68,7 +68,7 @@ export default function Products() {
             />
 
             <section className="ui-card p-4">
-                <h2 className="mb-3 mt-0 text-lg font-semibold text-slate-900">Busqueda</h2>
+                <h2 className="ui-title mb-3 mt-0 text-lg font-semibold">Busqueda</h2>
                 <input
                     className="ui-input"
                     placeholder="Buscar por nombre, código o categoría"

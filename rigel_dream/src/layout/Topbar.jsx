@@ -12,51 +12,27 @@ export default function Topbar() {
         navigate('/login')
     }
 
-    const accent = '#6366f1'
-    const textColor = '#111827'
-
     return (
-        <header
-            className="topbar"
-            style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '8px 16px',
-                height: 56,
-                borderBottom: '1px solid rgba(0,0,0,0.06)',
-                background: 'white',
-            }}
-        >
+        <header className="topbar justify-between px-4">
             {/* Left: brand */}
-            <div style={{display: 'flex', alignItems: 'center', gap: 12}}>
+            <div className="flex items-center gap-3">
                 <div
-                    style={{
-                        height: 36,
-                        width: 36,
-                        background: accent,
-                        borderRadius: 8,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        color: 'white',
-                        fontWeight: 700,
-                    }}
+                    className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-500 text-white"
                 >
                     ⭐
                 </div>
-                <div style={{fontWeight: 700, color: textColor}}>Rigel</div>
+                <div className="ui-title font-bold">Rigel</div>
             </div>
 
             {/* Right area: user + logout */}
-            <div style={{display: 'flex', alignItems: 'center', gap: 12, marginLeft: 'auto'}}>
-                <div style={{fontSize: 14, fontWeight: 500, color: textColor}}>{user?.username || 'Invitado'}</div>
+            <div className="ml-auto flex items-center gap-3">
+                <div className="ui-title text-sm font-medium">{user?.username || 'Invitado'}</div>
                 <button
                     onClick={doLogout}
-                    style={{padding: 8, borderRadius: 6, background: 'transparent', border: 'none', cursor: 'pointer'}}
+                    className="rounded-md p-2 text-slate-700 transition hover:bg-brand-50 hover:text-brand-700 dark:text-slate-100 dark:hover:bg-slate-800 dark:hover:text-brand-300"
                     aria-label="Cerrar sesión"
                 >
-                    <LogOut style={{width: 18, height: 18, color: textColor}}/>
+                    <LogOut className="h-[18px] w-[18px]"/>
                 </button>
             </div>
         </header>

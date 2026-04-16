@@ -33,61 +33,28 @@ export default function Sidebar({
     }
                                 }) {
     const {user} = useContext(AuthContext)
-    const width = collapsed ? 80 : 256 // px
-    const textColor = '#111827' // slate-900
-    const mutedColor = '#6b7280' // slate-500
-    const activeBg = '#eef2ff' // light purple-ish
-    const accent = '#6366f1' // indigo-500
+    const width = collapsed ? 80 : 256
     const visibleItems = items.filter((it) => !user?.role || it.roles.includes(user.role))
 
     return (
         <aside
-            className="sidebar"
+            className="sidebar sticky top-0 flex h-screen flex-col border-r border-app-border bg-white px-4 pb-4 pt-2 dark:border-slate-700 dark:bg-slate-900"
             style={{
                 width,
-                display: 'flex',
-                flexDirection: 'column',
-                padding: '8px 16px 16px',
-                position: 'sticky',
-                top: 0,
-                height: '100vh',
                 boxSizing: 'border-box',
-                background: 'white',
-                borderRight: '1px solid rgba(2,6,23,0.04)',
             }}
         >
-            {/* Header: alineado con la altura y el eje vertical del topbar */}
-            <div
-                style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: collapsed ? 'center' : 'flex-start',
-                    height: 56,
-                    marginBottom: 16,
-                }}
-            >
+            <div className={`mb-4 flex h-14 items-center ${collapsed ? 'justify-center' : 'justify-start'}`}>
                 <button
                     onClick={onToggle}
                     aria-label="Toggle sidebar"
-                    style={{
-                        background: 'transparent',
-                        border: 'none',
-                        padding: 8,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        color: textColor,
-                        cursor: 'pointer',
-                        marginLeft: 0,
-                        marginRight: 0,
-                        borderRadius: 8,
-                    }}
+                    className="flex items-center justify-center rounded-lg p-2 text-slate-900 transition hover:bg-brand-50 dark:text-slate-100 dark:hover:bg-slate-800"
                 >
-                    <Menu style={{width: 20, height: 20}}/>
+                    <Menu className="h-5 w-5"/>
                 </button>
             </div>
 
-            <nav style={{flex: 1, display: 'flex', flexDirection: 'column'}}>
+            <nav className="flex flex-1 flex-col">
                 {visibleItems.map((it) => {
                     const Icon = it.icon
                     return (
@@ -95,22 +62,19 @@ export default function Sidebar({
                             key={it.to + it.label}
                             to={it.to}
                             end={it.to === '/'}
-                            style={({isActive}) => ({
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: 12,
-                                padding: '10px 12px',
-                                borderRadius: 8,
-                                marginBottom: 6,
-                                color: isActive ? textColor : mutedColor,
-                                background: isActive ? activeBg : 'transparent',
-                                textDecoration: 'none',
-                            })}
+                            className={({isActive}) =>
+                                [
+                                    'mb-1.5 flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm no-underline transition',
+                                    isActive
+                                        ? 'bg-brand-50 text-slate-900 dark:bg-brand-500/20 dark:text-slate-100'
+                                        : 'text-slate-500 hover:bg-brand-50 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100',
+                                ].join(' ')
+                            }
                         >
                             {({isActive}) => (
                                 <>
-                                    <Icon style={{width: 18, height: 18, color: isActive ? accent : mutedColor}}/>
-                                    {!collapsed && <span style={{fontSize: 14}}>{it.label}</span>}
+                                    <Icon className={`h-[18px] w-[18px] ${isActive ? 'text-brand-500 dark:text-brand-300' : 'text-slate-500 dark:text-slate-400'}`}/>
+                                    {!collapsed && <span>{it.label}</span>}
                                 </>
                             )}
                         </NavLink>
@@ -119,13 +83,7 @@ export default function Sidebar({
             </nav>
 
             {!collapsed && (
-                <div
-                    style={{
-                        fontSize: 12,
-                        color: mutedColor,
-                        marginTop: 16,
-                    }}
-                >
+                <div className="ui-muted mt-4 text-xs">
                     v0.1.0
                 </div>
             )}
