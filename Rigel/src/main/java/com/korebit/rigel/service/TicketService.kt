@@ -38,12 +38,12 @@ class TicketService(
     )
 
     @Transactional
-    /**
-     * Deletes a ticket and restores consumed batch stock.
-     *
-     * @param barcode ticket barcode.
-     * @return operation response.
-     */
+            /**
+             * Deletes a ticket and restores consumed batch stock.
+             *
+             * @param barcode ticket barcode.
+             * @return operation response.
+             */
     fun deleteTicket(barcode: String): Response {
         val ticket = ticketRepository.findTicketByBarcode(barcode)
             ?: throw EntityNotFundException("Ticket with barcode $barcode not found")
@@ -76,12 +76,12 @@ class TicketService(
     }
 
     @Transactional
-    /**
-     * Creates a new ticket and allocates quantities from sellable batches.
-     *
-     * @param ticket ticket creation payload.
-     * @return operation response.
-     */
+            /**
+             * Creates a new ticket and allocates quantities from sellable batches.
+             *
+             * @param ticket ticket creation payload.
+             * @return operation response.
+             */
     fun addTicket(ticket: TicketAddRequest): Response {
         val consumerEmail = ticket.currentConsumerEmail().trim()
         if (consumerEmail.isBlank()) {
@@ -224,7 +224,7 @@ class TicketService(
         if (consumedByBatch.isNotEmpty()) {
             batchRepository.saveAll(consumedByBatch.keys)
         }
-        
+
         ticketRepository.save(newTicket)
 
         return Response(
@@ -262,7 +262,7 @@ class TicketService(
      *
      * @return list of ticket DTOs.
      */
-     fun getAllTickets() : List<TicketDto> {
+    fun getAllTickets(): List<TicketDto> {
         return ticketRepository.findAll().map { ticket ->
             TicketDto.toDto(ticket)
         }
