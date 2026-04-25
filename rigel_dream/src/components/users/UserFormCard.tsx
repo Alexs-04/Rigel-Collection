@@ -13,7 +13,7 @@ interface UserFormCardProps {
 export default function UserFormCard({form, saving, formMessage, onChangeForm, onSubmit}: UserFormCardProps) {
     return (
         <section className="ui-card p-5">
-            <h2 className="mb-3 mt-0 text-lg font-semibold text-slate-900">Agregar usuario</h2>
+            <h2 className="ui-title mb-3 mt-0 text-lg font-semibold">Agregar usuario</h2>
             <form onSubmit={onSubmit} className="grid gap-3">
                 <UserFieldsGrid
                     value={form}
@@ -30,7 +30,7 @@ export default function UserFormCard({form, saving, formMessage, onChangeForm, o
                     </button>
                 </div>
             </form>
-            {formMessage && <p className="mb-0 text-sm text-slate-500">{formMessage}</p>}
+            {formMessage && <p className="ui-muted mb-0 text-sm">{formMessage}</p>}
         </section>
     )
 }

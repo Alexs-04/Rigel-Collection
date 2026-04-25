@@ -31,16 +31,16 @@ export default function ProductDetailPanel({
 }) {
     return (
         <div className="ui-card product-detail-card p-4">
-            <h2 className="mt-0 text-lg font-semibold text-slate-900">Detalle del producto</h2>
+            <h2 className="ui-title mt-0 text-lg font-semibold">Detalle del producto</h2>
             {!selectedName && !isCollapsingDetail && (
-                <p className="text-sm text-slate-500">Selecciona un producto para ver su informacion.</p>
+                <p className="ui-muted text-sm">Selecciona un producto para ver su informacion.</p>
             )}
 
             <div className={`product-detail-body ${detailExpanded ? 'is-open' : ''}`}>
                 {showDetailContent && (
                     <>
-                        {loadingDetail && <p className="text-sm text-slate-500">Cargando detalle...</p>}
-                        {detailError && <p className="text-sm text-slate-500">{detailError}</p>}
+                        {loadingDetail && <p className="ui-muted text-sm">Cargando detalle...</p>}
+                        {detailError && <p className="ui-muted text-sm">{detailError}</p>}
 
                         {detail && !loadingDetail && (
                             <>
@@ -80,16 +80,16 @@ export default function ProductDetailPanel({
                                     </div>
                                 )}
 
-                                <h3 className="mb-2 text-base font-semibold text-slate-900">Proveedor(es) asociado(s)</h3>
+                                <h3 className="ui-title mb-2 text-base font-semibold">Proveedor(es) asociado(s)</h3>
                                 {Array.isArray(detail.suppliers) && detail.suppliers.length > 0 ? (
                                     <div className="grid gap-2">
                                         {detail.suppliers.map((supplier) => (
                                             <div
                                                 key={`${detail.name}-${supplier.name}`}
-                                                className="rounded-lg border border-slate-200 p-2.5"
+                                                className="ui-subcard"
                                             >
-                                                <div className="font-semibold text-slate-900">{supplier.name}</div>
-                                                <div className="text-xs text-slate-500">
+                                                <div className="ui-title font-semibold">{supplier.name}</div>
+                                                <div className="ui-muted text-xs">
                                                     Precio proveedor: {formatPriceMxn(supplier.supplyPrice)}
                                                 </div>
                                                 {isAdmin && managingSuppliers && (
@@ -106,7 +106,7 @@ export default function ProductDetailPanel({
                                                 {Array.isArray(supplier.batches) && supplier.batches.length > 0 && (
                                                     <div className="mt-2 grid gap-1.5">
                                                         {supplier.batches.map((batch) => (
-                                                            <div key={`${supplier.name}-${batch.id}`} className="text-xs text-slate-600">
+                                                            <div key={`${supplier.name}-${batch.id}`} className="text-xs text-slate-600 dark:text-slate-300">
                                                                 Lote {batch.code} - restante {batch.remainingAmount}/{batch.receivedAmount} - {batch.available ? 'Disponible' : 'No disponible'}
                                                             </div>
                                                         ))}
@@ -116,14 +116,14 @@ export default function ProductDetailPanel({
                                         ))}
                                     </div>
                                 ) : (
-                                    <p className="mt-0 text-sm text-slate-500">
+                                    <p className="ui-muted mt-0 text-sm">
                                         Este producto no tiene proveedores asociados.
                                     </p>
                                 )}
 
                                 {isAdmin && managingSuppliers && (
-                                    <div className="mt-4 rounded-xl border border-slate-200 p-3">
-                                        <h4 className="mb-2 mt-0 text-sm font-semibold text-slate-900">
+                                    <div className="mt-4 rounded-xl border border-slate-200 p-3 dark:border-slate-700 dark:bg-slate-800/60">
+                                        <h4 className="ui-title mb-2 mt-0 text-sm font-semibold">
                                             Asociar nuevo proveedor
                                         </h4>
                                         <div className="grid gap-2 md:grid-cols-2">
@@ -159,7 +159,7 @@ export default function ProductDetailPanel({
                                                 Agregar proveedor
                                             </button>
                                         </div>
-                                        {relationMessage && <p className="mb-0 mt-2 text-sm text-slate-500">{relationMessage}</p>}
+                                        {relationMessage && <p className="ui-muted mb-0 mt-2 text-sm">{relationMessage}</p>}
                                     </div>
                                 )}
                             </>

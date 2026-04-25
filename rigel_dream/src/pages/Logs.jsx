@@ -108,8 +108,8 @@ export default function Logs() {
     return (
         <div className="grid gap-4">
             <Card className="p-5">
-                <h1 className="mb-1 text-2xl font-bold text-slate-900">Bitácora</h1>
-                <p className="mt-0 text-sm text-slate-500">
+                <h1 className="ui-title mb-1 text-2xl font-bold">Bitácora</h1>
+                <p className="ui-muted mt-0 text-sm">
                     Movimientos del sistema. Solo usuarios con rol ROOT o ADMIN pueden acceder.
                 </p>
             </Card>
@@ -158,7 +158,7 @@ export default function Logs() {
                     </Button>
                 </div>
 
-                <label className="mt-2.5 inline-flex items-center gap-2 text-xs text-slate-600">
+                <label className="mt-2.5 inline-flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300">
                     <input
                         type="checkbox"
                         className="h-4 w-4 accent-brand-600"
@@ -172,19 +172,19 @@ export default function Logs() {
             <section className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(360px,1fr)_minmax(340px,1fr)]">
                 <Card as="article" className="p-4">
                     <div className="mb-2.5 flex items-center justify-between">
-                        <h2 className="m-0 text-lg font-semibold text-slate-900">Movimientos</h2>
-                        <span className="text-xs text-slate-500">
+                        <h2 className="ui-title m-0 text-lg font-semibold">Movimientos</h2>
+                        <span className="ui-muted text-xs">
                             {pageData.totalElements} registros
                         </span>
                     </div>
 
-                    {loadingList && <p className="text-sm text-slate-500">Cargando movimientos...</p>}
+                    {loadingList && <p className="ui-muted text-sm">Cargando movimientos...</p>}
                     {!loadingList && listError && <p className="m-0 text-sm text-red-700">{listError}</p>}
 
                     {!loadingList && !listError && (
                         <div className="grid gap-2">
                             {pageData.items.length === 0 && (
-                                <p className="m-0 text-sm text-slate-500">
+                                <p className="ui-muted m-0 text-sm">
                                     No se encontraron movimientos para el filtro seleccionado.
                                 </p>
                             )}
@@ -194,18 +194,14 @@ export default function Logs() {
                                     key={item.id}
                                     type="button"
                                     onClick={() => onSelect(item.id)}
-                                    className={`rounded-lg border px-3 py-2 text-left transition ${
-                                        selectedId === item.id
-                                            ? 'border-brand-300 bg-brand-50'
-                                            : 'border-slate-200 bg-white hover:border-brand-200 hover:bg-brand-50/40'
-                                    }`}
+                                    className={`ui-list-item px-3 py-2 ${selectedId === item.id ? 'ui-list-item-active' : ''}`}
                                 >
                                     <div className="flex justify-between gap-2.5">
                                         <strong className="text-sm" style={{color: methodColor(item.method)}}>{item.method}</strong>
-                                        <span className="text-xs text-slate-500">#{item.correlationId}</span>
+                                        <span className="ui-muted text-xs">#{item.correlationId}</span>
                                     </div>
-                                    <div className="mt-1.5 text-sm text-slate-900">{item.path}</div>
-                                    <div className="mt-2 flex flex-wrap gap-3.5 text-xs text-slate-500">
+                                    <div className="ui-title mt-1.5 text-sm">{item.path}</div>
+                                    <div className="ui-muted mt-2 flex flex-wrap gap-3.5 text-xs">
                                         <span>{item.username} ({item.role})</span>
                                         <span>HTTP {item.status}</span>
                                         <span>{item.durationMs} ms</span>
@@ -225,7 +221,7 @@ export default function Logs() {
                         >
                             Anterior
                         </Button>
-                        <span className="text-xs text-slate-500">
+                        <span className="ui-muted text-xs">
                             Página {pageData.totalPages === 0 ? 0 : pageData.page + 1} de {pageData.totalPages}
                         </span>
                         <Button
@@ -240,19 +236,19 @@ export default function Logs() {
                 </Card>
 
                 <Card as="article" className="p-4">
-                    <h2 className="mb-3 text-lg font-semibold text-slate-900">Detalle</h2>
+                    <h2 className="ui-title mb-3 text-lg font-semibold">Detalle</h2>
 
                     {!selectedId && (
-                        <p className="m-0 text-sm text-slate-500">
+                        <p className="ui-muted m-0 text-sm">
                             Selecciona un movimiento para ver su informacion detallada.
                         </p>
                     )}
 
-                    {selectedId && loadingDetail && <p className="text-sm text-slate-500">Cargando detalle...</p>}
+                    {selectedId && loadingDetail && <p className="ui-muted text-sm">Cargando detalle...</p>}
                     {selectedId && !loadingDetail && detailError && <p className="m-0 text-sm text-red-700">{detailError}</p>}
 
                     {selectedId && !loadingDetail && !detailError && detail && (
-                        <div className="grid gap-2.5 text-sm text-slate-700">
+                        <div className="grid gap-2.5 text-sm text-slate-700 dark:text-slate-200">
                             <div><strong>ID:</strong> {detail.id}</div>
                             <div><strong>Fecha:</strong> {formatDateTime(detail.occurredAt)}</div>
                             <div><strong>Usuario:</strong> {detail.username}</div>

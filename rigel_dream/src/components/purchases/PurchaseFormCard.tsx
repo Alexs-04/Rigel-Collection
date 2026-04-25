@@ -24,7 +24,7 @@ export default function PurchaseFormCard({
 }: PurchaseFormCardProps) {
     return (
         <section className="ui-card p-5">
-            <h2 className="mb-3 mt-0 text-lg font-semibold text-slate-900">Registrar compra</h2>
+            <h2 className="ui-title mb-3 mt-0 text-lg font-semibold">Registrar compra</h2>
 
             <form onSubmit={onSubmit} className="grid gap-2.5">
                 <select className="ui-input" value={form.productName} onChange={(e) => onChange('productName', e.target.value)} required>
@@ -67,7 +67,7 @@ export default function PurchaseFormCard({
                 <input className="ui-input" type="date" value={form.purchaseDate} onChange={(e) => onChange('purchaseDate', e.target.value)} required />
                 <input className="ui-input" placeholder="Notas" value={form.notes} onChange={(e) => onChange('notes', e.target.value)} />
 
-                <label className="mb-0 flex items-center gap-2 text-sm text-slate-600">
+                <label className="mb-0 flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
                     <input
                         type="checkbox"
                         checked={form.useExistingBatch}
@@ -105,7 +105,7 @@ export default function PurchaseFormCard({
                     </>
                 )}
 
-                <label className="mb-0 flex items-center gap-2 text-sm text-slate-600">
+                <label className="mb-0 flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
                     <input type="checkbox" checked={form.available} onChange={(e) => onChange('available', e.target.checked)} />
                     Disponible en piso de ventas
                 </label>
@@ -115,7 +115,7 @@ export default function PurchaseFormCard({
                 </button>
             </form>
 
-            {formMessage && <p className="mb-0 text-sm text-slate-500">{formMessage}</p>}
+            {formMessage && <p className="ui-muted mb-0 text-sm">{formMessage}</p>}
         </section>
     )
 }

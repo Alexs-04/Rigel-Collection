@@ -12,11 +12,15 @@
     }
 
     html, body, #root {
-        @apply h-full;
+        @apply h-full bg-app-bg dark:bg-slate-950;
     }
 
     body {
         @apply m-0 bg-app-bg text-app-text antialiased;
+    }
+
+    html.dark body {
+        @apply bg-slate-950 text-slate-100;
     }
 
     button,
@@ -29,19 +33,50 @@
     label {
         @apply mb-1.5 block text-xs font-medium text-slate-500;
     }
+
+    /* Dark mode compatibility layer for legacy light-only title utilities. */
+    html.dark h1,
+    html.dark h2,
+    html.dark h3,
+    html.dark h4,
+    html.dark h5,
+    html.dark h6 {
+        @apply text-slate-100;
+    }
+
+    html.dark .text-slate-900 {
+        @apply text-slate-100;
+    }
+
+    html.dark .text-slate-800,
+    html.dark .text-slate-700 {
+        @apply text-slate-200;
+    }
 }
 
 @layer components {
+    .ui-title {
+        @apply text-slate-900 dark:text-slate-100;
+    }
+
+    .ui-muted {
+        @apply text-slate-500 dark:text-slate-400;
+    }
+
     .ui-card {
-        @apply rounded-app border border-app-border bg-app-surface shadow-card;
+        @apply rounded-app border border-app-border bg-app-surface shadow-card dark:border-slate-700 dark:bg-slate-900;
     }
 
     .ui-input {
-        @apply w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition;
+        @apply w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100;
     }
 
     .ui-input:focus {
         @apply border-brand-500 ring-4 ring-brand-500/10;
+    }
+
+    .ui-select {
+        @apply ui-input;
     }
 
     .ui-btn {
@@ -53,11 +88,23 @@
     }
 
     .ui-btn-ghost {
-        @apply ui-btn border border-slate-200 bg-white text-slate-700 hover:border-brand-200 hover:bg-brand-50;
+        @apply ui-btn border border-slate-200 bg-white text-slate-700 hover:border-brand-200 hover:bg-brand-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:hover:border-brand-400 dark:hover:bg-slate-700;
     }
 
     .ui-btn-danger {
         @apply ui-btn border border-red-200 bg-red-50 text-red-700 hover:bg-red-100;
+    }
+
+    .ui-list-item {
+        @apply rounded-lg border border-slate-200 bg-white p-3 text-left text-inherit transition hover:border-brand-200 dark:border-slate-700 dark:bg-slate-800 dark:hover:border-brand-400;
+    }
+
+    .ui-list-item-active {
+        @apply border-brand-500 bg-brand-50 dark:border-brand-400 dark:bg-brand-500/20;
+    }
+
+    .ui-subcard {
+        @apply rounded-lg border border-slate-200 p-2.5 dark:border-slate-700 dark:bg-slate-800/60;
     }
 
     .supplier-detail-card,
@@ -101,19 +148,19 @@
 
 @layer utilities {
     .app-flex {
-        @apply flex min-h-screen;
+        @apply flex min-h-screen bg-app-bg dark:bg-slate-950;
     }
 
     .main {
-        @apply flex min-h-screen flex-1 flex-col;
+        @apply flex min-h-screen flex-1 flex-col bg-app-bg dark:bg-slate-950;
     }
 
     .topbar {
-        @apply flex h-14 items-center border-b border-app-border bg-white px-4;
+        @apply flex h-14 items-center border-b border-app-border bg-white px-4 dark:border-slate-700 dark:bg-slate-900;
     }
 
     .content {
-        @apply flex-1 p-5;
+        @apply flex-1 p-5 bg-app-bg dark:bg-slate-950;
     }
 
     .center-screen {
@@ -121,6 +168,6 @@
     }
 
     .bg-gradient {
-        @apply bg-gradient-to-b from-brand-50 to-slate-50;
+        @apply bg-gradient-to-b from-brand-50 to-slate-50 dark:from-slate-950 dark:to-slate-900;
     }
 }

@@ -40,7 +40,7 @@ public class DataInit implements CommandLineRunner {
      */
     @Override
     public void run(String @NonNull ... args) throws IllegalAccessError {
-        String defaultEmail = "arlix@korebit";
+        String defaultEmail = "root@root";
         String defaultPassword = "root";
         var existingConsumer = consumerRepository.findByEmail(defaultEmail);
         if (existingConsumer == null) {

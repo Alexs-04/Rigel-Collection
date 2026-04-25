@@ -38,16 +38,16 @@ export default function UserDetailPanel({
 }: UserDetailPanelProps) {
     return (
         <div className="ui-card supplier-detail-card p-4">
-            <h2 className="mt-0 text-lg font-semibold text-slate-900">Detalle del usuario</h2>
+            <h2 className="ui-title mt-0 text-lg font-semibold">Detalle del usuario</h2>
             {!selectedId && !isCollapsingDetail && (
-                <p className="text-sm text-slate-500">Selecciona un usuario para ver su informacion.</p>
+                <p className="ui-muted text-sm">Selecciona un usuario para ver su informacion.</p>
             )}
 
             <div className={`supplier-detail-body ${detailExpanded ? 'is-open' : ''}`}>
                 {showDetailContent && (
                     <>
-                        {loadingDetail && <p className="text-sm text-slate-500">Cargando detalle...</p>}
-                        {detailError && <p className="text-sm text-slate-500">{detailError}</p>}
+                        {loadingDetail && <p className="ui-muted text-sm">Cargando detalle...</p>}
+                        {detailError && <p className="ui-muted text-sm">{detailError}</p>}
 
                         {detail && !loadingDetail && (
                             <>
