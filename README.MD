@@ -12,3 +12,8 @@ Well, the purpose of this project is to create different modules that communicat
 - Kotlin Multiplatform (planned)
 - PostgreSQL
 - Docker(planned)
+
+## Installation
+To run the Rigel collection, you will need to have Java and Node.js installed on your machine. You can then clone the repository and follow the next steps:
+1. Navigate to the `rigel` directory and run `./gradlew build bootRun` to start the backend server.
+2. Navigate to the `rigel_dream` directory and run `npm install` to install the dependencies, then run `npm run dev` to start the frontend server.
