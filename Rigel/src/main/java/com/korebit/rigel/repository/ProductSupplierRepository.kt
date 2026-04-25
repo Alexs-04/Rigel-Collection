@@ -7,6 +7,6 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface ProductSupplierRepository : JpaRepository<ProductSupplier, ProductSupplierId> {
-    fun findByProduct_NameAndSupplier_Name(productName: String, supplierName: String): ProductSupplier?
+    fun findByProductNameAndSupplierName(productName: String, supplierName: String): ProductSupplier?
 }
 
