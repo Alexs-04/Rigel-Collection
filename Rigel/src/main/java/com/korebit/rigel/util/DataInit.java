@@ -29,7 +29,7 @@ public class DataInit implements CommandLineRunner {
      *
      * <p>Default bootstrap values:</p>
      * <ul>
-     *   <li>Email: {@code arlix@korebit}</li>
+     *   <li>Email: {@code root@root}</li>
      *   <li>Username: {@code root}</li>
      *   <li>Password: {@code root} (stored encoded)</li>
      *   <li>Role: {@code ROOT}</li>
@@ -52,7 +52,7 @@ public class DataInit implements CommandLineRunner {
             consumer.setRole(Role.ROOT);
             consumer.setActive(true);
             consumerRepository.save(consumer);
-        }else {
+        } else {
             System.out.println("Default admin user already exists. Skipping creation.");
         }
     }

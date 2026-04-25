@@ -20,6 +20,9 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
+/**
+ * Manages products, product-supplier relations, and product-level batch operations.
+ */
 class ProductService(
     private val productRepository: ProductRepository,
     private val supplierRepository: SupplierRepository,
@@ -28,12 +31,23 @@ class ProductService(
 ) {
 
     @Transactional(readOnly = true)
+    /**
+     * Retrieves all products.
+     *
+     * @return list of product DTOs.
+     */
     fun getAllProducts(): List<ProductDto> {
         val products = productRepository.findAll()
         return products.map { product -> ProductDto.toRequest(product) }
     }
 
     @Transactional
+    /**
+     * Creates a product with its initial supplier relation.
+     *
+     * @param productRequest product creation payload.
+     * @return operation response.
+     */
     fun saveProduct(productRequest: ProductAddRequest): Response {
         val name = productRequest.name.safeTrim()
         val barcode = productRequest.barcode.safeTrim()
@@ -84,6 +98,12 @@ class ProductService(
     }
 
     @Transactional
+    /**
+     * Adds a supplier relation to an existing product.
+     *
+     * @param relation request containing product, supplier, and supply price.
+     * @return operation response.
+     */
     fun addRelationToProduct(relation: AddRelationRequest): Response {
         val productName = relation.productName.safeTrim()
         val supplierName = relation.supplierName.safeTrim()
@@ -119,6 +139,13 @@ class ProductService(
     }
 
     @Transactional
+    /**
+     * Removes a supplier relation from a product when business constraints allow it.
+     *
+     * @param productName product name.
+     * @param supplierName supplier name to detach.
+     * @return operation response.
+     */
     fun removeRelationFromProduct(productName: String, supplierName: String): Response {
         val normalizedProductName = productName.safeTrim()
         val normalizedSupplierName = supplierName.safeTrim()
@@ -159,6 +186,12 @@ class ProductService(
     }
 
     @Transactional(readOnly = true)
+    /**
+     * Finds a product by name.
+     *
+     * @param name product name.
+     * @return product DTO.
+     */
     fun findProductByName(name: String): ProductDto {
         val product = productRepository
             .findByName(name)
@@ -168,6 +201,13 @@ class ProductService(
     }
 
     @Transactional
+    /**
+     * Updates product core data and its active supplier relation.
+     *
+     * @param currentName current product name.
+     * @param productRequest updated payload.
+     * @return operation response.
+     */
     fun updateProduct(currentName: String, productRequest: ProductAddRequest): Response {
         val existingProduct = productRepository.findByName(currentName)
             .orElseThrow { EntityNotFundException("Product not found") }
@@ -221,6 +261,12 @@ class ProductService(
     }
 
     @Transactional
+    /**
+     * Deletes a product by name.
+     *
+     * @param name product name.
+     * @return operation response.
+     */
     fun deleteProduct(name: String): Response {
         val product = productRepository.findByName(name)
             .orElseThrow { EntityNotFundException("Product not found") }
@@ -235,6 +281,12 @@ class ProductService(
     }
 
     @Transactional(readOnly = true)
+    /**
+     * Returns all batches linked to a product across its suppliers.
+     *
+     * @param name product name.
+     * @return batch DTO list sorted by reception date descending.
+     */
     fun getBatchesByProduct(name: String): List<BatchDto> {
         val product = productRepository.findByName(name)
             .orElseThrow { EntityNotFundException("Product not found") }
@@ -246,6 +298,13 @@ class ProductService(
     }
 
     @Transactional
+    /**
+     * Adds a batch to the first available supplier relation of a product.
+     *
+     * @param name product name.
+     * @param batchRequest batch payload.
+     * @return operation response.
+     */
     fun addBatchToProduct(name: String, batchRequest: ProductBatchRequest): Response {
         val product = productRepository.findByName(name)
             .orElseThrow { EntityNotFundException("Product not found") }
