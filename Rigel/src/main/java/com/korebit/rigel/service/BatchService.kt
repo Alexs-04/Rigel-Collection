@@ -135,7 +135,7 @@ class BatchService(
     }
 
     private fun findRelationOrThrow(request: BatchUpsertRequest): ProductSupplier {
-        return productSupplierRepository.findByProduct_NameAndSupplier_Name(
+        return productSupplierRepository.findByProductNameAndSupplierName(
             request.productName.trim(),
             request.supplierName.trim(),
         ) ?: throw EntityNotFundException("Supplier ${request.supplierName} is not related to product ${request.productName}")

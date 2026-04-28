@@ -1,3 +1,4 @@
+-- SQL script to create the database, user, and schema for the Rigel application in PostgreSQL(psql).
 CREATE DATABASE rigel_db;
 \c rigel_db;
 CREATE USER rigel_root WITH PASSWORD 'root';

@@ -156,7 +156,7 @@ class ProductService(
         val product = productRepository.findByName(normalizedProductName)
             .orElseThrow { EntityNotFundException("Product with name $normalizedProductName not found") }
 
-        val relation = productSupplierRepository.findByProduct_NameAndSupplier_Name(
+        val relation = productSupplierRepository.findByProductNameAndSupplierName(
             normalizedProductName,
             normalizedSupplierName
         ) ?: throw EntityNotFundException(

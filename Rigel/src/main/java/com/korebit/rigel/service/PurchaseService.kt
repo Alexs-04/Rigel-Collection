@@ -130,7 +130,7 @@ class PurchaseService(
     }
 
     private fun resolveRelation(productName: String, supplierName: String): ProductSupplier {
-        return productSupplierRepository.findByProduct_NameAndSupplier_Name(
+        return productSupplierRepository.findByProductNameAndSupplierName(
             productName.trim(),
             supplierName.trim(),
         ) ?: throw EntityNotFundException("Supplier $supplierName is not related to product $productName")
