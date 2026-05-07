@@ -201,11 +201,17 @@ export function useUsersPageState({isRoot}: {isRoot: boolean}) {
         setDetailError('')
 
         try {
-            await api.patch(`/consumer/api/users/${detail.id}/status`, {active: nextStatus})
+            console.log(`Enviando PATCH a /consumer/api/users/${detail.id}/status con payload:`, {active: nextStatus})
+            const response = await api.patch(`/consumer/api/users/${detail.id}/status`, {active: nextStatus})
+            console.log('Respuesta del servidor:', response)
+            setDetailError('')
             await loadUsers(search)
             await loadDetail(detail.id)
         } catch (error) {
-            setDetailError(normalizeError(error, 'No se pudo cambiar el estado del usuario.'))
+            console.error('Error al cambiar estado:', error)
+            const errorMsg = normalizeError(error, 'No se pudo cambiar el estado del usuario.')
+            console.error('Mensaje de error normalizado:', errorMsg)
+            setDetailError(errorMsg)
         } finally {
             setSaving(false)
         }
