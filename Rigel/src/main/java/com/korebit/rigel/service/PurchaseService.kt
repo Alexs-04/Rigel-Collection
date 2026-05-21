@@ -19,6 +19,9 @@ import java.time.format.DateTimeFormatter
 import java.util.UUID
 
 @Service
+/**
+ * Handles purchase registration and stock ingestion into batches.
+ */
 class PurchaseService(
     private val purchaseRepository: PurchaseRepository,
     private val productSupplierRepository: ProductSupplierRepository,
@@ -32,6 +35,11 @@ class PurchaseService(
     }
 
     @Transactional(readOnly = true)
+    /**
+     * Retrieves all purchases sorted by date descending.
+     *
+     * @return list of purchase DTOs.
+     */
     fun getAllPurchases(): List<PurchaseDto> {
         return purchaseRepository.findAll()
             .sortedWith(compareByDescending<Purchase> { it.purchaseDate }.thenByDescending { it.id ?: 0L })
@@ -39,6 +47,12 @@ class PurchaseService(
     }
 
     @Transactional(readOnly = true)
+    /**
+     * Retrieves a purchase by id.
+     *
+     * @param id purchase id.
+     * @return purchase DTO.
+     */
     fun getPurchaseById(id: Long): PurchaseDto {
         val purchase = purchaseRepository.findById(id)
             .orElseThrow { EntityNotFundException("Purchase with id $id not found") }
@@ -46,18 +60,36 @@ class PurchaseService(
     }
 
     @Transactional(readOnly = true)
+    /**
+     * Retrieves purchases filtered by product name.
+     *
+     * @param productName product name.
+     * @return matching purchase DTOs.
+     */
     fun getPurchasesByProduct(productName: String): List<PurchaseDto> {
         return purchaseRepository.findByProductName(productName.trim())
             .map(PurchaseDto::fromEntity)
     }
 
     @Transactional(readOnly = true)
+    /**
+     * Retrieves purchases filtered by supplier name.
+     *
+     * @param supplierName supplier name.
+     * @return matching purchase DTOs.
+     */
     fun getPurchasesBySupplier(supplierName: String): List<PurchaseDto> {
         return purchaseRepository.findBySupplierName(supplierName.trim())
             .map(PurchaseDto::fromEntity)
     }
 
     @Transactional
+    /**
+     * Creates a purchase and updates the target batch stock.
+     *
+     * @param request purchase payload.
+     * @return operation response.
+     */
     fun createPurchase(request: PurchaseCreateRequest): Response {
         val normalizedRequestedCode = validateRequest(request)
 

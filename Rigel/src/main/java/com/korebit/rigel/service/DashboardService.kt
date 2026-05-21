@@ -14,6 +14,9 @@ import java.math.BigDecimal
 import java.time.LocalDate
 
 @Service
+/**
+ * Builds dashboard metrics and aggregated sales insights.
+ */
 class DashboardService(
     private val productRepository: ProductRepository,
     private val supplierRepository: SupplierRepository,
@@ -21,6 +24,11 @@ class DashboardService(
     private val ticketRepository: TicketRepository
 ) {
     @Transactional(readOnly = true)
+    /**
+     * Returns global entity counters displayed on the dashboard.
+     *
+     * @return dashboard counters.
+     */
     fun getDashboardStats(): DashboardStats {
         return DashboardStats(
             totalProducts = productRepository.count(),
@@ -31,24 +39,49 @@ class DashboardService(
     }
 
     @Transactional(readOnly = true)
+    /**
+     * Calculates total sales for the month of the provided date.
+     *
+     * @param date optional reference date, defaults to today.
+     * @return monthly sales total.
+     */
     fun getSalesForMonth(date: LocalDate? = null): BigDecimal {
         val (startDate, endDate) = monthRange(date)
         return sumSalesBetween(startDate, endDate)
     }
 
     @Transactional(readOnly = true)
+    /**
+     * Calculates total sales for a single day.
+     *
+     * @param date optional reference date, defaults to today.
+     * @return daily sales total.
+     */
     fun getSalesForDay(date: LocalDate? = null): BigDecimal {
         val safeDate = requireDate(date)
         return sumSalesBetween(safeDate, safeDate)
     }
 
     @Transactional(readOnly = true)
+    /**
+     * Calculates total sales for the year of the provided date.
+     *
+     * @param date optional reference date, defaults to today.
+     * @return yearly sales total.
+     */
     fun getSalesForYear(date: LocalDate? = null): BigDecimal {
         val (startDate, endDate) = yearRange(date)
         return sumSalesBetween(startDate, endDate)
     }
 
     @Transactional(readOnly = true)
+    /**
+     * Retrieves top-selling products for the month of the provided date.
+     *
+     * @param date optional reference date.
+     * @param limit max number of rows.
+     * @return ranked product list.
+     */
     fun getMayorProductSale(date: LocalDate? = null, limit: Int = DEFAULT_TOP_LIMIT): List<DashboardTopItem> {
         val sanitizedLimit = sanitizeLimit(limit)
         val (startDate, endDate) = monthRange(date)
@@ -58,6 +91,13 @@ class DashboardService(
     }
 
     @Transactional(readOnly = true)
+    /**
+     * Retrieves top-selling suppliers for the month of the provided date.
+     *
+     * @param date optional reference date.
+     * @param limit max number of rows.
+     * @return ranked supplier list.
+     */
     fun getTopSellingSupplier(date: LocalDate? = null, limit: Int = DEFAULT_TOP_LIMIT): List<DashboardTopItem> {
         val sanitizedLimit = sanitizeLimit(limit)
         val (startDate, endDate) = monthRange(date)
@@ -67,6 +107,13 @@ class DashboardService(
     }
 
     @Transactional(readOnly = true)
+    /**
+     * Builds a complete dashboard snapshot for the requested date.
+     *
+     * @param date optional reference date.
+     * @param limit max number of ranked rows.
+     * @return consolidated snapshot payload.
+     */
     fun getDashboardSnapshot(date: LocalDate? = null, limit: Int = DEFAULT_TOP_LIMIT): DashboardSnapshot {
         val safeDate = requireDate(date)
         val sales = DashboardSalesSummary(
