@@ -1,7 +1,10 @@
 # Rigel Collection
 
-The Rigel collection is a project that attempts to unify some past versions of a very simple management software; on my
-GitHub profile you can see these past versions that have been left unfinished and simply do not work.
+Rigel Collection is a modular management software project that consolidates and reimagines 
+several previous unfinished iterations developed during my learning process.
+
+## What is Rigel Collection?
+Rigel aims to provide a modular business management solution focused on inventory, sales, and operational control for small businesses.
 
 ## Will it work?
 
