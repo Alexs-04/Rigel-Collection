@@ -18,12 +18,20 @@ import java.math.BigDecimal
 import java.time.LocalDateTime
 
 @Service
+/**
+ * Handles amount voucher lifecycle operations used for returnable container charges.
+ */
 class AmountService(
     private val amountRepository: AmountRepository,
     private val consumerRepository: ConsumerRepository,
 ) {
 
     @Transactional(readOnly = true)
+    /**
+     * Lists all amount vouchers ordered by creation date and folio.
+     *
+     * @return ordered list of amount DTOs.
+     */
     fun getAllAmounts(): List<AmountDto> {
         return amountRepository.findAll()
             .sortedWith(compareByDescending<Amount> { it.created }.thenByDescending { it.folio })
@@ -31,16 +39,34 @@ class AmountService(
     }
 
     @Transactional(readOnly = true)
+    /**
+     * Retrieves a single amount voucher by folio.
+     *
+     * @param folio voucher folio.
+     * @return amount DTO.
+     */
     fun getAmountByFolio(folio: Long): AmountDto {
         return AmountDto.fromEntity(findAmountByFolio(folio))
     }
 
     @Transactional(readOnly = true)
+    /**
+     * Returns all available container type options.
+     *
+     * @return container type catalog.
+     */
     fun getContainerTypes(): List<ContainerTypeOptionDto> {
         return ContainerType.entries.map(ContainerTypeOptionDto::fromType)
     }
 
     @Transactional
+    /**
+     * Creates a new amount voucher.
+     *
+     * @param request creation payload.
+     * @param actorUsername username of the consumer performing the action.
+     * @return operation response.
+     */
     fun createAmount(request: AmountCreateRequest, actorUsername: String): Response {
         validateRequest(
             customerName = request.customerName,
@@ -77,6 +103,13 @@ class AmountService(
     }
 
     @Transactional
+    /**
+     * Updates an existing amount voucher while it is still open.
+     *
+     * @param folio voucher folio.
+     * @param request update payload.
+     * @return operation response.
+     */
     fun updateAmount(folio: Long, request: AmountUpdateRequest): Response {
         validateRequest(
             customerName = request.customerName,
@@ -112,6 +145,12 @@ class AmountService(
     }
 
     @Transactional
+    /**
+     * Marks an amount voucher as returned.
+     *
+     * @param folio voucher folio.
+     * @return operation response.
+     */
     fun markAsReturned(folio: Long): Response {
         val amount = findAmountByFolio(folio)
         if (amount.returned) {
@@ -133,6 +172,13 @@ class AmountService(
     }
 
     @Transactional
+    /**
+     * Marks an expired amount voucher as bought out.
+     *
+     * @param folio voucher folio.
+     * @param request buyout payload.
+     * @return operation response.
+     */
     fun markAsBoughtOut(folio: Long, request: AmountBuyoutRequest): Response {
         val amount = findAmountByFolio(folio)
         if (amount.returned) {
@@ -166,6 +212,12 @@ class AmountService(
     }
 
     @Transactional
+    /**
+     * Deletes an amount voucher by folio.
+     *
+     * @param folio voucher folio.
+     * @return operation response.
+     */
     fun deleteAmount(folio: Long): Response {
         val amount = findAmountByFolio(folio)
         amountRepository.delete(amount)

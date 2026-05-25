@@ -13,6 +13,9 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
+/**
+ * Manages inventory batches tied to product-supplier relations.
+ */
 class BatchService(
     private val batchRepository: BatchRepository,
     private val productRepository: ProductRepository,
@@ -20,6 +23,12 @@ class BatchService(
 ) {
 
     @Transactional(readOnly = true)
+    /**
+     * Retrieves all batches for a product name.
+     *
+     * @param productName product name.
+     * @return list of batches mapped to DTOs.
+     */
     fun getBatchesByProduct(productName: String): List<BatchDto> {
         val product = productRepository.findByName(productName)
             .orElseThrow { EntityNotFundException("Product $productName not found") }
@@ -29,6 +38,12 @@ class BatchService(
     }
 
     @Transactional(readOnly = true)
+    /**
+     * Retrieves a batch by identifier.
+     *
+     * @param batchId batch id.
+     * @return batch DTO.
+     */
     fun getBatchById(batchId: Long): BatchDto {
         val batch = batchRepository.findById(batchId)
             .orElseThrow { EntityNotFundException("Batch with id $batchId not found") }
@@ -36,6 +51,12 @@ class BatchService(
     }
 
     @Transactional
+    /**
+     * Creates a new batch for an existing product-supplier relation.
+     *
+     * @param request batch payload.
+     * @return operation response.
+     */
     fun createBatch(request: BatchUpsertRequest): Response {
         validateRequest(request)
         val relation = findRelationOrThrow(request)
@@ -54,6 +75,13 @@ class BatchService(
     }
 
     @Transactional
+    /**
+     * Updates an existing batch and preserves consumed amount constraints.
+     *
+     * @param batchId batch id.
+     * @param request update payload.
+     * @return operation response.
+     */
     fun updateBatch(batchId: Long, request: BatchUpsertRequest): Response {
         validateRequest(request)
 
@@ -75,6 +103,12 @@ class BatchService(
     }
 
     @Transactional
+    /**
+     * Deletes a batch by id.
+     *
+     * @param batchId batch id.
+     * @return operation response.
+     */
     fun deleteBatch(batchId: Long): Response {
         val batch = batchRepository.findById(batchId)
             .orElseThrow { EntityNotFundException("Batch with id $batchId not found") }

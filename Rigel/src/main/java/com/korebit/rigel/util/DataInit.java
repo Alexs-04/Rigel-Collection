@@ -8,6 +8,12 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+/**
+ * Seeds baseline application data during startup.
+ *
+ * <p>This initializer ensures a default root user exists for initial access.
+ * If the default account is already present, no changes are applied.</p>
+ */
 @Component
 public class DataInit implements CommandLineRunner {
     private final ConsumerRepository consumerRepository;
@@ -18,6 +24,20 @@ public class DataInit implements CommandLineRunner {
         this.passwordEncoder = passwordEncoder;
     }
 
+    /**
+     * Creates the default root account when it does not exist.
+     *
+     * <p>Default bootstrap values:</p>
+     * <ul>
+     *   <li>Email: {@code root@root}</li>
+     *   <li>Username: {@code root}</li>
+     *   <li>Password: {@code root} (stored encoded)</li>
+     *   <li>Role: {@code ROOT}</li>
+     * </ul>
+     *
+     * @param args command-line arguments (unused)
+     * @throws IllegalAccessError if startup initialization cannot complete
+     */
     @Override
     public void run(String @NonNull ... args) throws IllegalAccessError {
         String defaultEmail = "root@root";
@@ -32,7 +52,7 @@ public class DataInit implements CommandLineRunner {
             consumer.setRole(Role.ROOT);
             consumer.setActive(true);
             consumerRepository.save(consumer);
-        }else {
+        } else {
             System.out.println("Default admin user already exists. Skipping creation.");
         }
     }

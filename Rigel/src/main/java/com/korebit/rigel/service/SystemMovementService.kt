@@ -15,11 +15,25 @@ import java.time.LocalDate
 import java.time.ZoneId
 
 @Service
+/**
+ * Persists and queries system movement audit records.
+ */
 class SystemMovementService(
     private val systemMovementRepository: SystemMovementRepository,
 ) {
 
     @Transactional
+    /**
+     * Persists a single movement event.
+     *
+     * @param username actor username.
+     * @param role actor role.
+     * @param method HTTP method.
+     * @param path request path.
+     * @param status HTTP status code.
+     * @param durationMs request duration in milliseconds.
+     * @param correlationId request correlation id.
+     */
     fun recordMovement(
         username: String,
         role: String,
@@ -43,6 +57,19 @@ class SystemMovementService(
     }
 
     @Transactional(readOnly = true)
+    /**
+     * Retrieves paginated movement records with optional filters.
+     *
+     * @param search optional free-text search.
+     * @param method optional HTTP method filter.
+     * @param status optional HTTP status filter.
+     * @param fromDate optional inclusive start date.
+     * @param toDate optional inclusive end date.
+     * @param importantOnly when true, keeps mutating and failed calls only.
+     * @param page zero-based page number.
+     * @param size page size.
+     * @return paginated movement response.
+     */
     fun getMovements(
         search: String?,
         method: String?,
@@ -113,6 +140,12 @@ class SystemMovementService(
     }
 
     @Transactional(readOnly = true)
+    /**
+     * Retrieves a movement by id.
+     *
+     * @param id movement id.
+     * @return movement DTO.
+     */
     fun getMovementById(id: Long): SystemMovementDto {
         val movement = systemMovementRepository.findById(id).orElseThrow {
             EntityNotFundException("Movement with id $id not found")

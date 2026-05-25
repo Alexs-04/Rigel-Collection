@@ -15,6 +15,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
 
+/**
+ * Provides JWT generation and validation utilities for authentication workflows.
+ */
 @Service
 public class JwtService {
 
@@ -25,23 +28,56 @@ public class JwtService {
     @Value("${jwt.refresh}")
     private long jwtRefresh;
 
+    /**
+     * Generates an access token for the provided consumer.
+     *
+     * @param consumer authenticated consumer.
+     * @return signed JWT access token.
+     */
     public String generateToken(final Consumer consumer) {
         return buildToken(consumer, jwtExpiration);
     }
 
+    /**
+     * Generates a refresh token for the provided consumer.
+     *
+     * @param consumer authenticated consumer.
+     * @return signed JWT refresh token.
+     */
     public String generateRefreshToken(final Consumer consumer) {
         return buildToken(consumer, jwtRefresh);
     }
 
+    /**
+     * Extracts the username (token subject) from a token.
+     *
+     * @param token signed JWT token.
+     * @return token subject.
+     */
     public String extractUsername(final String token) {
         return extractClaim(token, Claims::getSubject);
     }
 
+    /**
+     * Validates that a token belongs to a user and has not expired.
+     *
+     * @param token signed JWT token.
+     * @param userDetails user details to compare against.
+     * @return true when token is valid for the provided user.
+     */
     public boolean isTokenValid(final String token, final UserDetails userDetails) {
         final String username = extractUsername(token);
         return username.equals(userDetails.getUsername()) && !isTokenExpired(token);
     }
 
+    /**
+     * Extracts a claim from a token using the given resolver function.
+     *
+     * @param token signed JWT token.
+     * @param claimResolver resolver function for claim extraction.
+     * @param <T> resolved claim type.
+     * @return extracted claim value.
+     */
     public <T> T extractClaim(final String token, final Function<Claims, T> claimResolver) {
         final Claims claims = extractAllClaims(token);
         return claimResolver.apply(claims);
