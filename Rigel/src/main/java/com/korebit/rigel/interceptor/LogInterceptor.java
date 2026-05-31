@@ -15,6 +15,13 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 
+/**
+ * Logs request lifecycle details and optionally records system movements for auditing.
+ *
+ * <p>The interceptor logs start/end events with correlation ID, handler, status, and timing
+ * information. It also persists movements for error responses or mutating HTTP methods, while
+ * excluding the logs endpoint to avoid recursive persistence.</p>
+ */
 @Component
 public class LogInterceptor implements HandlerInterceptor {
 
@@ -27,6 +34,11 @@ public class LogInterceptor implements HandlerInterceptor {
         this.systemMovementService = systemMovementService;
     }
 
+    /**
+     * Stores request start time and logs a debug-level start event when enabled.
+     *
+     * @return true to continue request processing
+     */
     @Override
     public boolean preHandle(HttpServletRequest request,
                              @NonNull HttpServletResponse response,
@@ -48,6 +60,9 @@ public class LogInterceptor implements HandlerInterceptor {
         return true;
     }
 
+    /**
+     * Logs the end of the request and persists an audit movement when applicable.
+     */
     @Override
     public void afterCompletion(@NonNull HttpServletRequest request,
                                 @NonNull HttpServletResponse response,
@@ -107,6 +122,9 @@ public class LogInterceptor implements HandlerInterceptor {
         }
     }
 
+    /**
+     * Determines whether the request should be persisted as a system movement.
+     */
     private boolean shouldPersistMovement(HttpServletRequest request, HttpServletResponse response, Exception ex) {
         String path = request.getRequestURI();
         if (path != null && path.startsWith(LOGS_PATH_PREFIX)) {
@@ -125,6 +143,9 @@ public class LogInterceptor implements HandlerInterceptor {
                 || "DELETE".equalsIgnoreCase(method);
     }
 
+    /**
+     * Persists the movement and guards against persistence failures.
+     */
     private void persistMovement(HttpServletRequest request, HttpServletResponse response, long durationMs) {
         try {
             systemMovementService.recordMovement(
@@ -145,6 +166,9 @@ public class LogInterceptor implements HandlerInterceptor {
         }
     }
 
+    /**
+     * Resolves the request duration in milliseconds from the stored start time.
+     */
     private long resolveDurationMs(HttpServletRequest request) {
         Object startAttr = request.getAttribute(START_TIME_ATTR);
         if (startAttr instanceof Long startTime) {
@@ -153,6 +177,9 @@ public class LogInterceptor implements HandlerInterceptor {
         return -1;
     }
 
+    /**
+     * Resolves a readable handler identifier for logging.
+     */
     private String resolveHandler(Object handler) {
         if (handler instanceof HandlerMethod method) {
             return method.getBeanType().getSimpleName() + "#" + method.getMethod().getName();
@@ -160,11 +187,17 @@ public class LogInterceptor implements HandlerInterceptor {
         return handler.getClass().getSimpleName();
     }
 
+    /**
+     * Returns the correlation ID stored by {@link RequestCorrelationFilter}.
+     */
     private String getCorrelationId(HttpServletRequest request) {
         Object correlationId = request.getAttribute(RequestCorrelationFilter.CORRELATION_ID_KEY);
         return correlationId != null ? correlationId.toString() : "N/A";
     }
 
+    /**
+     * Returns the authenticated username or {@code anonymous}.
+     */
     private String getUsername() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated() || authentication instanceof AnonymousAuthenticationToken) {
@@ -173,6 +206,9 @@ public class LogInterceptor implements HandlerInterceptor {
         return authentication.getName();
     }
 
+    /**
+     * Returns the first ROLE_* authority without the prefix, or a fallback.
+     */
     private String getRole() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated() || authentication instanceof AnonymousAuthenticationToken) {

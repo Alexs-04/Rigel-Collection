@@ -13,9 +13,15 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+/**
+ * Configures HTTP security, authentication, and filter ordering for the API.
+ */
 @Configuration
 public class SecurityConfig {
 
+    /**
+     * Builds the {@link SecurityFilterChain} with stateless JWT auth and request authorization rules.
+     */
     @Bean
     public SecurityFilterChain securityFilterChain(
             HttpSecurity http,

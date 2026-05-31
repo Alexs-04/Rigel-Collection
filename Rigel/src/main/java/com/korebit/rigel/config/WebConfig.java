@@ -7,6 +7,9 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+/**
+ * Configures MVC settings such as CORS and request interceptors.
+ */
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
 
@@ -18,6 +21,9 @@ public class WebConfig implements WebMvcConfigurer {
         this.logInterceptor = logInterceptor;
     }
 
+    /**
+     * Registers CORS mappings based on the configured origin property.
+     */
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
@@ -28,6 +34,9 @@ public class WebConfig implements WebMvcConfigurer {
                 .allowCredentials(true);
     }
 
+    /**
+     * Registers the logging interceptor while excluding static and framework paths.
+     */
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(logInterceptor)

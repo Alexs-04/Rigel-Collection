@@ -17,6 +17,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.List;
 
+/**
+ * Spring configuration for authentication and security-related beans.
+ */
 @Configuration
 public class AppConfig {
 
@@ -26,16 +29,25 @@ public class AppConfig {
         this.consumerRepository = consumerRepository;
     }
 
+    /**
+     * Provides the password encoder used to hash and verify credentials.
+     */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
+    /**
+     * Exposes the {@link AuthenticationManager} from the Spring configuration.
+     */
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) {
         return config.getAuthenticationManager();
     }
 
+    /**
+     * Loads user details from the {@link ConsumerRepository} by email.
+     */
     @Bean
     public UserDetailsService userDetailsService() {
         return email -> {
@@ -52,6 +64,9 @@ public class AppConfig {
         };
     }
 
+    /**
+     * Configures the DAO authentication provider with the user details service and encoder.
+     */
     @Bean
     public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider(userDetailsService());

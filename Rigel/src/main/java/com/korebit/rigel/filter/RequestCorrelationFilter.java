@@ -12,12 +12,22 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.util.UUID;
 
+/**
+ * Adds a correlation ID to each HTTP request and response, and binds it to the logging context.
+ *
+ * <p>If the request does not provide an {@code X-Correlation-Id} header, a new UUID is generated.
+ * The value is stored as a request attribute and response header, and is also placed in the
+ * SLF4J MDC for downstream log correlation.</p>
+ */
 @Component
 public class RequestCorrelationFilter extends OncePerRequestFilter {
 
     public static final String CORRELATION_ID_HEADER = "X-Correlation-Id";
     public static final String CORRELATION_ID_KEY = "correlationId";
 
+    /**
+     * Ensures a correlation ID is available for the request and binds it to response and MDC.
+     */
     @Override
     protected void doFilterInternal(
             HttpServletRequest request,
