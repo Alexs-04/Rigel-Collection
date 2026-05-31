@@ -14,6 +14,12 @@ import org.springframework.web.bind.annotation.RestController
 class AuthRestController(
     private val authService: AuthService
 ) {
+    /**
+    * @param request: LoginRequest(email, password)
+    * @return ResponseEntity<TokenResponse>
+    * @description Receive login request, validate credentials, and return access and refresh tokens if successful.
+     *              If credentials are invalid, return an appropriate error response.
+    */
     @PostMapping("/login")
     fun tryLogin(@RequestBody request: LoginRequest): ResponseEntity<TokenResponse> {
         val tokens = authService.login(request)

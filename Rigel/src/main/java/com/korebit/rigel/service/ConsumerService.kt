@@ -19,6 +19,9 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
+/**
+ * Manages consumer accounts, administrative user operations, and token revocation.
+ */
 class ConsumerService(
     private val consumerRepository: ConsumerRepository,
     private val tokenRepository: TokenRepository,
@@ -28,6 +31,12 @@ class ConsumerService(
 ) {
 
     @Transactional
+    /**
+     * Registers a new consumer and returns the issued authentication tokens.
+     *
+     * @param consumerDto consumer payload.
+     * @return token response for the newly created account.
+     */
     fun saveConsumer(consumerDto: ConsumerDto): TokenResponse {
 
         if (consumerRepository.existsByUsername(consumerDto.username)) {
@@ -53,6 +62,11 @@ class ConsumerService(
     }
 
     @Transactional(readOnly = true)
+    /**
+     * Lists all consumers.
+     *
+     * @return list of consumers mapped to DTOs.
+     */
     fun getAllConsumers(): List<ConsumerDto> {
         return consumerRepository.findAll().map { consumer ->
             ConsumerDto(
@@ -68,6 +82,12 @@ class ConsumerService(
     }
 
     @Transactional(readOnly = true)
+    /**
+     * Finds a consumer by username.
+     *
+     * @param username unique username.
+     * @return consumer DTO when found.
+     */
     fun findByUsername(username: String): ConsumerDto? {
         if (!consumerRepository.existsByUsername(username)) {
             throw EntityNotFundException("Consumer with username $username not found")
@@ -87,6 +107,12 @@ class ConsumerService(
     }
 
     @Transactional(readOnly = true)
+    /**
+     * Finds a consumer by email.
+     *
+     * @param email unique email.
+     * @return consumer DTO when found.
+     */
     fun findByEmail(email: String): ConsumerDto? {
         if (!consumerRepository.existsByEmail(email)) {
             throw EntityNotFundException("Consumer with email $email not found")
@@ -106,6 +132,12 @@ class ConsumerService(
     }
 
     @Transactional(readOnly = true)
+    /**
+     * Retrieves users for the admin view with optional text filtering.
+     *
+     * @param search optional search text.
+     * @return sorted user list.
+     */
     fun getUsers(search: String?): List<UserAdminDto> {
         val normalizedSearch = search?.trim()?.lowercase().orEmpty()
         return consumerRepository.findAll()
@@ -122,6 +154,12 @@ class ConsumerService(
     }
 
     @Transactional
+    /**
+     * Creates a new user from an administrative request.
+     *
+     * @param request user payload.
+     * @return operation response.
+     */
     fun createUser(request: UserUpsertRequest): Response {
         validateRequiredFields(request.name, request.username, request.email)
         val password = request.password?.trim().orEmpty()
@@ -155,6 +193,13 @@ class ConsumerService(
     }
 
     @Transactional
+    /**
+     * Updates an existing user account by id.
+     *
+     * @param id user id.
+     * @param request update payload.
+     * @return operation response.
+     */
     fun updateUser(id: Long, request: UserUpsertRequest): Response {
         val consumer = findConsumerById(id)
         validateRequiredFields(request.name, request.username, request.email)
@@ -186,6 +231,14 @@ class ConsumerService(
     }
 
     @Transactional
+    /**
+     * Activates or deactivates a user account.
+     *
+     * @param id user id.
+     * @param request desired status payload.
+     * @param actorEmail email of the user performing the action.
+     * @return operation response.
+     */
     fun updateUserStatus(id: Long, request: UserStatusRequest, actorEmail: String): Response {
         val consumer = findConsumerById(id)
         if (!request.active && consumer.email.equals(actorEmail, ignoreCase = true)) {
