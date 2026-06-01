@@ -1,7 +1,10 @@
-import React from 'react'
+import React, {useState} from 'react'
 import {CATEGORY_OPTIONS_ES} from '../../utils/productPresentation.js'
+import {imageUploadService} from '../../services/imageUploadService.js'
 
 export default function ProductFieldsGrid({value, onChange, suppliers, disabled, isRequired}) {
+    const [uploading, setUploading] = useState(false)
+    const [uploadError, setUploadError] = useState('')
     return (
         <div className="mb-3.5 grid gap-2.5">
             <input
@@ -49,13 +52,44 @@ export default function ProductFieldsGrid({value, onChange, suppliers, disabled,
                 required={isRequired}
                 onChange={(e) => onChange('price', e.target.value)}
             />
-            <input
-                className="ui-input"
-                placeholder="URL de imagen"
-                value={value?.imageUrl || ''}
-                disabled={disabled}
-                onChange={(e) => onChange('imageUrl', e.target.value)}
-            />
+            <div className="sm:col-span-2">
+                <label className="block text-sm font-medium mb-2">Imagen del producto (600x600px)</label>
+                <div className="flex gap-4 items-start">
+                    <input
+                        type="file"
+                        accept="image/*"
+                        disabled={disabled || uploading}
+                        onChange={async (e) => {
+                            const file = e.target.files?.[0]
+                            if (!file) return
+
+                            setUploading(true)
+                            setUploadError('')
+                            try {
+                                const {publicId, url} = await imageUploadService.uploadImage(file)
+                                onChange('cloudinaryPublicId', publicId)
+                                onChange('imageUrl', url)
+                                setUploadError('')
+                            } catch (error) {
+                                setUploadError(error.message)
+                            } finally {
+                                setUploading(false)
+                                e.target.value = ''
+                            }
+                        }}
+                        className="flex-1 ui-input"
+                    />
+                    {value?.imageUrl && (
+                        <img
+                            src={value.imageUrl}
+                            alt="Preview"
+                            className="h-24 w-24 object-cover rounded border"
+                        />
+                    )}
+                </div>
+                {uploading && <p className="text-xs text-blue-600 mt-1">Subiendo imagen...</p>}
+                {uploadError && <p className="text-xs text-red-600 mt-1">{uploadError}</p>}
+            </div>
             <select
                 className="ui-input"
                 value={value?.supplierName || ''}

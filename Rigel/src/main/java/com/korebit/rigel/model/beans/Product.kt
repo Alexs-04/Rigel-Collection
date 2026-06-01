@@ -36,7 +36,10 @@ class Product(
     var category: Category = Category.OTHERS,
 
     @Column(nullable = true, length = 256)
-    var imageUrl: String = "",
+    var imageUrl: String? = "",
+
+    @Column(nullable = true, length = 128)
+    var cloudinaryPublicId: String? = "",
 
     @OneToMany(mappedBy = "product", cascade = [CascadeType.ALL], orphanRemoval = true)
     var suppliers: MutableList<ProductSupplier> = mutableListOf(),

@@ -72,7 +72,8 @@ class ProductService(
             barcode = barcode,
             price = (productRequest.price ?: 0.0).toBigDecimal(),
             category = parseCategory(productRequest.category.safeTrim()),
-            imageUrl = productRequest.imageUrl.safeTrim()
+            imageUrl = productRequest.imageUrl.safeTrim(),
+            cloudinaryPublicId = productRequest.cloudinaryPublicId.safeTrim()
         )
 
         val relation = ProductSupplier(
@@ -239,6 +240,7 @@ class ProductService(
         existingProduct.price = (productRequest.price ?: 0.0).toBigDecimal()
         existingProduct.category = parseCategory(productRequest.category.safeTrim())
         existingProduct.imageUrl = productRequest.imageUrl.safeTrim()
+        existingProduct.cloudinaryPublicId = productRequest.cloudinaryPublicId.safeTrim()
 
         val activeRelation = updateSupplierRelation(
             product = existingProduct,

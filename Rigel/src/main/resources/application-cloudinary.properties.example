@@ -1,0 +1,71 @@
+# Ejemplo de Configuración Cloudinary
+# Copiar este archivo a src/main/resources/application-cloudinary.properties
+# O agregar estas propiedades a application.properties existente
+
+# ============================================
+# CLOUDINARY CONFIGURATION
+# ============================================
+
+# Nombre de la nube de Cloudinary
+# Disponible en: https://cloudinary.com/console
+cloudinary.cloud-name=your_cloud_name
+
+# Clave de API de Cloudinary
+# Disponible en: https://cloudinary.com/console/settings/api-keys
+cloudinary.api-key=your_api_key
+
+# Secreto de API de Cloudinary
+# Disponible en: https://cloudinary.com/console/settings/api-keys
+# NUNCA compartir públicamente
+cloudinary.api-secret=your_api_secret
+
+# ============================================
+# IMAGE STORAGE CONFIGURATION
+# ============================================
+
+# Ruta local para almacenamiento de imágenes como fallback
+# Se utiliza si Cloudinary no está configurado
+# Crea automáticamente el directorio si no existe
+image.storage.local-path=./uploads
+
+# ============================================
+# CLOUDINARY API OPTIONS (Futuro)
+# ============================================
+
+# Control de calidad de imagen (1-100)
+# cloudinary.image.quality=auto
+
+# Ancho máximo de imagen en píxeles
+# cloudinary.image.max-width=2000
+
+# Alto máximo de imagen en píxeles
+# cloudinary.image.max-height=2000
+
+# ============================================
+# EJEMPLO DE STEP-BY-STEP PARA OBTENER CREDENCIALES
+# ============================================
+
+# 1. Crear cuenta en https://cloudinary.com
+# 2. Ir a https://cloudinary.com/console
+# 3. Copiar los valores:
+#    - Cloud Name: visible en el dashboard
+#    - API Key: en Settings → API Keys
+#    - API Secret: en Settings → API Keys
+#
+# 4. Actualizar este archivo con los valores
+#
+# 5. Cambiar perfil de ejecución (si usa Spring Boot profiles):
+#    spring.profiles.active=cloudinary
+#
+# 6. Las imágenes ahora se cargarán a Cloudinary en lugar de almacenamiento local
+
+# ============================================
+# TESTING
+# ============================================
+
+# Para verificar que la configuración es correcta:
+# 1. Crear un nuevo producto con imagen
+# 2. Verificar que en la respuesta viene el cloudinary_public_id
+# 3. Verificar que la imagen está disponible en:
+#    https://res.cloudinary.com/{cloud-name}/image/upload/{public-id}.webp
+

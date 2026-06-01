@@ -21,6 +21,7 @@ data class ProductAddRequest(
     val price: Double? = null,
     val stock: Int? = null,
     val imageUrl: String? = null,
+    val cloudinaryPublicId: String? = null,
     val supplierName: String? = null,
     val supplierPrice: Double? = null,
     val batch: ProductBatchRequest? = null,

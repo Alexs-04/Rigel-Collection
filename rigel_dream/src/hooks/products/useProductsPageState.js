@@ -9,6 +9,7 @@ const initialForm = {
     category: 'OTHERS',
     price: '',
     imageUrl: '',
+    cloudinaryPublicId: '',
     supplierName: '',
     supplierPrice: '',
 }
@@ -40,6 +41,7 @@ function buildPayload(source) {
         category: (source.category || 'OTHERS').trim().toUpperCase(),
         price: Number(source.price || 0),
         imageUrl: (source.imageUrl || '').trim(),
+        cloudinaryPublicId: (source.cloudinaryPublicId || '').trim(),
         supplierName,
         supplierPrice: Number(source.supplierPrice || source.price || 0),
     }
@@ -308,7 +310,7 @@ export function useProductsPageState({isAdmin}) {
             await loadPageData()
             await loadDetail(detail.name)
         } catch (error) {
-            setRelationMessage(normalizeError(error, 'No se pudo quitar la relacion del proveedor.'))
+            setRelationMessage(normalizeError(error, 'No se pudo quitar la relación del proveedor.'))
         } finally {
             setRelationSaving(false)
         }
