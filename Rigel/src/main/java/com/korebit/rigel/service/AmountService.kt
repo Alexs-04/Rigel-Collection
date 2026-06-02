@@ -234,7 +234,7 @@ class AmountService(
     }
 
     private fun resolveConsumer(username: String): Consumer {
-        return consumerRepository.findByUsername(username)
+        return consumerRepository.findByEmail(username)
             ?: throw EntityNotFundException("Consumer with username $username not found")
     }
 
