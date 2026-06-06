@@ -9,7 +9,7 @@ plugins {
 }
 
 group = 'com.korebit'
-version = '0.0.1-SNAPSHOT'
+version = '0.1.19'
 description = 'Rigel'
 
 java {
@@ -43,6 +43,9 @@ dependencies {
     implementation 'jakarta.transaction:jakarta.transaction-api:2.0.1'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
     implementation "org.jetbrains.kotlin:kotlin-reflect:1.9.10"
+
+    // Dependencias para procesamiento de imágenes
+    implementation 'commons-io:commons-io:2.15.1'
 }
 
 configurations.configureEach {

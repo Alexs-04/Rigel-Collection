@@ -3,7 +3,10 @@ package com.korebit.rigel.controller
 import com.korebit.rigel.dto.request.AddRelationRequest
 import com.korebit.rigel.dto.request.ProductAddRequest
 import com.korebit.rigel.dto.request.ProductBatchRequest
+import com.korebit.rigel.dto.request.ImageUploadRequest
+import com.korebit.rigel.dto.response.ImageUploadResponse
 import com.korebit.rigel.service.ProductService
+import com.korebit.rigel.service.image.CloudinaryImageService
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
@@ -17,7 +20,8 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/product")
 class ProductRestController(
-    private val productService: ProductService
+    private val productService: ProductService,
+    private val cloudinaryImageService: CloudinaryImageService,
 ) {
     @GetMapping("/all")
     fun getAllProducts() = productService.getAllProducts()
@@ -31,6 +35,39 @@ class ProductRestController(
     @PostMapping("/add")
     fun saveProduct(@RequestBody product: ProductAddRequest): ResponseEntity<Any> {
         return ResponseEntity.ok(productService.saveProduct(product))
+    }
+
+    @PostMapping("/upload-image")
+    fun uploadProductImage(@RequestBody request: ImageUploadRequest): ResponseEntity<ImageUploadResponse> {
+        if (request.imageBase64.isNullOrBlank()) {
+            return ResponseEntity.badRequest().body(
+                ImageUploadResponse(
+                    success = false,
+                    message = "Imagen en Base64 requerida"
+                )
+            )
+        }
+
+        if (request.fileName.isNullOrBlank()) {
+            return ResponseEntity.badRequest().body(
+                ImageUploadResponse(
+                    success = false,
+                    message = "Nombre de archivo requerido"
+                )
+            )
+        }
+
+        return try {
+            val response = cloudinaryImageService.uploadImage(request.imageBase64, request.fileName)
+            ResponseEntity.ok(response)
+        } catch (e: Exception) {
+            ResponseEntity.badRequest().body(
+                ImageUploadResponse(
+                    success = false,
+                    message = e.message ?: "Error al cargar imagen"
+                )
+            )
+        }
     }
 
     @PutMapping("/{name}")

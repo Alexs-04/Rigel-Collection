@@ -10,7 +10,8 @@ data class ProductDto(
     val category: String,
     val price: Double,
     val stock: Int,
-    val imageUrl: String,
+    val imageUrl: String?,
+    val cloudinaryPublicId: String?,
     val suppliers: List<ProductSupplierDto> = emptyList(),
 ) : Serializable {
     companion object {
@@ -38,6 +39,7 @@ data class ProductDto(
                     .flatMap { it.batches }
                     .sumOf { it.remainingAmount },
                 imageUrl = product.imageUrl,
+                cloudinaryPublicId = product.cloudinaryPublicId,
                 suppliers = suppliers,
             )
         }
