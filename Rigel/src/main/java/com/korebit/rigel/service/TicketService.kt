@@ -240,6 +240,7 @@ class TicketService(
      * @param barcode ticket barcode.
      * @return ticket DTO.
      */
+    @Transactional(readOnly = true)
     fun getTicketByBarcode(barcode: String): TicketDto {
         val ticket = ticketRepository.findTicketByBarcode(barcode)
             ?: throw EntityNotFundException("Ticket with barcode $barcode not found")
@@ -262,6 +263,7 @@ class TicketService(
      *
      * @return list of ticket DTOs.
      */
+    @Transactional(readOnly = true)
     fun getAllTickets(): List<TicketDto> {
         return ticketRepository.findAll().map { ticket ->
             TicketDto.toDto(ticket)
