@@ -2,9 +2,6 @@
 <project version="4">
   <component name="CompilerConfiguration">
     <bytecodeTargetLevel>
-      <module name="com.korebit.Rigel" target="21" />
-      <module name="com.korebit.Rigel.main" target="21" />
-      <module name="com.korebit.Rigel.test" target="21" />
       <module name="Rigel" target="21" />
       <module name="Rigel.main" target="21" />
       <module name="Rigel.test" target="21" />
