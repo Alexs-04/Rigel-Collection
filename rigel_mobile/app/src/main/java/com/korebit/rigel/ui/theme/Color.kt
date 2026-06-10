@@ -10,6 +10,7 @@ val BrandDark = Color(0xFF1D4ED8)
 // Slate Colors
 val Slate50 = Color(0xFFF8FAFC)
 val Slate100 = Color(0xFFF1F5F9)
+val Slate400 = Color(0xFF94A3B8)
 val Slate500 = Color(0xFF64748B)
 val Slate900 = Color(0xFF0F172A)
 

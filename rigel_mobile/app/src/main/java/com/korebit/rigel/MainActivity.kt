@@ -4,7 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import com.korebit.rigel.screens.LoginScreen
+import com.korebit.rigel.navigation.RigelNavigation
 import com.korebit.rigel.ui.theme.RigelTheme
 
 class MainActivity : ComponentActivity() {
@@ -13,11 +13,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             RigelTheme {
-                LoginScreen(
-                    onLoginSuccess = {
-                        // TODO: Navegar al dashboard
-                    }
-                )
+                RigelNavigation()
             }
         }
     }

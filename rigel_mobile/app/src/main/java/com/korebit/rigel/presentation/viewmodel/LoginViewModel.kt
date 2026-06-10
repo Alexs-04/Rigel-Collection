@@ -47,15 +47,8 @@ class LoginViewModel(
         viewModelScope.launch {
             val result = authRepository.login(currentState.email, currentState.password)
 
-            result.onSuccess { response ->
-                if (response.success) {
-                    _uiState.value = LoginUiState(isLoggedIn = true)
-                } else {
-                    _uiState.value = currentState.copy(
-                        isLoading = false,
-                        error = response.message
-                    )
-                }
+            result.onSuccess { tokenResponse ->
+                _uiState.value = _uiState.value.copy(isLoading = false, isLoggedIn = true, error = null)
             }
 
             result.onFailure { exception ->
