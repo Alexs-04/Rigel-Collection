@@ -33,7 +33,7 @@ fun DashboardScreen(
     var currentRoute by remember { mutableStateOf("dashboard") }
 
     Column(
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier.fillMaxSize().padding(30.dp)
     ) {
         // Top Bar
         MobileTopBar(

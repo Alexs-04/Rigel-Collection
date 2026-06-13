@@ -35,7 +35,7 @@ fun RigelNavigation() {
             DashboardScreen(
                 username = "Usuario",
                 onLogout = {
-                    // Clean token before navigating back to login
+                    // Clean token before navigating back to LoginScreen.kt
                     RetrofitClient.clearAuthToken()
                     navController.navigate(Route.Login.route) {
                         popUpTo(Route.Dashboard.route) { inclusive = true }
