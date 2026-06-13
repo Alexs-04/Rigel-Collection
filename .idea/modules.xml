@@ -4,7 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/Rigel.iml" filepath="$PROJECT_DIR$/.idea/modules/Rigel.iml" />
       <module fileurl="file://$PROJECT_DIR$/Rigel-Collection.iml" filepath="$PROJECT_DIR$/Rigel-Collection.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/Rigel.test.iml" filepath="$PROJECT_DIR$/.idea/modules/Rigel.test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/Rigel.main.iml" filepath="$PROJECT_DIR$/.idea/modules/Rigel.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/rigel_dream/rigel_dream.iml" filepath="$PROJECT_DIR$/rigel_dream/rigel_dream.iml" />
     </modules>
   </component>

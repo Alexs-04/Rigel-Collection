@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+    Network security config for local development.
+    Allows cleartext (HTTP) only for local host 192.168.0.2.
+
+    IMPORTANT: In production, DO NOT allow cleartext. Modify this file
+    to require HTTPS (or remove the reference from AndroidManifest.xml).
+-->
+<network-security-config>
+    <!-- Base: by default do not allow cleartext -->
+    <base-config cleartextTrafficPermitted="false" />
+
+    <!-- Allow cleartext only for the development host -->
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="false">192.168.0.2</domain>
+    </domain-config>
+</network-security-config>
+

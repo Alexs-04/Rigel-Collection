@@ -6,10 +6,19 @@
       <GradleProjectSettings>
         <option name="testRunner" value="CHOOSE_PER_TEST" />
         <option name="externalProjectPath" value="$PROJECT_DIR$/Rigel" />
-        <option name="gradleJvm" value="#GRADLE_LOCAL_JAVA_HOME" />
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$/Rigel" />
+          </set>
+        </option>
+      </GradleProjectSettings>
+      <GradleProjectSettings>
+        <option name="testRunner" value="CHOOSE_PER_TEST" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$/rigel_mobile" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$/rigel_mobile" />
+            <option value="$PROJECT_DIR$/rigel_mobile/app" />
           </set>
         </option>
       </GradleProjectSettings>
