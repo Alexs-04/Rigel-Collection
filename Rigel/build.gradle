@@ -42,10 +42,9 @@ dependencies {
     runtimeOnly "io.jsonwebtoken:jjwt-jackson:0.12.6"
     implementation 'jakarta.transaction:jakarta.transaction-api:2.0.1'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
-    implementation "org.jetbrains.kotlin:kotlin-reflect:1.9.10"
+    implementation "org.jetbrains.kotlin:kotlin-reflect:2.3.20"
 
-    // Dependencias para procesamiento de imágenes
-    implementation 'commons-io:commons-io:2.15.1'
+    implementation 'commons-io:commons-io:2.22.0'
 }
 
 configurations.configureEach {
@@ -54,7 +53,7 @@ configurations.configureEach {
 
 kotlin {
     compilerOptions {
-        freeCompilerArgs.addAll("-Xjsr305=strict", "-Xannotation-default-target-param-property")
+        freeCompilerArgs.add("-Xjsr305=strict")
     }
 }
 
