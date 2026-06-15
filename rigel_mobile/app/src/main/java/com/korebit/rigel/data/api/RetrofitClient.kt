@@ -19,7 +19,7 @@ import java.util.concurrent.TimeUnit
  */
 object RetrofitClient {
     private const val BASE_URL =
-        "http://192.168.0.2:8080/" // TODO: Configure this URL for different environments
+        "http://192.168.0.13:8080/" // TODO: Configure this URL for different environments
 
     // Interceptor that adds Authorization header when a token is available
     private class AuthInterceptor : Interceptor {
@@ -86,5 +86,12 @@ object RetrofitClient {
     // Helpers so that the authentication flow can update the token
     fun setAuthToken(token: String?) = TokenManager.setToken(token)
     fun clearAuthToken() = TokenManager.clear()
+
+    /**
+     * Generic factory to create other service instances using the shared retrofit instance.
+     * This keeps the retrofit instance encapsulated while allowing creation of additional
+     * API service interfaces (e.g. DashboardService) from other modules.
+     */
+    fun <T> createService(service: Class<T>): T = retrofit.create(service)
 }
 
