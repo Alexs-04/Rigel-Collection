@@ -1,10 +1,12 @@
 import React, {useState} from 'react'
 import {CATEGORY_OPTIONS_ES} from '../../utils/productPresentation.js'
 import {imageUploadService} from '../../services/imageUploadService.js'
+import {resolveInventoryImageUrl} from '../../services/inventoryService.ts'
 
 export default function ProductFieldsGrid({value, onChange, suppliers, disabled, isRequired}) {
     const [uploading, setUploading] = useState(false)
     const [uploadError, setUploadError] = useState('')
+    const previewImageUrl = resolveInventoryImageUrl(value?.imageUrl)
     return (
         <div className="mb-3.5 grid gap-2.5">
             <input
@@ -58,9 +60,9 @@ export default function ProductFieldsGrid({value, onChange, suppliers, disabled,
                     <input
                         type="file"
                         accept="image/*"
-                        disabled={disabled || uploading}
+                        disabled={disabled}
                         onChange={async (e) => {
-                            const file = e.target.files?.[0]
+                            const file = e.currentTarget.files?.[0]
                             if (!file) return
 
                             setUploading(true)
@@ -69,19 +71,17 @@ export default function ProductFieldsGrid({value, onChange, suppliers, disabled,
                                 const {publicId, url} = await imageUploadService.uploadImage(file)
                                 onChange('cloudinaryPublicId', publicId)
                                 onChange('imageUrl', url)
-                                setUploadError('')
                             } catch (error) {
-                                setUploadError(error.message)
+                                setUploadError(error instanceof Error ? error.message : 'Error al cargar imagen')
                             } finally {
                                 setUploading(false)
-                                e.target.value = ''
                             }
                         }}
                         className="flex-1 ui-input"
                     />
-                    {value?.imageUrl && (
+                    {previewImageUrl && (
                         <img
-                            src={value.imageUrl}
+                            src={previewImageUrl}
                             alt="Preview"
                             className="h-24 w-24 object-cover rounded border"
                         />
