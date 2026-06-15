@@ -25,6 +25,11 @@ class CloudinaryImageService(
     private val localStoragePath: String,
 ) {
 
+    private data class ProcessedImage(
+        val bytes: ByteArray,
+        val mimeType: String,
+    )
+
     /**
      * It processes an image in Base64, converts it to WebP if necessary,
      * and upload to Cloudinary (or local storage as a fallback)
@@ -39,13 +44,13 @@ class CloudinaryImageService(
                 ?: throw IllegalArgumentException("No se pudo leer la imagen")
 
             // Convert to WebP
-            val webpBytes = convertToWebP(bufferedImage)
+            val processedImage = convertToWebP(bufferedImage)
 
             // Determinate if it uses Cloudinary or local storage
             return if (isCloudinaryConfigured()) {
-                uploadToCloudinary(fileName)
+                uploadToCloudinary(processedImage, fileName)
             } else {
-                uploadToLocalStorage(webpBytes, fileName)
+                uploadToLocalStorage(processedImage, fileName)
             }
         } catch (e: Exception) {
             throw IllegalArgumentException("Error al procesar imagen: ${e.message}", e)
@@ -55,7 +60,7 @@ class CloudinaryImageService(
     /**
      * Convert image to Webp
      */
-    private fun convertToWebP(bufferedImage: BufferedImage): ByteArray {
+    private fun convertToWebP(bufferedImage: BufferedImage): ProcessedImage {
         return try {
             val output = ByteArrayOutputStream()
 
@@ -65,25 +70,34 @@ class CloudinaryImageService(
             if (!written) {
                 // If WebP is not supported, write as PNG as a fallback.
                 ImageIO.write(bufferedImage, "png", output)
+                ProcessedImage(output.toByteArray(), "image/png")
+            } else {
+                ProcessedImage(output.toByteArray(), "image/webp")
             }
-
-            output.toByteArray()
         } catch (_: Exception) {
             // If there is an error, return as PNG
             val output = ByteArrayOutputStream()
             ImageIO.write(bufferedImage, "png", output)
-            output.toByteArray()
+            ProcessedImage(output.toByteArray(), "image/png")
         }
+    }
+
+    /**
+     * Create a data URL so the frontend can preview the image immediately
+     */
+    private fun toDataUrl(imageBytes: ByteArray, mimeType: String): String {
+        val encoded = Base64.getEncoder().encodeToString(imageBytes)
+        return "data:$mimeType;base64,$encoded"
     }
 
     /**
      * Upload the image to Cloudinary (configuration required)
      */
-    private fun uploadToCloudinary(fileName: String): ImageUploadResponse {
+    private fun uploadToCloudinary(image: ProcessedImage, fileName: String): ImageUploadResponse {
         // TODO: Implement real integration with Cloudinary SDK when available
-        // For now, return simulated response
+        // For now, return a previewable data URL and a stable public id
         val publicId = generatePublicId(fileName)
-        val simulatedUrl = "https://res.cloudinary.com/$cloudinaryCloudName/image/upload/$publicId.webp"
+        val simulatedUrl = toDataUrl(image.bytes, image.mimeType)
 
         return ImageUploadResponse(
             cloudinaryPublicId = publicId,
@@ -96,7 +110,7 @@ class CloudinaryImageService(
     /**
      * Store the image in local storage as a fallback
      */
-    private fun uploadToLocalStorage(imageBytes: ByteArray, fileName: String): ImageUploadResponse {
+    private fun uploadToLocalStorage(image: ProcessedImage, fileName: String): ImageUploadResponse {
         try {
             val uploadDir = File(localStoragePath)
             if (!uploadDir.exists()) {
@@ -107,9 +121,9 @@ class CloudinaryImageService(
             val webpFileName = "$publicId.webp"
             val outputFile = File(uploadDir, webpFileName)
 
-            outputFile.writeBytes(imageBytes)
+            outputFile.writeBytes(image.bytes)
 
-            val url = "/uploads/$webpFileName"
+            val url = toDataUrl(image.bytes, image.mimeType)
 
             return ImageUploadResponse(
                 cloudinaryPublicId = publicId,
