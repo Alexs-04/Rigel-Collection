@@ -19,7 +19,8 @@ import java.util.concurrent.TimeUnit
  */
 object RetrofitClient {
     private const val BASE_URL =
-        "http://192.168.0.13:8080/" // TODO: Configure this URL for different environments
+        "http://192.168.0.14:8080/" // TODO: Configure this URL for different environments
+
 
     // Interceptor that adds Authorization header when a token is available
     private class AuthInterceptor : Interceptor {
@@ -82,7 +83,7 @@ object RetrofitClient {
         .build()
 
     val authService: AuthService = retrofit.create(AuthService::class.java)
-
+    val posService: PosService = retrofit.create(PosService::class.java)
     // Helpers so that the authentication flow can update the token
     fun setAuthToken(token: String?) = TokenManager.setToken(token)
     fun clearAuthToken() = TokenManager.clear()

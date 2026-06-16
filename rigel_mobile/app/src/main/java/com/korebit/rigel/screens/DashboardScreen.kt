@@ -307,10 +307,10 @@ private fun DashboardContent() {
 private fun StatCard(
     title: String,
     value: String,
-    modifier: Modifier = Modifier // Añadimos el modifier como parámetro
+    modifier: Modifier = Modifier
 ) {
     Box(
-        modifier = modifier // Aplicamos el modifier que viene del padre
+        modifier = modifier
             .background(Color.White)
             .padding(12.dp)
     ) {
@@ -320,90 +320,3 @@ private fun StatCard(
         }
     }
 }
-
-
-@Composable
-private fun POSContent(role: String? = null) {
-    // Access control: SUPPLIER role doesn't have access to POS
-    val canAccessPos = role != "SUPPLIER"
-
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
-        Text(
-            text = "Punto de Venta",
-            fontSize = 24.sp,
-            fontWeight = FontWeight.Bold,
-            color = Slate900,
-            modifier = Modifier.padding(bottom = 16.dp)
-        )
-
-        if (!canAccessPos) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(Color.White)
-                    .padding(16.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "Acceso denegado. El rol SUPPLIER no tiene acceso al punto de venta.",
-                    fontSize = 14.sp,
-                    color = Slate500
-                )
-            }
-            return
-        }
-
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(Color.White)
-                .padding(16.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = "Funcionalidad de POS próximamente",
-                fontSize = 14.sp,
-                color = Slate500
-            )
-        }
-    }
-}
-
-
-@Composable
-private fun SettingsContent() {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
-        Text(
-            text = "Configuración",
-            fontSize = 24.sp,
-            fontWeight = FontWeight.Bold,
-            color = Slate900,
-            modifier = Modifier.padding(bottom = 16.dp)
-        )
-
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(Color.White)
-                .padding(16.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = "Opciones de configuración próximamente",
-                fontSize = 14.sp,
-                color = Slate500
-            )
-        }
-    }
-}
-
