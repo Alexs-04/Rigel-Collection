@@ -2,36 +2,48 @@ import api from './api.js'
 import {resizeImage, blobToBase64, isValidImageFile} from '../utils/imageResizer.js'
 
 /**
- * Servicio para manejar carga de imágenes a Cloudinary
+ * Service to handle image uploads to Cloudinary
  */
 export const imageUploadService = {
     /**
-     * Procesa y sube una imagen
-     * @param {File} file - Archivo de imagen
+     * Process and upload an image
+     * @param {File} file - Image file
      * @returns {Promise<{publicId: string, url: string}>}
      */
     async uploadImage(file) {
-        // Validar archivo
+        // Validate file
         if (!isValidImageFile(file)) {
             throw new Error('Formato de imagen no soportado. Use PNG, JPG, WebP, GIF o BMP (máx 10MB)')
         }
 
         try {
-            // Redimensionar imagen a 600x600
+            // Resize image to 600x600px
             const resizedBlob = await resizeImage(file)
 
-            // Convertir a Base64
+            // Convert to Base64
             const base64 = await blobToBase64(resizedBlob)
 
-            // Enviar al backend para conversión a WebP y carga en Cloudinary
+            // Send to backend for conversion to WebP and upload to Cloudinary
             const response = await api.post('/product/upload-image', {
                 imageBase64: base64,
                 fileName: file.name
             })
 
+            const data = response?.data || {}
+            if (data.success === false) {
+                throw new Error(data.message || 'El servidor rechazó la imagen')
+            }
+
+            const publicId = data.cloudinaryPublicId || data.publicId || ''
+            const url = data.imageUrl || data.url || ''
+
+            if (!url) {
+                throw new Error('El servidor no devolvió una URL de imagen válida')
+            }
+
             return {
-                publicId: response.data.cloudinaryPublicId,
-                url: response.data.imageUrl
+                publicId,
+                url
             }
         } catch (error) {
             const message = error?.response?.data?.message || error.message || 'Error al cargar imagen'
