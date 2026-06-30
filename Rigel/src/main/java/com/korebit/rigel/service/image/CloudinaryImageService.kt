@@ -1,5 +1,7 @@
 package com.korebit.rigel.service.image
 
+import com.cloudinary.Cloudinary
+import com.cloudinary.utils.ObjectUtils
 import com.korebit.rigel.dto.response.ImageUploadResponse
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
@@ -21,14 +23,49 @@ class CloudinaryImageService(
     @param:Value("\${cloudinary.cloud-name:}")
     private val cloudinaryCloudName: String,
 
+    @param:Value("\${cloudinary.folder:rigel/products}")
+    private val cloudinaryFolder: String,
+
     @param:Value("\${image.storage.local-path:./uploads}")
     private val localStoragePath: String,
 ) {
 
+    // Cloudinary client is built only once if credentials exist
+    private val cloudinary: Cloudinary? by lazy {
+        if (isCloudinaryConfigured()) {
+            Cloudinary(
+                ObjectUtils.asMap(
+                    "cloud_name", cloudinaryCloudName,
+                    "api_key", cloudinaryApiKey,
+                    "api_secret", cloudinaryApiSecret,
+                    "secure", true
+                )
+            )
+        } else null
+    }
+
     private data class ProcessedImage(
         val bytes: ByteArray,
         val mimeType: String,
-    )
+    ) {
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (javaClass != other?.javaClass) return false
+
+            other as ProcessedImage
+
+            if (!bytes.contentEquals(other.bytes)) return false
+            if (mimeType != other.mimeType) return false
+
+            return true
+        }
+
+        override fun hashCode(): Int {
+            var result = bytes.contentHashCode()
+            result = 31 * result + mimeType.hashCode()
+            return result
+        }
+    }
 
     /**
      * It processes an image in Base64, converts it to WebP if necessary,
@@ -54,6 +91,23 @@ class CloudinaryImageService(
             }
         } catch (e: Exception) {
             throw IllegalArgumentException("Error al procesar imagen: ${e.message}", e)
+        }
+    }
+
+    /**
+     * Delete an image from Cloudinary (or local) given its public id
+     */
+    fun deleteImage(publicId: String) {
+        try {
+            if (isCloudinaryConfigured()) {
+                cloudinary?.uploader()?.destroy(publicId, ObjectUtils.emptyMap())
+            } else {
+                val uploadDir = File(localStoragePath)
+                val file = File(uploadDir, "$publicId.webp")
+                if (file.exists()) file.delete()
+            }
+        } catch (e: Exception) {
+            throw IllegalArgumentException("Error al eliminar imagen: ${e.message}", e)
         }
     }
 
@@ -91,20 +145,40 @@ class CloudinaryImageService(
     }
 
     /**
-     * Upload the image to Cloudinary (configuration required)
+     * Upload the image to Cloudinary
      */
     private fun uploadToCloudinary(image: ProcessedImage, fileName: String): ImageUploadResponse {
-        // TODO: Implement real integration with Cloudinary SDK when available
-        // For now, return a previewable data URL and a stable public id
-        val publicId = generatePublicId(fileName)
-        val simulatedUrl = toDataUrl(image.bytes, image.mimeType)
+        val client = cloudinary
+            ?: throw IllegalStateException("Cloudinary no está configurado correctamente")
 
-        return ImageUploadResponse(
-            cloudinaryPublicId = publicId,
-            imageUrl = simulatedUrl,
-            success = true,
-            message = "Imagen procesada y lista para Cloudinary"
-        )
+        val publicId = generatePublicId(fileName)
+
+        return try {
+            val uploadResult = client.uploader().upload(
+                image.bytes,
+                ObjectUtils.asMap(
+                    "public_id", publicId,
+                    "folder", cloudinaryFolder,
+                    "resource_type", "image",
+                    "overwrite", true,
+                    "format", if (image.mimeType == "image/webp") "webp" else "png"
+                )
+            )
+
+            val secureUrl = uploadResult["secure_url"] as? String
+                ?: throw IllegalStateException("Cloudinary no devolvió una URL válida")
+            val returnedPublicId = uploadResult["public_id"] as? String ?: publicId
+
+            ImageUploadResponse(
+                cloudinaryPublicId = returnedPublicId,
+                imageUrl = secureUrl,
+                success = true,
+                message = "Imagen subida correctamente a Cloudinary"
+            )
+        } catch (e: Exception) {
+            // Si falla la subida a Cloudinary, hacemos fallback a almacenamiento local
+            uploadToLocalStorage(image, fileName)
+        }
     }
 
     /**
@@ -141,8 +215,8 @@ class CloudinaryImageService(
      */
     private fun isCloudinaryConfigured(): Boolean {
         return cloudinaryApiKey.isNotBlank() &&
-               cloudinaryApiSecret.isNotBlank() &&
-               cloudinaryCloudName.isNotBlank()
+                cloudinaryApiSecret.isNotBlank() &&
+                cloudinaryCloudName.isNotBlank()
     }
 
     /**
@@ -159,10 +233,3 @@ class CloudinaryImageService(
         return "product_${cleanName}_${timestamp}_$random"
     }
 }
-
-
-
-
-
-
-
