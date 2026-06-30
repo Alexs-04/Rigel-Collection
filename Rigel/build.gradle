@@ -9,7 +9,7 @@ plugins {
 }
 
 group = 'com.korebit'
-version = '0.1.19'
+version = '0.1.22'
 description = 'Rigel'
 
 java {
@@ -43,6 +43,7 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
     implementation "org.jetbrains.kotlin:kotlin-reflect:2.3.20"
 
+    implementation 'com.cloudinary:cloudinary-core:2.4.0'
     implementation 'commons-io:commons-io:2.22.0'
 }
 
