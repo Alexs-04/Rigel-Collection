@@ -9,7 +9,7 @@ plugins {
 }
 
 group = 'com.korebit'
-version = '0.1.22'
+version = '0.1.23'
 description = 'Rigel'
 
 java {
@@ -43,7 +43,9 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
     implementation "org.jetbrains.kotlin:kotlin-reflect:2.3.20"
 
-    implementation 'com.cloudinary:cloudinary-core:2.4.0'
+    //implementation 'com.cloudinary:cloudinary-core:2.4.0'
+    //TODO: Update to 2.4.0 once the issue with the missing dependency is resolved. Vulnerability: https://www.cve.org/CVERecord?id=CVE-2025-48924
+    implementation 'com.cloudinary:cloudinary-http44:1.39.0'
     implementation 'commons-io:commons-io:2.22.0'
 }
 

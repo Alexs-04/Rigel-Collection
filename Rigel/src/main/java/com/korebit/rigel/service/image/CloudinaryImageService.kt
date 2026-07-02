@@ -28,6 +28,9 @@ class CloudinaryImageService(
 
     @param:Value("\${image.storage.local-path:./uploads}")
     private val localStoragePath: String,
+
+    @param:Value("\${image.storage.public-path:/uploads}")
+    private val localPublicPath: String,
 ) {
 
     // Cloudinary client is built only once if credentials exist
@@ -192,16 +195,18 @@ class CloudinaryImageService(
             }
 
             val publicId = generatePublicId(fileName)
-            val webpFileName = "$publicId.webp"
-            val outputFile = File(uploadDir, webpFileName)
+            val extension = if (image.mimeType == "image/webp") "webp" else "png"
+            val storedFileName = "$publicId.$extension"
+            val outputFile = File(uploadDir, storedFileName)
 
             outputFile.writeBytes(image.bytes)
 
-            val url = toDataUrl(image.bytes, image.mimeType)
+            // Relative path served statically, NOT a data URL
+            val relativeUrl = "$localPublicPath/$storedFileName"
 
             return ImageUploadResponse(
                 cloudinaryPublicId = publicId,
-                imageUrl = url,
+                imageUrl = relativeUrl,
                 success = true,
                 message = "Imagen almacenada localmente"
             )
