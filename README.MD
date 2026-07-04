@@ -41,7 +41,7 @@ docker run -p 8080:8080 rigel:1.0
 If you want to use the backend service's JAR file directly, you can simply do the following:
 
 ```bash
-java -jar rigel/build/libs/rigel-0.0.1-SNAPSHOT.jar
+java -jar Rigel/build/libs/Rigel-0.1.23.jar
 ```
 
 Note: The JAR file name may vary depending on the version and build configuration, so make sure to adjust the command
