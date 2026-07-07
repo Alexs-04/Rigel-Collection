@@ -9,8 +9,8 @@ plugins {
 }
 
 group = 'com.korebit'
-version = '0.1.23'
-description = 'Rigel'
+version = '0.1.30'
+description = 'rigel'
 
 java {
     toolchain {
@@ -27,6 +27,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
     implementation 'org.springframework.boot:spring-boot-starter-webmvc'
+    implementation("org.springframework.boot:spring-boot-starter-mail")
     implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     runtimeOnly 'org.postgresql:postgresql'

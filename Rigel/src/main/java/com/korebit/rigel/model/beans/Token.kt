@@ -12,8 +12,9 @@ import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import java.io.Serializable
+import java.time.LocalDateTime
 
-@Entity(name = "tokenS")
+@Entity(name = "tokens")
 class Token(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,6 +29,9 @@ class Token(
 
     var revoked: Boolean = false,
     var expired: Boolean = false,
+
+    @Column(nullable = true)
+    var expiresAt: LocalDateTime? = null,
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")

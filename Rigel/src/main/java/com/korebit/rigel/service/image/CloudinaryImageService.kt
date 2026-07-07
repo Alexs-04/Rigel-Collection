@@ -29,7 +29,7 @@ class CloudinaryImageService(
     @param:Value("\${image.storage.local-path:./uploads}")
     private val localStoragePath: String,
 
-    @param:Value("\${image.storage.public-path:/uploads}")
+    @param:Value($$"${image.storage.public-path:/uploads}")
     private val localPublicPath: String,
 ) {
 
