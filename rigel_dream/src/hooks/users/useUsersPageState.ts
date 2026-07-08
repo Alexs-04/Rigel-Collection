@@ -10,7 +10,6 @@ const initialForm: UserFormValues = {
     email: '',
     phoneNumber: '',
     role: 'USER',
-    password: '',
 }
 
 function normalizeError(error: unknown, fallback: string): string {
@@ -18,31 +17,44 @@ function normalizeError(error: unknown, fallback: string): string {
     return maybeError?.response?.data?.message || fallback
 }
 
-function buildPayload(source: Partial<UserFormValues> | Partial<UserDetail>, includePassword = true) {
-    const payload: {
-        name: string
-        username: string
-        email: string
-        phoneNumber: string
-        role: string
-        password?: string
-    } = {
+function buildEditPayload(source: Partial<UserDetail>) {
+    return {
         name: String(source.name || '').trim(),
         username: String(source.username || '').trim(),
         email: String(source.email || '').trim(),
         phoneNumber: String(source.phoneNumber || '').trim(),
         role: String(source.role || 'USER').trim().toUpperCase(),
     }
-
-    const password = String(source.password || '').trim()
-    if (includePassword || password) {
-        payload.password = password
-    }
-
-    return payload
 }
 
-export function useUsersPageState({isRoot}: {isRoot: boolean}) {
+interface UseUsersPageStateReturn {
+    users: UserSummary[]
+    loadingList: boolean
+    listError: string
+    search: string
+    setSearch: (search: string) => void
+    form: UserFormValues
+    formMessage: string
+    saving: boolean
+    selectedId: number | null
+    detail: UserDetail | null
+    loadingDetail: boolean
+    detailError: string
+    editing: boolean
+    isCollapsingDetail: boolean
+    detailExpanded: boolean
+    showDetailContent: boolean
+    setEditing: (editing: boolean) => void
+    onChangeForm: (key: keyof UserFormValues | 'password', value: string) => void
+    onChangeDetail: (key: keyof UserDetail | 'password', value: string) => void
+    addUser: (event: FormEvent<HTMLFormElement>) => Promise<void>
+    saveChanges: () => Promise<void>
+    toggleUserStatus: () => Promise<void>
+    handleUserClick: (selectedUser: UserSummary) => void
+    loadDetail: (id: number) => Promise<void>
+}
+
+export function useUsersPageState({isRoot}: {isRoot: boolean}): UseUsersPageStateReturn {
     const [users, setUsers] = useState<UserSummary[]>([])
     const [loadingList, setLoadingList] = useState(true)
     const [listError, setListError] = useState('')
@@ -93,15 +105,13 @@ export function useUsersPageState({isRoot}: {isRoot: boolean}) {
             requestRef: detailRequestRef,
             fetchDetail: async () => {
                 const cached = users.find((item) => item.id === id)
-                if (cached) {
-                    return {...cached, password: ''}
-                }
+                if (cached) return cached
 
                 const res = await api.get('/consumer/api/users')
                 const list = Array.isArray(res.data) ? (res.data as UserSummary[]) : []
                 const found = list.find((item) => item.id === id)
                 if (!found) throw new Error('Usuario no encontrado')
-                return {...found, password: ''}
+                return found
             },
             onSuccess: (resolvedDetail: UserDetail) => {
                 setDetail(resolvedDetail)
@@ -136,14 +146,16 @@ export function useUsersPageState({isRoot}: {isRoot: boolean}) {
         loadDetail(selectedUser.id)
     }
 
-    const onChangeForm = (key: keyof UserFormValues, value: string) => {
+    const onChangeForm = (key: keyof UserFormValues | 'password', value: string) => {
         setForm((prev) => ({...prev, [key]: value}))
     }
 
-    const onChangeDetail = (key: keyof UserDetail, value: string) => {
+    const onChangeDetail = (key: keyof UserDetail | 'password', value: string) => {
         setDetail((prev) => (prev ? {...prev, [key]: value} : prev))
     }
 
+    // Sends an invitation email — no password required.
+    // The user sets their own password when they click the activation link.
     const addUser = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault()
         if (!isRoot) return
@@ -152,18 +164,22 @@ export function useUsersPageState({isRoot}: {isRoot: boolean}) {
         setFormMessage('')
 
         try {
-            const payload = buildPayload(form, true)
-            if (!payload.password) {
-                setFormMessage('La contrasena es obligatoria al crear usuarios.')
-                return
+            const payload = {
+                name: form.name.trim(),
+                username: form.username.trim(),
+                email: form.email.trim(),
+                phoneNumber: form.phoneNumber.trim(),
+                role: form.role,
             }
 
-            await api.post('/consumer/api/users', payload)
+            const res = await api.post('/admin/users/invite', payload)
+            const message: string = res.data?.message || 'Invitacion enviada.'
+
             setForm(initialForm)
-            setFormMessage('Usuario agregado correctamente.')
+            setFormMessage(message)
             await loadUsers(search)
         } catch (error) {
-            const fallback = error instanceof Error ? error.message : 'No se pudo agregar el usuario.'
+            const fallback = error instanceof Error ? error.message : 'No se pudo enviar la invitacion.'
             setFormMessage(normalizeError(error, fallback))
         } finally {
             setSaving(false)
@@ -177,7 +193,7 @@ export function useUsersPageState({isRoot}: {isRoot: boolean}) {
         setDetailError('')
 
         try {
-            const payload = buildPayload(detail, false)
+            const payload = buildEditPayload(detail)
             await api.put(`/consumer/api/users/${detail.id}`, payload)
             setEditing(false)
             await loadUsers(search)
@@ -201,17 +217,11 @@ export function useUsersPageState({isRoot}: {isRoot: boolean}) {
         setDetailError('')
 
         try {
-            console.log(`Enviando PATCH a /consumer/api/users/${detail.id}/status con payload:`, {active: nextStatus})
-            const response = await api.patch(`/consumer/api/users/${detail.id}/status`, {active: nextStatus})
-            console.log('Respuesta del servidor:', response)
-            setDetailError('')
+            await api.patch(`/consumer/api/users/${detail.id}/status`, {active: nextStatus})
             await loadUsers(search)
             await loadDetail(detail.id)
         } catch (error) {
-            console.error('Error al cambiar estado:', error)
-            const errorMsg = normalizeError(error, 'No se pudo cambiar el estado del usuario.')
-            console.error('Mensaje de error normalizado:', errorMsg)
-            setDetailError(errorMsg)
+            setDetailError(normalizeError(error, 'No se pudo cambiar el estado del usuario.'))
         } finally {
             setSaving(false)
         }
@@ -260,6 +270,5 @@ export function useUsersPageState({isRoot}: {isRoot: boolean}) {
         toggleUserStatus,
         handleUserClick,
         loadDetail,
-    }
+    } as UseUsersPageStateReturn
 }
-

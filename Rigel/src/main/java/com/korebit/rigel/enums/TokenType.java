@@ -1,5 +1,7 @@
 package com.korebit.rigel.enums;
 
 public enum TokenType {
-    BEARER
+    BEARER,
+    EMAIL_VERIFICATION,
+    PASSWORD_RESET
 }

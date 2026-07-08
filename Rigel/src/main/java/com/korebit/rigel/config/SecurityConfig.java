@@ -31,6 +31,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/account/**").permitAll()
+                        .requestMatchers("/admin/**").hasAnyRole("ADMIN", "ROOT")
                         .requestMatchers(HttpMethod.POST, "/consumer/api/add").permitAll()
                         .requestMatchers(HttpMethod.GET, "/product/**", "/suppliers/**", "/batches/**", "/purchases/**")
                         .hasAnyRole("ROOT", "ADMIN", "USER", "SUPPLIER")

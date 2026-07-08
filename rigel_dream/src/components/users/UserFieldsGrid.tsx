@@ -1,14 +1,12 @@
 import {roleOptions, type UserDetail, type UserFormValues, type UserRole} from '../../types/users'
 
-type EditableUserField = keyof Pick<UserFormValues, 'name' | 'username' | 'email' | 'phoneNumber' | 'role' | 'password'>
-
 interface UserFieldsGridProps {
-    value: UserFormValues | UserDetail
+    value: (UserFormValues | UserDetail) & {password?: string}
     disabled: boolean
     isRequired?: boolean
     showPassword?: boolean
     passwordPlaceholder?: string
-    onChange: (key: EditableUserField, value: string) => void
+    onChange: (key: any, value: string) => void
 }
 
 export default function UserFieldsGrid({
@@ -16,7 +14,7 @@ export default function UserFieldsGrid({
     disabled,
     isRequired = false,
     showPassword = false,
-    passwordPlaceholder = 'Contrasena',
+    passwordPlaceholder = 'Contraseña',
     onChange,
 }: UserFieldsGridProps) {
     return (
@@ -69,7 +67,7 @@ export default function UserFieldsGrid({
                     className="ui-input"
                     placeholder={passwordPlaceholder}
                     type="password"
-                    value={value.password || ''}
+                    value={(value as any).password || ''}
                     disabled={disabled}
                     required={isRequired}
                     onChange={(e) => onChange('password', e.target.value)}
