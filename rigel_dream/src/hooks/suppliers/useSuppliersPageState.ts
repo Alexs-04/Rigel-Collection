@@ -47,7 +47,6 @@ export function useSuppliersPageState({isAdmin}: {isAdmin: boolean}) {
     const detailRequestRef = useRef(0)
     const [isCollapsingDetail, setIsCollapsingDetail] = useState(false)
 
-    // @ts-ignore
     const loadSuppliers = async () => {
         setLoadingList(true)
         setListError('')
@@ -62,7 +61,6 @@ export function useSuppliersPageState({isAdmin}: {isAdmin: boolean}) {
         }
     }
 
-    // @ts-ignore
     const loadDetail = async (name: string) => {
         if (collapseTimeoutRef.current) {
             clearTimeout(collapseTimeoutRef.current)
@@ -133,7 +131,6 @@ export function useSuppliersPageState({isAdmin}: {isAdmin: boolean}) {
         setDetail((prev) => (prev ? {...prev, [key]: value} : prev))
     }
 
-    // @ts-ignore
     const addSupplier = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault()
         if (!isAdmin) return
@@ -153,7 +150,6 @@ export function useSuppliersPageState({isAdmin}: {isAdmin: boolean}) {
         }
     }
 
-    // @ts-ignore
     const saveChanges = async () => {
         if (!detail || !selectedName || !isAdmin) return
 
@@ -173,7 +169,6 @@ export function useSuppliersPageState({isAdmin}: {isAdmin: boolean}) {
         }
     }
 
-    // @ts-ignore
     const deleteSupplier = async () => {
         if (!detail || !isAdmin) return
         const confirmed = window.confirm(`Deseas eliminar al proveedor ${detail.name}?`)

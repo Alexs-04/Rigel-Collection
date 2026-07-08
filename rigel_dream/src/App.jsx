@@ -15,6 +15,8 @@ import Inventory from "./pages/Inventory.tsx";
 import Amounts from "./pages/Amounts.tsx";
 import {AuthContext} from './context/AuthContext'
 import DebugPanel from './components/DebugPanel'
+import ResetPasswordPage from "./pages/ResetPassword.tsx";
+import ActivateAccountPage from "./pages/ActivateAccount.tsx";
 
 function AppLayout({children}) {
     const [collapsed, setCollapsed] = useState(false)
@@ -68,6 +70,8 @@ function AppRoutes() {
                 <Route path="/inventory"
                        element={<RoleRoute allowedRoles={['ROOT', 'ADMIN', 'USER']}><Inventory/></RoleRoute>}/>
                 <Route path="/amounts" element={<RoleRoute allowedRoles={['ROOT', 'ADMIN', 'USER']}><Amounts /></RoleRoute>}/>
+                <Route path="/activate" element={<ActivateAccountPage />} />
+                <Route path="/reset-password" element={<ResetPasswordPage />} />
             </Routes>
         </AppLayout>
     )

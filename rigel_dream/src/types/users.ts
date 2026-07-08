@@ -12,16 +12,15 @@ export interface UserSummary {
     active: boolean
 }
 
+// Invite form — no password, the user sets it themselves on activation
 export interface UserFormValues {
     name: string
     username: string
     email: string
     phoneNumber: string
     role: UserRole
-    password: string
 }
 
 export interface UserDetail extends UserSummary {
-    password?: string
+    // password is not shown or edited here; reset is done via email flow
 }
-

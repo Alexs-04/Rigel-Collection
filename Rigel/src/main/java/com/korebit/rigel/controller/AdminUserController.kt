@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.RestController
 class AdminUserController(
     private val invitationService: UserInvitationService,
 ) {
-
     @PostMapping("/invite")
     fun inviteUser(@RequestBody request: InviteUserRequest): ResponseEntity<InviteUserResponse> {
         val consumer = invitationService.inviteUser(

@@ -1,7 +1,7 @@
-import type {UserDetail, UserFormValues} from '../../types/users'
+import type {UserDetail} from '../../types/users'
 import UserFieldsGrid from './UserFieldsGrid'
 
-type UserDetailField = keyof Pick<UserFormValues, 'name' | 'username' | 'email' | 'phoneNumber' | 'role' | 'password'>
+type UserDetailField = 'name' | 'username' | 'email' | 'phoneNumber' | 'role' | 'password'
 
 interface UserDetailPanelProps {
     selectedId: number | null
