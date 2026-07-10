@@ -6,7 +6,7 @@ type Status = 'idle' | 'loading' | 'success' | 'error'
 
 function normalizeError(error: unknown): string {
     const maybeError = error as {response?: {data?: {message?: string}}}
-    return maybeError?.response?.data?.message || 'Enlace invalido o expirado. Solicita uno nuevo.'
+    return maybeError?.response?.data?.message || 'Enlace invalido o expirado. solicita uno nuevo.'
 }
 
 export default function ResetPasswordPage() {
@@ -28,11 +28,11 @@ export default function ResetPasswordPage() {
         setError('')
 
         if (password.length < 8) {
-            setError('La contrasena debe tener al menos 8 caracteres.')
+            setError('La contraseña debe tener al menos 8 caracteres.')
             return
         }
         if (password !== confirm) {
-            setError('Las contrasenas no coinciden.')
+            setError('Las contraseñas no coinciden.')
             return
         }
 
@@ -54,7 +54,7 @@ export default function ResetPasswordPage() {
         try {
             await api.post('/account/forgot-password', {email})
             // Backend always returns 200, message is informative
-            setForgotMessage('Si el correo esta registrado, recibiras un enlace en breve.')
+            setForgotMessage('Si el correo esta registrado, recibirás un enlace en breve.')
             setForgotStatus('success')
         } catch {
             setForgotMessage('No se pudo procesar la solicitud. Intenta de nuevo.')
