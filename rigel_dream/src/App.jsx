@@ -20,7 +20,6 @@ import ActivateAccountPage from "./pages/ActivateAccount.tsx";
 
 function AppLayout({children}) {
     const [collapsed, setCollapsed] = useState(false)
-
     const toggle = () => setCollapsed((c) => !c)
 
     return (
@@ -46,9 +45,7 @@ function RoleRoute({children, allowedRoles}) {
 function AppRoutes() {
     const {user, logout} = useContext(AuthContext)
 
-    if (!user) {
-        return <Navigate to="/login" replace/>
-    }
+    if (!user) return <Navigate to="/login" replace/>
 
     if (user.active === false) {
         logout()
@@ -65,13 +62,9 @@ function AppRoutes() {
                 <Route path="/logs" element={<RoleRoute allowedRoles={['ROOT', 'ADMIN']}><Logs/></RoleRoute>}/>
                 <Route path="/settings" element={<RoleRoute allowedRoles={['ROOT', 'ADMIN']}><Settings/></RoleRoute>}/>
                 <Route path="/users" element={<RoleRoute allowedRoles={['ROOT']}><Users/></RoleRoute>}/>
-                <Route path="/purchases"
-                       element={<RoleRoute allowedRoles={['ROOT', 'ADMIN']}><Purchases/></RoleRoute>}/>
-                <Route path="/inventory"
-                       element={<RoleRoute allowedRoles={['ROOT', 'ADMIN', 'USER']}><Inventory/></RoleRoute>}/>
-                <Route path="/amounts" element={<RoleRoute allowedRoles={['ROOT', 'ADMIN', 'USER']}><Amounts /></RoleRoute>}/>
-                <Route path="/activate" element={<ActivateAccountPage />} />
-                <Route path="/reset-password" element={<ResetPasswordPage />} />
+                <Route path="/purchases" element={<RoleRoute allowedRoles={['ROOT', 'ADMIN']}><Purchases/></RoleRoute>}/>
+                <Route path="/inventory" element={<RoleRoute allowedRoles={['ROOT', 'ADMIN', 'USER']}><Inventory/></RoleRoute>}/>
+                <Route path="/amounts" element={<RoleRoute allowedRoles={['ROOT', 'ADMIN', 'USER']}><Amounts/></RoleRoute>}/>
             </Routes>
         </AppLayout>
     )
@@ -81,7 +74,12 @@ function App() {
     return (
         <BrowserRouter>
             <Routes>
+                {/* Rutas públicas — no requieren sesión */}
                 <Route path="/login" element={<LoginForm/>}/>
+                <Route path="/activate" element={<ActivateAccountPage/>}/>
+                <Route path="/reset-password" element={<ResetPasswordPage/>}/>
+
+                {/* Rutas protegidas */}
                 <Route path="/*" element={<AppRoutes/>}/>
             </Routes>
             <DebugPanel/>
