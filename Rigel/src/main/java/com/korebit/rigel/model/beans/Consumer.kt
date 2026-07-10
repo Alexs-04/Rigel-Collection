@@ -27,8 +27,8 @@ class Consumer (
     @Column(nullable = false, length = 32, unique = true)
     var username: String = "",
 
-    @Column(nullable = false, length = 128)
-    var password: String? = "",
+    @Column(nullable = true, length = 128)
+    var password: String? = null,
 
     @Column(unique = true, length = 128, nullable = false)
     var email: String = "",

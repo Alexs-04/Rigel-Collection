@@ -20,7 +20,7 @@ class UserInvitationService(
     private val passwordEncoder: PasswordEncoder,
     private val emailService: EmailService,
 
-    @param:Value($$"${app.mail.token-expiration-hours}")
+    @param:Value("\${app.mail.token-expiration-hours}")
     private val activationTokenExpirationHours: Long,
 ) {
 

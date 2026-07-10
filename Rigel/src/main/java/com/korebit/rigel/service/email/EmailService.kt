@@ -9,10 +9,10 @@ import org.springframework.stereotype.Service
 class EmailService(
     private val mailSender: JavaMailSender,
 
-    @param:Value($$"${app.base-url}")
+    @param:Value("\${app.base-url}")
     private val baseUrl: String,
 
-    @param:Value($$"${app.mail.from}")
+    @param:Value("\${app.mail.from}")
     private val fromEmail: String,
 ) {
 
