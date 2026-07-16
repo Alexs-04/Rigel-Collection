@@ -15,6 +15,9 @@
       <module name="com.korebit.Rigel" options="-parameters" />
       <module name="com.korebit.Rigel.main" options="-parameters" />
       <module name="com.korebit.Rigel.test" options="-parameters" />
+      <module name="rigel" options="-parameters" />
+      <module name="rigel.main" options="-parameters" />
+      <module name="rigel.test" options="-parameters" />
     </option>
   </component>
 </project>

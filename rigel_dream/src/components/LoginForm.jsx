@@ -95,7 +95,7 @@ export default function LoginForm() {
 
                         <div className="flex justify-between text-xs text-slate-500">
                             <div></div>
-                            <a className="text-brand-600 no-underline hover:text-brand-700" href="#">¿Olvidaste tu
+                            <a className="text-brand-600 no-underline hover:text-brand-700" href="/reset-password">¿Olvidaste tu
                                 contraseña?</a>
                         </div>
                     </form>
