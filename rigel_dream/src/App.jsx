@@ -74,12 +74,12 @@ function App() {
     return (
         <BrowserRouter>
             <Routes>
-                {/* Rutas públicas — no requieren sesión */}
+                {/* Publics routes */}
                 <Route path="/login" element={<LoginForm/>}/>
                 <Route path="/activate" element={<ActivateAccountPage/>}/>
                 <Route path="/reset-password" element={<ResetPasswordPage/>}/>
 
-                {/* Rutas protegidas */}
+                {/* Protected routes */}
                 <Route path="/*" element={<AppRoutes/>}/>
             </Routes>
             <DebugPanel/>
