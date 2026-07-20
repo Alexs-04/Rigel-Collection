@@ -2,9 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/Rigel.iml" filepath="$PROJECT_DIR$/.idea/modules/Rigel.iml" />
-      <module fileurl="file://$PROJECT_DIR$/Rigel-Collection.iml" filepath="$PROJECT_DIR$/Rigel-Collection.iml" />
-      <module fileurl="file://$PROJECT_DIR$/rigel_dream/rigel_dream.iml" filepath="$PROJECT_DIR$/rigel_dream/rigel_dream.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/Rigel-Collection.iml" filepath="$PROJECT_DIR$/.idea/Rigel-Collection.iml" />
     </modules>
   </component>
 </project>
