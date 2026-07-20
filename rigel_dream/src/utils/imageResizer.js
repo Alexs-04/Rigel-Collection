@@ -1,7 +1,7 @@
 /**
- * Redimensiona una imagen a 600x600px manteniendo aspecto
- * @param {File} file - Archivo de imagen
- * @returns {Promise<Blob>} - Blob redimensionado
+ * Resize an image to a maximum size of 600x600 pixels, maintaining the aspect ratio and adding a white background if necessary.
+ * @param {File} file - Image file
+ * @returns {Promise<Blob>} - Resized blob
  */
 export async function resizeImage(file) {
     return new Promise((resolve, reject) => {
@@ -21,7 +21,6 @@ export async function resizeImage(file) {
                 let width = img.width
                 let height = img.height
 
-                // Mantener proporciones
                 if (width > height) {
                     if (width > maxWidth) {
                         height = Math.round((height * maxWidth) / width)
@@ -34,13 +33,11 @@ export async function resizeImage(file) {
                     }
                 }
 
-                // Crear canvas con fondo transparente/blanco
                 canvas.width = targetSize
                 canvas.height = targetSize
                 ctx.fillStyle = '#ffffff'
                 ctx.fillRect(0, 0, targetSize, targetSize)
 
-                // Centrar imagen
                 const x = (targetSize - width) / 2
                 const y = (targetSize - height) / 2
                 ctx.drawImage(img, x, y, width, height)
@@ -64,9 +61,9 @@ export async function resizeImage(file) {
 }
 
 /**
- * Convierte un Blob a Base64
- * @param {Blob} blob - Blob a convertir
- * @returns {Promise<string>} - String en Base64
+ * Converts a Blob to Base64
+ * @param {Blob} blob - Blob to convert
+ * @returns {Promise<string>} - Base64 string
  */
 export function blobToBase64(blob) {
     return new Promise((resolve, reject) => {
@@ -83,9 +80,9 @@ export function blobToBase64(blob) {
 }
 
 /**
- * Valida que el archivo sea una imagen soportada
- * @param {File} file - Archivo a validar
- * @returns {boolean} - True si es imagen válida
+ * Validates that the file is a supported image
+ * @param {File} file - File to validate
+ * @returns {boolean} - True if it's a valid image
  */
 export function isValidImageFile(file) {
     const validMimes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/bmp']
