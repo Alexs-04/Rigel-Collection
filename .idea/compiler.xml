@@ -1,20 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="CompilerConfiguration">
-    <bytecodeTargetLevel>
-      <module name="Rigel" target="21" />
-      <module name="Rigel.main" target="21" />
-      <module name="Rigel.test" target="21" />
-    </bytecodeTargetLevel>
-  </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
-      <module name="Rigel" options="-parameters" />
-      <module name="Rigel.main" options="-parameters" />
-      <module name="Rigel.test" options="-parameters" />
-      <module name="com.korebit.Rigel" options="-parameters" />
-      <module name="com.korebit.Rigel.main" options="-parameters" />
-      <module name="com.korebit.Rigel.test" options="-parameters" />
       <module name="rigel" options="-parameters" />
       <module name="rigel.main" options="-parameters" />
       <module name="rigel.test" options="-parameters" />
