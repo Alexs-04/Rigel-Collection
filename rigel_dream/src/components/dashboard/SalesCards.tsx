@@ -10,7 +10,7 @@ export default function SalesCards({sales}: SalesCardsProps) {
     const cards = [
         {label: 'Ventas del dia', value: formatCurrency(sales?.day)},
         {label: 'Ventas del mes', value: formatCurrency(sales?.month)},
-        {label: 'Ventas del anio', value: formatCurrency(sales?.year)},
+        {label: 'Ventas del año', value: formatCurrency(sales?.year)},
     ]
 
     return (
