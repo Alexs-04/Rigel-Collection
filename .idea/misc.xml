@@ -4,6 +4,7 @@
   <component name="FrameworkDetectionExcludesConfiguration">
     <file type="web" url="file://$PROJECT_DIR$/rigel" />
   </component>
+  <component name="ProjectRootManager" version="2" project-jdk-name="temurin-21" project-jdk-type="JavaSDK" />
   <component name="TimeTrackingManager">
     <option name="totallyTimeSpent" value="76000" />
   </component>
