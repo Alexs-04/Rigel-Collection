@@ -49,4 +49,7 @@ class Product(
 
     @Column(nullable = true)
     var perishable: Boolean = false,
+
+    @Column(nullable = true)
+    var minStock : Int? = null,
 ) : Serializable

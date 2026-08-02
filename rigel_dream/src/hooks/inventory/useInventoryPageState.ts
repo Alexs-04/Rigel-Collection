@@ -39,7 +39,7 @@ export function useInventoryPageState() {
     }
 
     useEffect(() => {
-        loadProducts()
+        loadProducts().then(r => r).catch(e => console.error('Error loading products:', e))
     }, [])
 
     const filteredProducts = useMemo(() => {
@@ -71,6 +71,8 @@ export function useInventoryPageState() {
         return products.reduce((sum, product) => sum + Number(product.price || 0) * Number(product.stock || 0), 0)
     }, [products])
 
+    const allProducts =  products
+
     return {
         products,
         productCount: products.length,
@@ -85,6 +87,7 @@ export function useInventoryPageState() {
         setSearch,
         setSelectedBarcode,
         reload: loadProducts,
+        allProducts
     }
 }
 

@@ -9,11 +9,11 @@ this time with a clear architecture and a long-term roadmap.
 
 ## Modules
 
-| Module          | Tech                        | Status  |
-|-----------------|-----------------------------|---------|
-| `rigel`         | Spring Boot + Kotlin        | Active  |
-| `rigel_dream`   | React + TypeScript          | Active  |
-| `rigel_android` | Jetpack Compose (+ KMP TBD) | Planned |
+| Module          | Tech                        | Status   |
+|-----------------|-----------------------------|----------|
+| `rigel`         | Spring Boot + Kotlin        | Active   |
+| `rigel_dream`   | React + TypeScript          | Active   |
+| `rigel_android` | Jetpack Compose (+ KMP TBD) | Refactor |
 
 ---
 
@@ -156,7 +156,7 @@ image:
 
 - [ ] Low stock alerts
 - [ ] Sales history and reports
-- [ ] Role-based access (admin / employee)
+- [x] Role-based access (admin / employee)
 
 ### v0.3 · Mobile In progress
 

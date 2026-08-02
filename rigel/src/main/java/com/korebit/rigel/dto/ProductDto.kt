@@ -13,6 +13,7 @@ data class ProductDto(
     val imageUrl: String?,
     val cloudinaryPublicId: String?,
     val suppliers: List<ProductSupplierDto> = emptyList(),
+    val minStock : Int? = null,
 ) : Serializable {
     companion object {
         fun toRequest(product: Product): ProductDto {
@@ -41,6 +42,7 @@ data class ProductDto(
                 imageUrl = product.imageUrl,
                 cloudinaryPublicId = product.cloudinaryPublicId,
                 suppliers = suppliers,
+                product.minStock
             )
         }
     }
