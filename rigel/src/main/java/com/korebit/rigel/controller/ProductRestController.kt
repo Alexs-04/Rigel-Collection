@@ -5,11 +5,13 @@ import com.korebit.rigel.dto.request.ProductAddRequest
 import com.korebit.rigel.dto.request.ProductBatchRequest
 import com.korebit.rigel.dto.request.ImageUploadRequest
 import com.korebit.rigel.dto.response.ImageUploadResponse
+import com.korebit.rigel.dto.response.Response
 import com.korebit.rigel.service.ProductService
 import com.korebit.rigel.service.image.CloudinaryImageService
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
@@ -96,5 +98,14 @@ class ProductRestController(
         @PathVariable supplierName: String,
     ): ResponseEntity<Any> {
         return ResponseEntity.ok(productService.removeRelationFromProduct(productName, supplierName))
+    }
+
+    @PatchMapping("/{barcode}/min-stock")
+    fun updateMinStock(
+        @PathVariable barcode: String,
+        @RequestBody body: Map<String, Int?>,
+    ): ResponseEntity<Response> {
+        val result = productService.updateMinStock(barcode, body["minStock"])
+        return ResponseEntity.ok(result)
     }
 }

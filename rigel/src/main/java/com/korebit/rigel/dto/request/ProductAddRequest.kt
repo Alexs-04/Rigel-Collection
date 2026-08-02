@@ -25,4 +25,5 @@ data class ProductAddRequest(
     val supplierName: String? = null,
     val supplierPrice: Double? = null,
     val batch: ProductBatchRequest? = null,
+    val minStock: Int? = null,
 )

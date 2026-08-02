@@ -1,7 +1,6 @@
 import api from './api'
 import type {ProductSummary} from '../types/products'
 
-// TODO: Fix in production
 // @ts-ignore
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8080'
 const ABSOLUTE_URL_PATTERN = /^(https?:)?\/\//i
@@ -12,10 +11,7 @@ export function resolveInventoryImageUrl(imageUrl: string | null | undefined): s
     if (ABSOLUTE_URL_PATTERN.test(normalized) || normalized.startsWith('data:') || normalized.startsWith('blob:')) {
         return normalized
     }
-    if (normalized.startsWith('/')) {
-        return `${API_BASE}${normalized}`
-    }
-    return `${API_BASE}/${normalized}`
+    return normalized.startsWith('/') ? `${API_BASE}${normalized}` : `${API_BASE}/${normalized}`
 }
 
 export async function fetchInventoryProducts(): Promise<ProductSummary[]> {
@@ -31,9 +27,17 @@ export async function fetchInventoryProducts(): Promise<ProductSummary[]> {
             category: String(product.category || 'OTHERS'),
             price: Number(product.price || 0),
             stock: Number(product.stock || 0),
-            imageUrl: resolveInventoryImageUrl((product as ProductSummary).imageUrl),
+            imageUrl: resolveInventoryImageUrl(product.imageUrl),
             suppliers: Array.isArray(product.suppliers) ? product.suppliers : [],
+            minStock: product.minStock != null ? Number(product.minStock) : undefined,
         }))
-        .sort((left, right) => left.name.localeCompare(right.name, 'es', {sensitivity: 'base'}))
+        .sort((a, b) => a.name.localeCompare(b.name, 'es', {sensitivity: 'base'}))
 }
 
+/**
+ * Updates the low-stock threshold for a single product.
+ * Pass null to remove the threshold.
+ */
+export async function updateProductMinStock(barcode: string, minStock: number | null): Promise<void> {
+    await api.patch(`/product/${barcode}/min-stock`, {minStock})
+}

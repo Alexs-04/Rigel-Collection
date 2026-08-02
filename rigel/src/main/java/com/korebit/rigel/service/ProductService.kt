@@ -6,11 +6,11 @@ import com.korebit.rigel.dto.request.AddRelationRequest
 import com.korebit.rigel.dto.request.ProductAddRequest
 import com.korebit.rigel.dto.request.ProductBatchRequest
 import com.korebit.rigel.dto.response.Response
+import com.korebit.rigel.enums.Category
 import com.korebit.rigel.exception.EntityNotFundException
 import com.korebit.rigel.model.beans.Batch
 import com.korebit.rigel.model.beans.Product
 import com.korebit.rigel.model.beans.Supplier
-import com.korebit.rigel.enums.Category
 import com.korebit.rigel.model.extra.ProductSupplier
 import com.korebit.rigel.repository.BatchRepository
 import com.korebit.rigel.repository.ProductRepository
@@ -31,23 +31,23 @@ class ProductService(
 ) {
 
     @Transactional(readOnly = true)
-    /**
-     * Retrieves all products.
-     *
-     * @return list of product DTOs.
-     */
+            /**
+             * Retrieves all products.
+             *
+             * @return list of product DTOs.
+             */
     fun getAllProducts(): List<ProductDto> {
         val products = productRepository.findAll()
         return products.map { product -> ProductDto.toRequest(product) }
     }
 
     @Transactional
-    /**
-     * Creates a product with its initial supplier relation.
-     *
-     * @param productRequest product creation payload.
-     * @return operation response.
-     */
+            /**
+             * Creates a product with its initial supplier relation.
+             *
+             * @param productRequest product creation payload.
+             * @return operation response.
+             */
     fun saveProduct(productRequest: ProductAddRequest): Response {
         val name = productRequest.name.safeTrim()
         val barcode = productRequest.barcode.safeTrim()
@@ -99,12 +99,12 @@ class ProductService(
     }
 
     @Transactional
-    /**
-     * Adds a supplier relation to an existing product.
-     *
-     * @param relation request containing product, supplier, and supply price.
-     * @return operation response.
-     */
+            /**
+             * Adds a supplier relation to an existing product.
+             *
+             * @param relation request containing product, supplier, and supply price.
+             * @return operation response.
+             */
     fun addRelationToProduct(relation: AddRelationRequest): Response {
         val productName = relation.productName.safeTrim()
         val supplierName = relation.supplierName.safeTrim()
@@ -140,13 +140,13 @@ class ProductService(
     }
 
     @Transactional
-    /**
-     * Removes a supplier relation from a product when business constraints allow it.
-     *
-     * @param productName product name.
-     * @param supplierName supplier name to detach.
-     * @return operation response.
-     */
+            /**
+             * Removes a supplier relation from a product when business constraints allow it.
+             *
+             * @param productName product name.
+             * @param supplierName supplier name to detach.
+             * @return operation response.
+             */
     fun removeRelationFromProduct(productName: String, supplierName: String): Response {
         val normalizedProductName = productName.safeTrim()
         val normalizedSupplierName = supplierName.safeTrim()
@@ -187,12 +187,12 @@ class ProductService(
     }
 
     @Transactional(readOnly = true)
-    /**
-     * Finds a product by name.
-     *
-     * @param name product name.
-     * @return product DTO.
-     */
+            /**
+             * Finds a product by name.
+             *
+             * @param name product name.
+             * @return product DTO.
+             */
     fun findProductByName(name: String): ProductDto {
         val product = productRepository
             .findByName(name)
@@ -202,13 +202,13 @@ class ProductService(
     }
 
     @Transactional
-    /**
-     * Updates product core data and its active supplier relation.
-     *
-     * @param currentName current product name.
-     * @param productRequest updated payload.
-     * @return operation response.
-     */
+            /**
+             * Updates product core data and its active supplier relation.
+             *
+             * @param currentName current product name.
+             * @param productRequest updated payload.
+             * @return operation response.
+             */
     fun updateProduct(currentName: String, productRequest: ProductAddRequest): Response {
         val existingProduct = productRepository.findByName(currentName)
             .orElseThrow { EntityNotFundException("Product not found") }
@@ -263,12 +263,12 @@ class ProductService(
     }
 
     @Transactional
-    /**
-     * Deletes a product by name.
-     *
-     * @param name product name.
-     * @return operation response.
-     */
+            /**
+             * Deletes a product by name.
+             *
+             * @param name product name.
+             * @return operation response.
+             */
     fun deleteProduct(name: String): Response {
         val product = productRepository.findByName(name)
             .orElseThrow { EntityNotFundException("Product not found") }
@@ -283,12 +283,12 @@ class ProductService(
     }
 
     @Transactional(readOnly = true)
-    /**
-     * Returns all batches linked to a product across its suppliers.
-     *
-     * @param name product name.
-     * @return batch DTO list sorted by reception date descending.
-     */
+            /**
+             * Returns all batches linked to a product across its suppliers.
+             *
+             * @param name product name.
+             * @return batch DTO list sorted by reception date descending.
+             */
     fun getBatchesByProduct(name: String): List<BatchDto> {
         val product = productRepository.findByName(name)
             .orElseThrow { EntityNotFundException("Product not found") }
@@ -300,13 +300,13 @@ class ProductService(
     }
 
     @Transactional
-    /**
-     * Adds a batch to the first available supplier relation of a product.
-     *
-     * @param name product name.
-     * @param batchRequest batch payload.
-     * @return operation response.
-     */
+            /**
+             * Adds a batch to the first available supplier relation of a product.
+             *
+             * @param name product name.
+             * @param batchRequest batch payload.
+             * @return operation response.
+             */
     fun addBatchToProduct(name: String, batchRequest: ProductBatchRequest): Response {
         val product = productRepository.findByName(name)
             .orElseThrow { EntityNotFundException("Product not found") }
@@ -323,6 +323,21 @@ class ProductService(
             status = 200,
             message = "Batch ${batchRequest.code.safeTrim()} added to product ${product.name} successfully"
         )
+    }
+
+    /**
+     * Updates the minimum stock for a product.
+     * @param barcode product barcode.
+     * @param minStock new minimum stock value.
+     * @return operation response.
+     */
+    @Transactional
+    fun updateMinStock(barcode: String, minStock: Int?): Response {
+        val product = productRepository.findByBarcode(barcode)
+            .orElseThrow { EntityNotFundException("Product not found") }
+        product.minStock = minStock
+        productRepository.save(product)
+        return Response(success = true, status = 200, message = "Umbral actualizado")
     }
 
     private fun updateSupplierRelation(product: Product, supplier: Supplier, supplierPrice: Double): ProductSupplier {

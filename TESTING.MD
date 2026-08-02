@@ -34,7 +34,7 @@ The tests are located in: `src/test/java/com/korebit/rigel/service/`
     - Login success
     - Validation of credentials
     - Inactive consumer login
-    - Revoque of tokens
+    - Revocation of tokens
     - Management of token expiration
 
 4. **SupplierServiceTest.java** (11 tests)
@@ -86,7 +86,7 @@ Features:
 ### Run all tests
 
 ```bash
-cd Rigel
+cd rigel
 ./gradlew test
 ```
 

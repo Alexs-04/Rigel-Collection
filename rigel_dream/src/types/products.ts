@@ -1,4 +1,6 @@
-export interface ProductBatch {
+export type ProductCategory = string
+
+export interface BatchSummary {
     id: number
     code: string
     receptionDate: string
@@ -7,13 +9,13 @@ export interface ProductBatch {
     remainingAmount: number
     available: boolean
     price: number
-    notes: string
+    notes?: string
 }
 
-export interface ProductSupplier {
+export interface SupplierSummary {
     name: string
     supplyPrice: number
-    batches: ProductBatch[]
+    batches: BatchSummary[]
 }
 
 export interface ProductSummary {
@@ -23,7 +25,19 @@ export interface ProductSummary {
     category: string
     price: number
     stock: number
-    imageUrl: string
-    suppliers: ProductSupplier[]
+    imageUrl?: string
+    cloudinaryPublicId?: string
+    suppliers: SupplierSummary[]
+    perishable?: boolean
+    minStock?: number        // null = sin umbral configurado
 }
 
+/** Derived: true when minStock is set and current stock is at or below it */
+export function isLowStock(product: ProductSummary): boolean {
+    return product.minStock != null && product.stock <= product.minStock
+}
+
+/** Derived: true when minStock is set and stock is at zero */
+export function isOutOfStock(product: ProductSummary): boolean {
+    return product.stock <= 0
+}
