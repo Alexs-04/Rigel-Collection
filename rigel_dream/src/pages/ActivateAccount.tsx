@@ -24,15 +24,15 @@ export default function ActivateAccountPage() {
         setError('')
 
         if (password.length < 8) {
-            setError('La contrasena debe tener al menos 8 caracteres.')
+            setError('La contraseña debe tener al menos 8 caracteres.')
             return
         }
         if (password !== confirm) {
-            setError('Las contrasenas no coinciden.')
+            setError('Las contraseñas no coinciden.')
             return
         }
         if (!token) {
-            setError('Token de activacion no encontrado en el enlace.')
+            setError('Token de activación no encontrado en el enlace.')
             return
         }
 
@@ -50,7 +50,7 @@ export default function ActivateAccountPage() {
         return (
             <div className="flex min-h-screen items-center justify-center bg-slate-50 p-4">
                 <div className="ui-card w-full max-w-md p-8 text-center">
-                    <div className="mb-4 text-4xl">✅</div>
+                    <div className="mb-4 text-4xl"></div>
                     <h1 className="ui-title mb-2 text-xl font-semibold">Cuenta activada</h1>
                     <p className="ui-muted mb-6 text-sm">Tu cuenta ha sido activada correctamente. Ya puedes iniciar sesion.</p>
                     <button className="ui-btn-primary w-full" onClick={() => navigate('/login')}>
