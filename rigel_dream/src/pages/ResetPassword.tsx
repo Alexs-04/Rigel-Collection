@@ -67,7 +67,7 @@ export default function ResetPasswordPage() {
         return (
             <div className="flex min-h-screen items-center justify-center bg-slate-50 p-4">
                 <div className="ui-card w-full max-w-md p-8 text-center">
-                    <div className="mb-4 text-4xl">✅</div>
+                    <div className="mb-4 text-4xl"></div>
                     <h1 className="ui-title mb-2 text-xl font-semibold">Contrasena actualizada</h1>
                     <p className="ui-muted mb-6 text-sm">Tu contrasena ha sido cambiada correctamente.</p>
                     <button className="ui-btn-primary w-full" onClick={() => navigate('/login')}>
@@ -110,7 +110,7 @@ export default function ResetPasswordPage() {
                         {error && <p className="text-sm text-red-600">{error}</p>}
 
                         <button className="ui-btn-primary" type="submit" disabled={resetStatus === 'loading'}>
-                            {resetStatus === 'loading' ? 'Guardando...' : 'Cambiar contrasena'}
+                            {resetStatus === 'loading' ? 'Guardando...' : 'Cambiar contraseña'}
                         </button>
                     </form>
                 </div>
@@ -122,9 +122,10 @@ export default function ResetPasswordPage() {
     return (
         <div className="flex min-h-screen items-center justify-center bg-slate-50 p-4">
             <div className="ui-card w-full max-w-md p-8">
-                <h1 className="ui-title mb-1 mt-0 text-xl font-semibold">Recuperar contrasena</h1>
+                <div className="mb-4 text-4xl">❓</div>
+                <h1 className="ui-title mb-1 mt-0 text-xl font-semibold">Recuperar contraseña</h1>
                 <p className="ui-muted mb-6 mt-0 text-sm">
-                    Ingresa tu correo y te enviaremos un enlace para restablecer tu contrasena.
+                    Ingresa tu correo y te enviaremos un enlace para restablecer tu contraseña.
                 </p>
 
                 <form onSubmit={handleForgot} className="grid gap-3">

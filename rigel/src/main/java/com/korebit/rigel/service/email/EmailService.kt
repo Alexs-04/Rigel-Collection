@@ -16,14 +16,15 @@ class EmailService(
     private val fromEmail: String,
 ) {
 
+    private val normalizedBaseUrl = baseUrl.trimEnd('/')
     /**
      * Sends an account activation email with a one-time link.
      */
     fun sendActivationEmail(to: String, recipientName: String, token: String) {
-        val link = "$baseUrl/activate?token=$token"
+        val link = "$normalizedBaseUrl/activate?token=$token"
         send(
             to = to,
-            subject = "Activa tu cuenta en Rigel Collection",
+            subject = "Activa tu cuenta en Rigel",
             body = buildActivationBody(recipientName, link),
         )
     }
@@ -32,10 +33,10 @@ class EmailService(
      * Sends a password reset email with a one-time link.
      */
     fun sendPasswordResetEmail(to: String, recipientName: String, token: String) {
-        val link = "$baseUrl/reset-password?token=$token"
+        val link = "$normalizedBaseUrl/reset-password?token=$token"
         send(
             to = to,
-            subject = "Restablecer contraseña — Rigel Collection",
+            subject = "Restablecer contraseña — Rigel",
             body = buildPasswordResetBody(recipientName, link),
         )
     }
@@ -58,7 +59,7 @@ class EmailService(
         <head><meta charset="UTF-8"></head>
         <body style="font-family:sans-serif;background:#f4f4f5;margin:0;padding:32px;">
           <div style="max-width:520px;margin:auto;background:#fff;border-radius:12px;padding:40px;box-shadow:0 2px 8px rgba(0,0,0,.08);">
-            <h2 style="margin-top:0;color:#1e293b;">Bienvenido a Rigel Collection</h2>
+            <h2 style="margin-top:0;color:#1e293b;">Bienvenido a Rigel</h2>
             <p style="color:#475569;">Hola <strong>$name</strong>,</p>
             <p style="color:#475569;">El administrador te ha dado acceso al sistema. Haz clic en el botón de abajo para activar tu cuenta y establecer tu contraseña.</p>
             <div style="text-align:center;margin:32px 0;">
