@@ -22,9 +22,7 @@ data class TicketDto(
                 ticket.description,
                 ticket.dateAndTime,
                 ticket.totalAmount.toDouble(),
-                ticket.ticketDetails.map { x ->
-                    TicketDetailDto(x.product?.barcode ?: "", x.quantity, x.price, x.discount, x.batch?.code, x.product?.name ?: "")
-                },
+                ticket.ticketDetails.map(TicketDetailDto::fromEntity),
                 ticket.payment
             )
         }

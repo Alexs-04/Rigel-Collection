@@ -17,19 +17,7 @@ data class ProductDto(
 ) : Serializable {
     companion object {
         fun fromEntity(product: Product): ProductDto {
-            val suppliers = product.suppliers.mapNotNull { relation ->
-                val supplier = relation.supplier ?: return@mapNotNull null
-                val batches = relation.batches
-                    .sortedByDescending { it.receptionDate }
-                    .map(ProductBatchDto::fromEntity)
-
-                ProductSupplierDto(
-                    name = supplier.name,
-                    supplyPrice = relation.supplyPrice.toDouble(),
-                    batches = batches,
-                )
-            }
-
+            val suppliers = product.suppliers.mapNotNull(ProductSupplierDto::fromEntity)
             return ProductDto(
                 name = product.name,
                 description = product.description,

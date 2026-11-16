@@ -1,7 +1,7 @@
 package com.korebit.rigel.service
 
 import com.korebit.rigel.dto.SystemMovementDto
-import com.korebit.rigel.dto.SystemMovementPageDto
+import com.korebit.rigel.dto.PageDto
 import com.korebit.rigel.exception.EntityNotFundException
 import com.korebit.rigel.model.beans.SystemMovement
 import com.korebit.rigel.repository.SystemMovementRepository
@@ -79,7 +79,7 @@ class SystemMovementService(
         importantOnly: Boolean,
         page: Int,
         size: Int,
-    ): SystemMovementPageDto {
+    ): PageDto<SystemMovementDto> {
         val safePage = page.coerceAtLeast(0)
         val safeSize = size.coerceIn(1, 200)
         val pageable = PageRequest.of(safePage, safeSize, Sort.by(Sort.Direction.DESC, "occurredAt"))
@@ -130,13 +130,7 @@ class SystemMovementService(
 
         val pageResult = systemMovementRepository.findAll(spec, pageable)
 
-        return SystemMovementPageDto(
-            items = pageResult.content.map(SystemMovementDto::fromEntity),
-            page = pageResult.number,
-            size = pageResult.size,
-            totalElements = pageResult.totalElements,
-            totalPages = pageResult.totalPages,
-        )
+        return PageDto.from(pageResult, SystemMovementDto::fromEntity)
     }
 
     @Transactional(readOnly = true)

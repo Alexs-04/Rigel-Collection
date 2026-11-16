@@ -95,29 +95,53 @@ export function useProductsPageState({isAdmin}) {
         return suppliers.filter((supplier) => !assigned.has(supplier?.name))
     }, [detail, suppliers])
 
+    // Reset the relation form whenever its defaults change (panel toggled, detail or suppliers reloaded).
+    const defaultRelationSupplier = availableSuppliersForDetail[0]?.name || ''
+    const defaultRelationPrice = detail?.price ?? ''
+    const relationDefaultsKey = managingSuppliers ? `${defaultRelationSupplier}|${defaultRelationPrice}` : null
+    const [appliedRelationDefaultsKey, setAppliedRelationDefaultsKey] = useState(null)
+    if (appliedRelationDefaultsKey !== relationDefaultsKey) {
+        setAppliedRelationDefaultsKey(relationDefaultsKey)
+        setRelationForm(
+            managingSuppliers
+                ? {supplierName: defaultRelationSupplier, supplierPrice: defaultRelationPrice}
+                : initialRelationForm
+        )
+    }
+
+    const requestPageData = async () => {
+        const [productsRes, suppliersRes] = await Promise.all([
+            api.get('/product/all'),
+            api.get('/suppliers/all').catch(() => ({data: []})),
+        ])
+        return {
+            loadedProducts: Array.isArray(productsRes.data) ? productsRes.data : [],
+            loadedSuppliers: Array.isArray(suppliersRes.data) ? suppliersRes.data : [],
+        }
+    }
+
+    const applyPageData = ({loadedProducts, loadedSuppliers}) => {
+        setProducts(loadedProducts)
+        setSuppliers(loadedSuppliers)
+        setForm((prev) => {
+            if (prev.supplierName) return prev
+            const firstSupplier = loadedSuppliers[0]?.name || ''
+            return {...prev, supplierName: firstSupplier}
+        })
+    }
+
+    const applyPageDataError = (error) => {
+        setListError(normalizeError(error, 'No se pudo cargar la informacion de productos.'))
+    }
+
     const loadPageData = async () => {
         setLoadingList(true)
         setListError('')
 
         try {
-            const [productsRes, suppliersRes] = await Promise.all([
-                api.get('/product/all'),
-                api.get('/suppliers/all').catch(() => ({data: []})),
-            ])
-
-            const loadedProducts = Array.isArray(productsRes.data) ? productsRes.data : []
-            const loadedSuppliers = Array.isArray(suppliersRes.data) ? suppliersRes.data : []
-
-            setProducts(loadedProducts)
-            setSuppliers(loadedSuppliers)
-
-            setForm((prev) => {
-                if (prev.supplierName) return prev
-                const firstSupplier = loadedSuppliers[0]?.name || ''
-                return {...prev, supplierName: firstSupplier}
-            })
+            applyPageData(await requestPageData())
         } catch (error) {
-            setListError(normalizeError(error, 'No se pudo cargar la informacion de productos.'))
+            applyPageDataError(error)
         } finally {
             setLoadingList(false)
         }
@@ -317,22 +341,12 @@ export function useProductsPageState({isAdmin}) {
     }
 
     useEffect(() => {
-        loadPageData()
+        // Initial load: the list already starts in the loading state.
+        requestPageData()
+            .then(applyPageData)
+            .catch(applyPageDataError)
+            .finally(() => setLoadingList(false))
     }, [])
-
-    useEffect(() => {
-        if (!managingSuppliers) {
-            setRelationForm(initialRelationForm)
-            return
-        }
-
-        const defaultSupplier = availableSuppliersForDetail[0]?.name || ''
-        const defaultPrice = detail?.price ?? ''
-        setRelationForm({
-            supplierName: defaultSupplier,
-            supplierPrice: defaultPrice,
-        })
-    }, [managingSuppliers, availableSuppliersForDetail, detail?.price])
 
     useEffect(() => {
         return () => {

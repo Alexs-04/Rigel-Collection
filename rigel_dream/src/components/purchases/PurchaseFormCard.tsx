@@ -1,11 +1,11 @@
 import type {PurchaseFormValues} from '../../types/purchases'
-import type {ProductBatch, ProductSupplier, ProductSummary} from '../../types/products'
+import type {BatchSummary, SupplierSummary, ProductSummary} from '../../types/products'
 
 interface PurchaseFormCardProps {
     form: PurchaseFormValues
     products: ProductSummary[]
-    suppliers: ProductSupplier[]
-    batches: ProductBatch[]
+    suppliers: SupplierSummary[]
+    batches: BatchSummary[]
     saving: boolean
     formMessage: string
     onChange: (key: keyof PurchaseFormValues, value: string | boolean) => void

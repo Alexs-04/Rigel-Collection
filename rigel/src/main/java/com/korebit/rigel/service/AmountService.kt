@@ -3,8 +3,7 @@ package com.korebit.rigel.service
 import com.korebit.rigel.dto.AmountDto
 import com.korebit.rigel.dto.ContainerTypeOptionDto
 import com.korebit.rigel.dto.request.AmountBuyoutRequest
-import com.korebit.rigel.dto.request.AmountCreateRequest
-import com.korebit.rigel.dto.request.AmountUpdateRequest
+import com.korebit.rigel.dto.request.AmountUpsertRequest
 import com.korebit.rigel.enums.ContainerType
 import com.korebit.rigel.exception.EntityNotFundException
 import com.korebit.rigel.model.beans.Amount
@@ -44,14 +43,8 @@ class AmountService(
      * @param actorEmail email (security principal name) of the user performing the action.
      */
     @Transactional
-    fun createAmount(request: AmountCreateRequest, actorEmail: String): AmountDto {
-        validateRequest(
-            customerName = request.customerName,
-            quantity = request.quantity,
-            saleUnitPrice = request.saleUnitPrice,
-            buyoutUnitPrice = request.buyoutUnitPrice,
-            expirationDate = request.expirationDate,
-        )
+    fun createAmount(request: AmountUpsertRequest, actorEmail: String): AmountDto {
+        validateRequest(request)
 
         val saleUnitPrice = request.saleUnitPrice.toBigDecimal()
         val amount = Amount(
@@ -74,14 +67,8 @@ class AmountService(
 
     /** Updates a voucher while it is still open (not returned nor bought out). */
     @Transactional
-    fun updateAmount(folio: Long, request: AmountUpdateRequest): AmountDto {
-        validateRequest(
-            customerName = request.customerName,
-            quantity = request.quantity,
-            saleUnitPrice = request.saleUnitPrice,
-            buyoutUnitPrice = request.buyoutUnitPrice,
-            expirationDate = request.expirationDate,
-        )
+    fun updateAmount(folio: Long, request: AmountUpsertRequest): AmountDto {
+        validateRequest(request)
 
         val amount = findAmountByFolio(folio)
         if (amount.returned || amount.boughtOutAt != null) {
@@ -159,20 +146,14 @@ class AmountService(
             ?: throw EntityNotFundException("Usuario $email no encontrado")
     }
 
-    private fun validateRequest(
-        customerName: String,
-        quantity: Int,
-        saleUnitPrice: Double,
-        buyoutUnitPrice: Double?,
-        expirationDate: LocalDateTime,
-    ) {
-        if (customerName.isBlank()) throw IllegalArgumentException("El nombre del cliente es obligatorio")
-        if (quantity <= 0) throw IllegalArgumentException("La cantidad debe ser mayor a 0")
-        if (saleUnitPrice < 0) throw IllegalArgumentException("El precio de venta no puede ser negativo")
-        if (buyoutUnitPrice != null && buyoutUnitPrice < 0) {
+    private fun validateRequest(request: AmountUpsertRequest) {
+        if (request.customerName.isBlank()) throw IllegalArgumentException("El nombre del cliente es obligatorio")
+        if (request.quantity <= 0) throw IllegalArgumentException("La cantidad debe ser mayor a 0")
+        if (request.saleUnitPrice < 0) throw IllegalArgumentException("El precio de venta no puede ser negativo")
+        if (request.buyoutUnitPrice != null && request.buyoutUnitPrice < 0) {
             throw IllegalArgumentException("El precio de compra no puede ser negativo")
         }
-        if (!expirationDate.isAfter(LocalDateTime.now().minusMinutes(1))) {
+        if (!request.expirationDate.isAfter(LocalDateTime.now().minusMinutes(1))) {
             throw IllegalArgumentException("La fecha limite debe ser posterior a la fecha actual")
         }
     }

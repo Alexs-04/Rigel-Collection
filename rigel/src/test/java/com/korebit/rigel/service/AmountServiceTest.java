@@ -2,8 +2,7 @@ package com.korebit.rigel.service;
 
 import com.korebit.rigel.dto.AmountDto;
 import com.korebit.rigel.dto.request.AmountBuyoutRequest;
-import com.korebit.rigel.dto.request.AmountCreateRequest;
-import com.korebit.rigel.dto.request.AmountUpdateRequest;
+import com.korebit.rigel.dto.request.AmountUpsertRequest;
 import com.korebit.rigel.enums.AmountStatus;
 import com.korebit.rigel.enums.ContainerType;
 import com.korebit.rigel.exception.EntityNotFundException;
@@ -50,7 +49,7 @@ class AmountServiceTest {
 
     private Amount testAmount;
     private Consumer testConsumer;
-    private AmountCreateRequest createRequest;
+    private AmountUpsertRequest createRequest;
 
     @BeforeEach
     void setUp() {
@@ -74,7 +73,7 @@ class AmountServiceTest {
         testAmount.setConsumer(testConsumer);
         testAmount.setNotes("Test notes");
 
-        createRequest = new AmountCreateRequest(
+        createRequest = new AmountUpsertRequest(
                 "Test Description",
                 ContainerType.BEER_CONTAINER,
                 "Test Customer",
@@ -135,7 +134,7 @@ class AmountServiceTest {
     @Test
     @DisplayName("Should throw exception when creating amount with empty customer name")
     void testCreateAmountEmptyCustomerName() {
-        AmountCreateRequest invalidRequest = new AmountCreateRequest(
+        AmountUpsertRequest invalidRequest = new AmountUpsertRequest(
                 "Test Description",
                 ContainerType.BEER_CONTAINER,
                 "   ",
@@ -154,7 +153,7 @@ class AmountServiceTest {
     @Test
     @DisplayName("Should throw exception when creating amount with invalid quantity")
     void testCreateAmountInvalidQuantity() {
-        AmountCreateRequest invalidRequest = new AmountCreateRequest(
+        AmountUpsertRequest invalidRequest = new AmountUpsertRequest(
                 "Test Description",
                 ContainerType.BEER_CONTAINER,
                 "Test Customer",
@@ -183,7 +182,7 @@ class AmountServiceTest {
     @Test
     @DisplayName("Should update an amount")
     void testUpdateAmount() {
-        AmountUpdateRequest updateRequest = new AmountUpdateRequest(
+        AmountUpsertRequest updateRequest = new AmountUpsertRequest(
                 "Updated Description",
                 ContainerType.LARGE_GLASS_CONTAINER,
                 "Updated Customer",
@@ -209,7 +208,7 @@ class AmountServiceTest {
     @DisplayName("Should throw exception when updating closed amount")
     void testUpdateClosedAmount() {
         testAmount.setReturned(true);
-        AmountUpdateRequest updateRequest = new AmountUpdateRequest(
+        AmountUpsertRequest updateRequest = new AmountUpsertRequest(
                 "Updated", ContainerType.BEER_CONTAINER, "Customer", 5, 10.0, 5.0,
                 LocalDateTime.now().plusDays(7), "notes"
         );

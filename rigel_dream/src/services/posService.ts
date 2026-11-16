@@ -1,8 +1,8 @@
 import api from './api'
-import type {ProductBatch, ProductSummary} from '../types/products'
+import type {BatchSummary, ProductSummary} from '../types/products'
 import type {PosCatalogItem, PosTicket, PosTicketCreatePayload} from '../types/pos'
 
-function isBatchSellable(batch: ProductBatch, todayIso: string): boolean {
+function isBatchSellable(batch: BatchSummary, todayIso: string): boolean {
     return batch.available && batch.remainingAmount > 0 && String(batch.expirationDate || '') >= todayIso
 }
 

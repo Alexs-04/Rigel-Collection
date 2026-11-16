@@ -3,8 +3,7 @@ package com.korebit.rigel.controller
 import com.korebit.rigel.dto.AmountDto
 import com.korebit.rigel.dto.ContainerTypeOptionDto
 import com.korebit.rigel.dto.request.AmountBuyoutRequest
-import com.korebit.rigel.dto.request.AmountCreateRequest
-import com.korebit.rigel.dto.request.AmountUpdateRequest
+import com.korebit.rigel.dto.request.AmountUpsertRequest
 import com.korebit.rigel.service.AmountService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -38,13 +37,13 @@ class AmountRestController(
 
     @PostMapping("/add")
     fun createAmount(
-        @RequestBody request: AmountCreateRequest,
+        @RequestBody request: AmountUpsertRequest,
         authentication: Authentication,
     ): ResponseEntity<AmountDto> =
         ResponseEntity.status(HttpStatus.CREATED).body(amountService.createAmount(request, authentication.name))
 
     @PutMapping("/{folio}")
-    fun updateAmount(@PathVariable folio: Long, @RequestBody request: AmountUpdateRequest): ResponseEntity<AmountDto> =
+    fun updateAmount(@PathVariable folio: Long, @RequestBody request: AmountUpsertRequest): ResponseEntity<AmountDto> =
         ResponseEntity.ok(amountService.updateAmount(folio, request))
 
     @PatchMapping("/{folio}/return")

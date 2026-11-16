@@ -1,7 +1,7 @@
 package com.korebit.rigel.controller
 
 import com.korebit.rigel.dto.SystemMovementDto
-import com.korebit.rigel.dto.SystemMovementPageDto
+import com.korebit.rigel.dto.PageDto
 import com.korebit.rigel.service.SystemMovementService
 import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.http.ResponseEntity
@@ -32,7 +32,7 @@ class SystemMovementRestController(
         @RequestParam(required = false, defaultValue = "true") importantOnly: Boolean,
         @RequestParam(required = false, defaultValue = "0") page: Int,
         @RequestParam(required = false, defaultValue = "20") size: Int,
-    ): ResponseEntity<SystemMovementPageDto> {
+    ): ResponseEntity<PageDto<SystemMovementDto>> {
         return ResponseEntity.ok(systemMovementService.getMovements(search, method, status, fromDate, toDate, importantOnly, page, size))
     }
 

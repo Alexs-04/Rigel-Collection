@@ -1,4 +1,4 @@
-import {useCallback, useEffect, useState} from 'react'
+import {useEffect, useState} from 'react'
 import {fetchSystemMovementById, fetchSystemMovements} from '../services/logsService'
 import Button from '../components/ui/Button'
 import Card from '../components/ui/Card'
@@ -42,28 +42,6 @@ export default function Logs() {
     const [detailError, setDetailError] = useState('')
     const [refreshKey, setRefreshKey] = useState(0)
 
-    const loadMovements = useCallback(async () => {
-        setLoadingList(true)
-        setListError('')
-        try {
-            const data = await fetchSystemMovements({
-                search: filters.search || undefined,
-                method: filters.method || undefined,
-                status: filters.status ? Number(filters.status) : undefined,
-                fromDate: filters.fromDate || undefined,
-                toDate: filters.toDate || undefined,
-                importantOnly: filters.importantOnly,
-                page: pageData.page,
-                size: pageData.size,
-            })
-            setPageData(data)
-        } catch (error) {
-            setListError(normalizeError(error))
-        } finally {
-            setLoadingList(false)
-        }
-    }, [filters, pageData.page, pageData.size])
-
     const loadDetail = async (id) => {
         setLoadingDetail(true)
         setDetailError('')
@@ -78,10 +56,40 @@ export default function Logs() {
     }
 
     useEffect(() => {
-        void loadMovements()
-    }, [loadMovements, refreshKey])
+        let active = true
+        fetchSystemMovements({
+            search: filters.search || undefined,
+            method: filters.method || undefined,
+            status: filters.status ? Number(filters.status) : undefined,
+            fromDate: filters.fromDate || undefined,
+            toDate: filters.toDate || undefined,
+            importantOnly: filters.importantOnly,
+            page: pageData.page,
+            size: pageData.size,
+        })
+            .then((data) => {
+                if (!active) return
+                setPageData(data)
+                setListError('')
+            })
+            .catch((error) => {
+                if (active) setListError(normalizeError(error))
+            })
+            .finally(() => {
+                if (active) setLoadingList(false)
+            })
+        return () => {
+            active = false
+        }
+    }, [filters, pageData.page, pageData.size, refreshKey])
+
+    const goToPage = (page) => {
+        setLoadingList(true)
+        setPageData((prev) => ({...prev, page}))
+    }
 
     const onSearch = () => {
+        setLoadingList(true)
         setPageData((prev) => ({...prev, page: 0}))
         setRefreshKey((prev) => prev + 1)
     }
@@ -90,6 +98,7 @@ export default function Logs() {
         setFilters({search: '', method: '', status: '', fromDate: '', toDate: '', importantOnly: true})
         setSelectedId(null)
         setDetail(null)
+        setLoadingList(true)
         setPageData((prev) => ({...prev, page: 0}))
         setRefreshKey((prev) => prev + 1)
     }
@@ -217,7 +226,7 @@ export default function Logs() {
                             type="button"
                             variant="ghost"
                             disabled={loadingList || pageData.page <= 0}
-                            onClick={() => setPageData((prev) => ({...prev, page: prev.page - 1}))}
+                            onClick={() => goToPage(pageData.page - 1)}
                         >
                             Anterior
                         </Button>
@@ -228,7 +237,7 @@ export default function Logs() {
                             type="button"
                             variant="ghost"
                             disabled={loadingList || pageData.page + 1 >= pageData.totalPages}
-                            onClick={() => setPageData((prev) => ({...prev, page: prev.page + 1}))}
+                            onClick={() => goToPage(pageData.page + 1)}
                         >
                             Siguiente
                         </Button>
