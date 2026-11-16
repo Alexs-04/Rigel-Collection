@@ -2,6 +2,7 @@ import PurchaseDetailPanel from '../components/purchases/PurchaseDetailPanel'
 import PurchaseFormCard from '../components/purchases/PurchaseFormCard'
 import PurchasesListPanel from '../components/purchases/PurchasesListPanel'
 import {usePurchasesPageState} from '../hooks/purchases/usePurchasesPageState'
+import PageHeader from '../components/ui/PageHeader'
 
 export default function Purchases() {
     const {
@@ -25,12 +26,10 @@ export default function Purchases() {
 
     return (
         <div className="grid gap-4">
-            <section className="ui-card p-5">
-                <h1 className="ui-title mb-1.5 mt-0 text-2xl font-semibold">Compras</h1>
-                <p className="ui-muted mt-0 text-sm">
-                    Registra entradas al inventario por producto-proveedor y lote.
-                </p>
-            </section>
+            <PageHeader
+                title="Compras"
+                description="Registra entradas al inventario por producto-proveedor y lote."
+            />
 
             <PurchaseFormCard
                 form={form}

@@ -9,6 +9,7 @@ import Card from '../components/ui/Card'
 import {Input} from '../components/ui/Input'
 import {fetchDashboardSnapshot} from '../services/dashboardService'
 import type {DashboardSnapshot} from '../types/dashboard'
+import PageHeader from '../components/ui/PageHeader'
 
 function toInputDate(value: Date | string | null | undefined): string {
     if (!value) return ''
@@ -47,12 +48,10 @@ export default function Dashboard() {
 
     return (
         <div className="grid gap-4">
-            <Card className="p-5">
-                <h1 className="mb-1 text-2xl font-bold text-slate-900">Dashboard</h1>
-                <p className="m-0 text-sm text-slate-500">
-                    Visualiza el estado general del negocio segun la informacion consolidada del backend.
-                </p>
-            </Card>
+            <PageHeader
+                title="Dashboard"
+                description="Visualiza el estado general del negocio segun la informacion consolidada del backend."
+            />
 
             <Card className="p-4">
                 <div className="flex flex-wrap items-end gap-3">

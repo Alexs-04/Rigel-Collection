@@ -4,6 +4,7 @@ import UserDetailPanel from '../components/users/UserDetailPanel'
 import UserFormCard from '../components/users/UserFormCard'
 import UsersListPanel from '../components/users/UsersListPanel'
 import {useUsersPageState} from '../hooks/users/useUsersPageState'
+import PageHeader from '../components/ui/PageHeader'
 
 export default function Users() {
     const auth = useContext(AuthContext)
@@ -39,12 +40,10 @@ export default function Users() {
 
     return (
         <div className="grid gap-4">
-            <section className="ui-card p-5">
-                <h1 className="ui-title mb-1.5 mt-0 text-2xl font-semibold">Usuarios</h1>
-                <p className="ui-muted mt-0 text-sm">
-                    Gestiona cuentas registradas. Solo rol ROOT puede acceder y administrar usuarios.
-                </p>
-            </section>
+            <PageHeader
+                title="Usuarios"
+                description="Gestiona cuentas registradas. Solo rol ROOT puede acceder y administrar usuarios."
+            />
 
             {!isRoot && (
                 <section className="ui-card p-4">

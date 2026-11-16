@@ -1,3 +1,5 @@
+import PageHeader from '../ui/PageHeader'
+
 interface InventoryHeaderProps {
     productCount: number
     totalStock: number
@@ -13,28 +15,25 @@ function formatCurrency(amount: number): string {
 }
 
 export default function InventoryHeader({productCount, totalStock, totalValue}: InventoryHeaderProps) {
-    return (
-        <section className="ui-card p-5">
-            <h1 className="ui-title mb-1.5 mt-0 text-2xl font-semibold">Inventario</h1>
-            <p className="ui-muted mt-0 text-sm">
-                Consulta los productos registrados, revisa su imagen asociada a Cloudinary y analiza stock, precio e información detallada.
-            </p>
+    const figures = [
+        {label: 'Productos', value: productCount},
+        {label: 'Stock total', value: totalStock},
+        {label: 'Valor estimado', value: formatCurrency(totalValue)},
+    ]
 
-            <div className="mt-4 grid gap-3 sm:grid-cols-3">
-                <div className="rounded-xl border border-slate-200 p-3 dark:border-slate-700">
-                    <div className="text-xs uppercase tracking-wide text-slate-500">Productos</div>
-                    <div className="mt-1 text-lg font-semibold text-slate-900 dark:text-slate-100">{productCount}</div>
-                </div>
-                <div className="rounded-xl border border-slate-200 p-3 dark:border-slate-700">
-                    <div className="text-xs uppercase tracking-wide text-slate-500">Stock total</div>
-                    <div className="mt-1 text-lg font-semibold text-slate-900 dark:text-slate-100">{totalStock}</div>
-                </div>
-                <div className="rounded-xl border border-slate-200 p-3 dark:border-slate-700">
-                    <div className="text-xs uppercase tracking-wide text-slate-500">Valor estimado</div>
-                    <div className="mt-1 text-lg font-semibold text-slate-900 dark:text-slate-100">{formatCurrency(totalValue)}</div>
-                </div>
+    return (
+        <PageHeader
+            title="Inventario"
+            description="Consulta los productos registrados, revisa su imagen asociada a Cloudinary y analiza stock, precio e información detallada."
+        >
+            <div className="mt-6 grid gap-x-10 gap-y-4 sm:grid-cols-3">
+                {figures.map((item) => (
+                    <div key={item.label} className="border-l border-app-text/25 pl-4">
+                        <p className="ui-figure-label">{item.label}</p>
+                        <p className="ui-figure-value">{item.value}</p>
+                    </div>
+                ))}
             </div>
-        </section>
+        </PageHeader>
     )
 }
-

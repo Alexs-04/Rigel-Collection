@@ -57,20 +57,20 @@ export default function PosCheckoutCard({
                 </select>
             </label>
 
-            <div className="grid gap-1.5 rounded-lg border border-slate-200 p-3">
+            <div className="ui-receipt">
                 <div className="flex justify-between">
-                    <span className="text-sm text-slate-500">Piezas</span>
+                    <span className="text-app-muted">Piezas</span>
                     <strong>{totals.items}</strong>
                 </div>
                 <div className="flex justify-between">
-                    <span className="text-sm text-slate-500">Subtotal</span>
+                    <span className="text-app-muted">Subtotal</span>
                     <strong>{formatPriceMxn(totals.subtotal)}</strong>
                 </div>
                 <div className="flex justify-between">
-                    <span className="text-sm text-slate-500">Descuento</span>
+                    <span className="text-app-muted">Descuento</span>
                     <strong>{formatPriceMxn(totals.discount)}</strong>
                 </div>
-                <div className="flex justify-between text-lg font-semibold text-slate-900">
+                <div className="flex items-baseline justify-between">
                     <span>Total</span>
                     <strong>{formatPriceMxn(totals.total)}</strong>
                 </div>

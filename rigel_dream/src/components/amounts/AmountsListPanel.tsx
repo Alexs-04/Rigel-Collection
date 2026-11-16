@@ -54,7 +54,7 @@ export default function AmountsListPanel({
                             className={`w-full rounded-lg border px-3 py-2 text-left transition ${
                                 selected
                                     ? 'border-brand-300 bg-brand-50'
-                                    : 'border-slate-200 bg-white hover:border-brand-200 hover:bg-brand-50/40'
+                                    : 'border-app-border bg-app-surface hover:border-app-text/60'
                             }`}
                             onClick={() => onSelect(item.folio)}
                         >

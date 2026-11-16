@@ -19,7 +19,7 @@ import ResetPasswordPage from "./pages/ResetPassword.tsx";
 import ActivateAccountPage from "./pages/ActivateAccount.tsx";
 
 function AppLayout({children}) {
-    const [collapsed, setCollapsed] = useState(false)
+    const [collapsed, setCollapsed] = useState(() => window.innerWidth < 1024)
     const toggle = () => setCollapsed((c) => !c)
 
     return (

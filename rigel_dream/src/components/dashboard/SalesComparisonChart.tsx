@@ -8,9 +8,9 @@ interface SalesComparisonChartProps {
 
 export default function SalesComparisonChart({sales}: SalesComparisonChartProps) {
     const values = [
-        {label: 'Dia', value: Number(sales?.day || 0), color: '#6366f1'},
-        {label: 'Mes', value: Number(sales?.month || 0), color: '#22c55e'},
-        {label: 'Anio', value: Number(sales?.year || 0), color: '#0ea5e9'},
+        {label: 'Dia', value: Number(sales?.day || 0), color: 'var(--viz-1)'},
+        {label: 'Mes', value: Number(sales?.month || 0), color: 'var(--viz-2)'},
+        {label: 'Anio', value: Number(sales?.year || 0), color: 'var(--viz-3)'},
     ]
 
     const maxValue = Math.max(...values.map((item) => item.value), 0)
@@ -24,16 +24,16 @@ export default function SalesComparisonChart({sales}: SalesComparisonChartProps)
                     return (
                         <div key={item.label}>
                             <div className="mb-1 flex justify-between">
-                                <span className="text-xs text-slate-600">{item.label}</span>
-                                <strong className="text-xs text-slate-900">{formatCurrency(item.value)}</strong>
+                                <span className="ui-figure-label">{item.label}</span>
+                                <strong className="num text-xs text-slate-900">{formatCurrency(item.value)}</strong>
                             </div>
-                            <div className="h-2.5 overflow-hidden rounded-full bg-slate-200">
+                            <div className="h-2.5 overflow-hidden bg-app-text/10">
                                 <div
                                     style={{
                                         width: `${width}%`,
                                         background: item.color,
                                     }}
-                                    className="h-full rounded-full transition-[width] duration-200"
+                                    className="h-full transition-[width] duration-500"
                                 />
                             </div>
                         </div>
