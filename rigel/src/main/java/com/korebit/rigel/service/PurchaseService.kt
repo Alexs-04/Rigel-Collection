@@ -2,7 +2,6 @@ package com.korebit.rigel.service
 
 import com.korebit.rigel.dto.PurchaseDto
 import com.korebit.rigel.dto.request.PurchaseCreateRequest
-import com.korebit.rigel.dto.response.Response
 import com.korebit.rigel.exception.EntityNotFundException
 import com.korebit.rigel.model.beans.Batch
 import com.korebit.rigel.model.beans.Purchase
@@ -10,7 +9,6 @@ import com.korebit.rigel.model.extra.ProductSupplier
 import com.korebit.rigel.repository.BatchRepository
 import com.korebit.rigel.repository.ProductSupplierRepository
 import com.korebit.rigel.repository.PurchaseRepository
-import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
@@ -18,10 +16,10 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.UUID
 
-@Service
 /**
  * Handles purchase registration and stock ingestion into batches.
  */
+@Service
 class PurchaseService(
     private val purchaseRepository: PurchaseRepository,
     private val productSupplierRepository: ProductSupplierRepository,
@@ -34,63 +32,63 @@ class PurchaseService(
         private val PURCHASE_CODE_DATE_FORMAT: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMdd")
     }
 
-    @Transactional(readOnly = true)
     /**
      * Retrieves all purchases sorted by date descending.
      *
      * @return list of purchase DTOs.
      */
+    @Transactional(readOnly = true)
     fun getAllPurchases(): List<PurchaseDto> {
         return purchaseRepository.findAll()
             .sortedWith(compareByDescending<Purchase> { it.purchaseDate }.thenByDescending { it.id ?: 0L })
             .map(PurchaseDto::fromEntity)
     }
 
-    @Transactional(readOnly = true)
     /**
      * Retrieves a purchase by id.
      *
      * @param id purchase id.
      * @return purchase DTO.
      */
+    @Transactional(readOnly = true)
     fun getPurchaseById(id: Long): PurchaseDto {
         val purchase = purchaseRepository.findById(id)
             .orElseThrow { EntityNotFundException("Purchase with id $id not found") }
         return PurchaseDto.fromEntity(purchase)
     }
 
-    @Transactional(readOnly = true)
     /**
      * Retrieves purchases filtered by product name.
      *
      * @param productName product name.
      * @return matching purchase DTOs.
      */
+    @Transactional(readOnly = true)
     fun getPurchasesByProduct(productName: String): List<PurchaseDto> {
         return purchaseRepository.findByProductName(productName.trim())
             .map(PurchaseDto::fromEntity)
     }
 
-    @Transactional(readOnly = true)
     /**
      * Retrieves purchases filtered by supplier name.
      *
      * @param supplierName supplier name.
      * @return matching purchase DTOs.
      */
+    @Transactional(readOnly = true)
     fun getPurchasesBySupplier(supplierName: String): List<PurchaseDto> {
         return purchaseRepository.findBySupplierName(supplierName.trim())
             .map(PurchaseDto::fromEntity)
     }
 
-    @Transactional
     /**
      * Creates a purchase and updates the target batch stock.
      *
      * @param request purchase payload.
-     * @return operation response.
+     * @return the persisted purchase.
      */
-    fun createPurchase(request: PurchaseCreateRequest): Response {
+    @Transactional
+    fun createPurchase(request: PurchaseCreateRequest): PurchaseDto {
         val normalizedRequestedCode = validateRequest(request)
 
         val relation = resolveRelation(request.productName, request.supplierName)
@@ -111,22 +109,20 @@ class PurchaseService(
 
         batchRepository.save(batch)
 
-        val persisted = persistPurchaseWithUniqueCode(
-            requestedCode = normalizedRequestedCode,
-            purchaseDate = request.purchaseDate,
-            quantity = quantity,
-            unitPrice = unitPrice,
-            totalPrice = totalPrice,
-            notes = request.notes.trim(),
-            relation = relation,
-            batch = batch,
+        val persisted = purchaseRepository.save(
+            Purchase(
+                code = resolvePurchaseCode(normalizedRequestedCode),
+                purchaseDate = request.purchaseDate,
+                quantity = quantity,
+                unitPrice = unitPrice,
+                totalPrice = totalPrice,
+                notes = request.notes.trim(),
+                productSupplier = relation,
+                batch = batch,
+            )
         )
 
-        return Response(
-            message = "Purchase ${persisted.code} created successfully",
-            status = 201,
-            success = true,
-        )
+        return PurchaseDto.fromEntity(persisted)
     }
 
     private fun resolveRelation(productName: String, supplierName: String): ProductSupplier {
@@ -207,48 +203,17 @@ class PurchaseService(
         return normalizedCode
     }
 
-    private fun persistPurchaseWithUniqueCode(
-        requestedCode: String?,
-        purchaseDate: LocalDate,
-        quantity: Int,
-        unitPrice: BigDecimal,
-        totalPrice: BigDecimal,
-        notes: String,
-        relation: ProductSupplier,
-        batch: Batch,
-    ): Purchase {
-        var attempt = 0
-        var currentCode = requestedCode ?: generatePurchaseCode()
-
-        while (attempt < MAX_PURCHASE_CODE_RETRIES) {
-            attempt++
-
-            val purchase = Purchase(
-                code = currentCode,
-                purchaseDate = purchaseDate,
-                quantity = quantity,
-                unitPrice = unitPrice,
-                totalPrice = totalPrice,
-                notes = notes,
-                productSupplier = relation,
-                batch = batch,
-            )
-
-            try {
-                return purchaseRepository.saveAndFlush(purchase)
-            } catch (ex: DataIntegrityViolationException) {
-                if (!isPurchaseCodeConstraintViolation(ex)) {
-                    throw ex
-                }
-
-                if (requestedCode != null) {
-                    throw IllegalArgumentException("Purchase with code $requestedCode already exists")
-                }
-
-                currentCode = generatePurchaseCode()
-            }
+    /**
+     * Returns the requested code (already validated as unique) or generates a new unique one.
+     * A concurrent insert with the same code still fails on the unique constraint and is
+     * reported as 409 by the global exception handler.
+     */
+    private fun resolvePurchaseCode(requestedCode: String?): String {
+        if (requestedCode != null) return requestedCode
+        repeat(MAX_PURCHASE_CODE_RETRIES) {
+            val candidate = generatePurchaseCode()
+            if (!purchaseRepository.existsByCodeIgnoreCase(candidate)) return candidate
         }
-
         throw IllegalStateException("Could not generate a unique purchase code after $MAX_PURCHASE_CODE_RETRIES attempts")
     }
 
@@ -257,19 +222,4 @@ class PurchaseService(
         val randomPart = UUID.randomUUID().toString().replace("-", "").take(12).uppercase()
         return "$PURCHASE_CODE_PREFIX-$datePart-$randomPart"
     }
-
-    private fun isPurchaseCodeConstraintViolation(ex: DataIntegrityViolationException): Boolean {
-        val messages = mutableListOf<String>()
-        var current: Throwable? = ex
-        while (current != null) {
-            current.message?.let(messages::add)
-            current = current.cause
-        }
-        val message = messages.joinToString(" ").lowercase()
-
-        return message.contains("uk_purchases_code") ||
-            message.contains("purchases_code_key") ||
-            (message.contains("duplicate key") && message.contains("code"))
-    }
 }
-

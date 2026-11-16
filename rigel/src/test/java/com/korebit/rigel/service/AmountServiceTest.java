@@ -4,7 +4,7 @@ import com.korebit.rigel.dto.AmountDto;
 import com.korebit.rigel.dto.request.AmountBuyoutRequest;
 import com.korebit.rigel.dto.request.AmountCreateRequest;
 import com.korebit.rigel.dto.request.AmountUpdateRequest;
-import com.korebit.rigel.dto.response.Response;
+import com.korebit.rigel.enums.AmountStatus;
 import com.korebit.rigel.enums.ContainerType;
 import com.korebit.rigel.exception.EntityNotFundException;
 import com.korebit.rigel.model.beans.Amount;
@@ -18,6 +18,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Sort;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -25,6 +26,7 @@ import java.util.Collections;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
@@ -87,13 +89,13 @@ class AmountServiceTest {
     @Test
     @DisplayName("Should retrieve all amounts")
     void testGetAllAmounts() {
-        when(amountRepository.findAll()).thenReturn(Collections.singletonList(testAmount));
+        when(amountRepository.findAll(any(Sort.class))).thenReturn(Collections.singletonList(testAmount));
 
         var result = amountService.getAllAmounts();
 
         assertEquals(1, result.size());
         assertEquals("Test Amount", result.getFirst().getDescription());
-        verify(amountRepository, times(1)).findAll();
+        verify(amountRepository, times(1)).findAll(any(Sort.class));
     }
 
     @Test
@@ -116,16 +118,17 @@ class AmountServiceTest {
     }
 
     @Test
-    @DisplayName("Should create a new amount")
+    @DisplayName("Should create a new amount owned by the authenticated user")
     void testCreateAmount() {
-        when(consumerRepository.findByUsername("testuser")).thenReturn(testConsumer);
-        when(amountRepository.save(any())).thenReturn(testAmount);
+        when(consumerRepository.findByEmail("test@example.com")).thenReturn(testConsumer);
+        when(amountRepository.save(any())).then(returnsFirstArg());
 
-        Response response = amountService.createAmount(createRequest, "testuser");
+        AmountDto result = amountService.createAmount(createRequest, "test@example.com");
 
-        assertTrue(response.getSuccess());
-        assertEquals(201, response.getStatus());
-        assertTrue(response.getMessage().contains("registrado correctamente"));
+        assertEquals("Test Customer", result.getCustomerName());
+        assertEquals(50.0, result.getTotal());
+        assertEquals(AmountStatus.ACTIVE, result.getStatus());
+        assertEquals(1L, result.getOwnerId());
         verify(amountRepository, times(1)).save(any());
     }
 
@@ -143,10 +146,9 @@ class AmountServiceTest {
                 "Test notes"
         );
 
-        when(consumerRepository.findByUsername("testuser")).thenReturn(testConsumer);
-
         assertThrows(IllegalArgumentException.class,
-                () -> amountService.createAmount(invalidRequest, "testuser"));
+                () -> amountService.createAmount(invalidRequest, "test@example.com"));
+        verifyNoInteractions(consumerRepository, amountRepository);
     }
 
     @Test
@@ -163,19 +165,19 @@ class AmountServiceTest {
                 "Test notes"
         );
 
-        when(consumerRepository.findByUsername("testuser")).thenReturn(testConsumer);
-
         assertThrows(IllegalArgumentException.class,
-                () -> amountService.createAmount(invalidRequest, "testuser"));
+                () -> amountService.createAmount(invalidRequest, "test@example.com"));
+        verifyNoInteractions(consumerRepository, amountRepository);
     }
 
     @Test
     @DisplayName("Should throw exception when creating amount with consumer not found")
     void testCreateAmountConsumerNotFound() {
-        when(consumerRepository.findByUsername("notfound")).thenReturn(null);
+        when(consumerRepository.findByEmail("notfound@example.com")).thenReturn(null);
 
         assertThrows(EntityNotFundException.class,
-                () -> amountService.createAmount(createRequest, "notfound"));
+                () -> amountService.createAmount(createRequest, "notfound@example.com"));
+        verify(amountRepository, never()).save(any());
     }
 
     @Test
@@ -193,12 +195,13 @@ class AmountServiceTest {
         );
 
         when(amountRepository.findById(1L)).thenReturn(Optional.of(testAmount));
-        when(amountRepository.save(any())).thenReturn(testAmount);
+        when(amountRepository.save(any())).then(returnsFirstArg());
 
-        Response response = amountService.updateAmount(1L, updateRequest);
+        AmountDto result = amountService.updateAmount(1L, updateRequest);
 
-        assertTrue(response.getSuccess());
-        assertEquals(200, response.getStatus());
+        assertEquals("Updated Customer", result.getCustomerName());
+        assertEquals(ContainerType.LARGE_GLASS_CONTAINER, result.getType());
+        assertEquals(150.0, result.getTotal());
         verify(amountRepository, times(1)).save(any());
     }
 
@@ -221,12 +224,12 @@ class AmountServiceTest {
     @DisplayName("Should mark amount as returned")
     void testMarkAsReturned() {
         when(amountRepository.findById(1L)).thenReturn(Optional.of(testAmount));
-        when(amountRepository.save(any())).thenReturn(testAmount);
+        when(amountRepository.save(any())).then(returnsFirstArg());
 
-        Response response = amountService.markAsReturned(1L);
+        AmountDto result = amountService.markAsReturned(1L);
 
-        assertTrue(response.getSuccess());
-        assertEquals(200, response.getStatus());
+        assertEquals(AmountStatus.RETURNED, result.getStatus());
+        assertNotNull(result.getReturnedAt());
         verify(amountRepository, times(1)).save(any());
     }
 
@@ -247,13 +250,13 @@ class AmountServiceTest {
         AmountBuyoutRequest buyoutRequest = new AmountBuyoutRequest(3.00, "Buyout notes");
 
         when(amountRepository.findById(1L)).thenReturn(Optional.of(testAmount));
-        when(amountRepository.save(any())).thenReturn(testAmount);
+        when(amountRepository.save(any())).then(returnsFirstArg());
 
-        Response response = amountService.markAsBoughtOut(1L, buyoutRequest);
+        AmountDto result = amountService.markAsBoughtOut(1L, buyoutRequest);
 
-        assertTrue(response.getSuccess());
-        assertEquals(200, response.getStatus());
-        assertNotNull(testAmount.getBoughtOutAt());
+        assertEquals(AmountStatus.BOUGHT_OUT, result.getStatus());
+        assertEquals(15.0, result.getBuyoutTotal());
+        assertEquals("Test notes | Buyout notes", result.getNotes());
         verify(amountRepository, times(1)).save(any());
     }
 
@@ -273,13 +276,10 @@ class AmountServiceTest {
     @DisplayName("Should delete an amount")
     void testDeleteAmount() {
         when(amountRepository.findById(1L)).thenReturn(Optional.of(testAmount));
-        doNothing().when(amountRepository).delete(any());
 
-        Response response = amountService.deleteAmount(1L);
+        amountService.deleteAmount(1L);
 
-        assertTrue(response.getSuccess());
-        assertEquals(200, response.getStatus());
-        verify(amountRepository, times(1)).delete(any());
+        verify(amountRepository, times(1)).delete(testAmount);
     }
 
     @Test

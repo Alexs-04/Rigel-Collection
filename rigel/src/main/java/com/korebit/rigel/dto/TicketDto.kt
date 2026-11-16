@@ -15,7 +15,7 @@ data class TicketDto(
     val payment: MethodPayment = MethodPayment.CASH
 ) : Serializable {
     companion object {
-        fun toDto(ticket : Ticket): TicketDto {
+        fun fromEntity(ticket: Ticket): TicketDto {
             return TicketDto(
                 ticket.consumer?.email ?: "Unknown",
                 ticket.barcode,

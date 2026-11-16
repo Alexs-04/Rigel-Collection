@@ -2,7 +2,6 @@ package com.korebit.rigel.service;
 
 import com.korebit.rigel.dto.BatchDto;
 import com.korebit.rigel.dto.request.BatchUpsertRequest;
-import com.korebit.rigel.dto.response.Response;
 import com.korebit.rigel.exception.EntityNotFundException;
 import com.korebit.rigel.model.beans.Batch;
 import com.korebit.rigel.model.beans.Product;
@@ -25,6 +24,7 @@ import java.util.Collections;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
@@ -80,6 +80,7 @@ class BatchServiceTest {
         testBatch.setRemainingAmount(100);
         testBatch.setAvailable(true);
         testBatch.setPrice(BigDecimal.valueOf(10.00));
+        testBatch.setNotes("");
     }
 
     @Test
@@ -138,17 +139,34 @@ class BatchServiceTest {
                 "Test notes"
         );
 
-        when(productRepository.findByName("Test Product")).thenReturn(Optional.of(testProduct));
         when(productSupplierRepository.findByProductNameAndSupplierName("Test Product", "Test Supplier"))
                 .thenReturn(productSupplier);
         when(batchRepository.findByCode("BATCH-002")).thenReturn(Optional.empty());
-        when(batchRepository.save(any())).thenReturn(testBatch);
+        when(batchRepository.save(any())).then(invocation -> {
+            Batch saved = invocation.getArgument(0);
+            saved.setId(2L);
+            return saved;
+        });
 
-        Response response = batchService.createBatch(request);
+        BatchDto result = batchService.createBatch(request);
 
-        assertTrue(response.getSuccess());
-        assertEquals(200, response.getStatus());
+        assertEquals("BATCH-002", result.getCode());
+        assertEquals(50, result.getRemainingAmount());
+        assertEquals("Test Product", result.getProductName());
         verify(batchRepository, times(1)).save(any());
+    }
+
+    @Test
+    @DisplayName("Should reject a batch whose code already exists")
+    void testCreateBatchDuplicateCode() {
+        BatchUpsertRequest request = new BatchUpsertRequest(
+                "BATCH-001", "Test Product", "Test Supplier",
+                LocalDate.now(), LocalDate.now().plusDays(30), 50, null, true, 10.00, ""
+        );
+        when(batchRepository.findByCode("BATCH-001")).thenReturn(Optional.of(testBatch));
+
+        assertThrows(IllegalArgumentException.class, () -> batchService.createBatch(request));
+        verify(batchRepository, never()).save(any());
     }
 
     @Test
@@ -205,30 +223,44 @@ class BatchServiceTest {
                 "Updated notes"
         );
 
+        testBatch.setRemainingAmount(80); // 20 units already sold
         when(batchRepository.findById(1L)).thenReturn(Optional.of(testBatch));
-        when(productRepository.findByName("Test Product")).thenReturn(Optional.of(testProduct));
         when(productSupplierRepository.findByProductNameAndSupplierName("Test Product", "Test Supplier"))
                 .thenReturn(productSupplier);
-        when(batchRepository.save(any())).thenReturn(testBatch);
+        when(batchRepository.save(any())).then(returnsFirstArg());
 
-        Response response = batchService.updateBatch(1L, request);
+        BatchDto result = batchService.updateBatch(1L, request);
 
-        assertTrue(response.getSuccess());
-        assertEquals(200, response.getStatus());
+        assertEquals(75, result.getReceivedAmount());
+        assertEquals(55, result.getRemainingAmount());
+        assertEquals(12.0, result.getPrice());
         verify(batchRepository, times(1)).save(any());
+    }
+
+    @Test
+    @DisplayName("Should reject an update that leaves less stock than already consumed")
+    void testUpdateBatchBelowConsumed() {
+        testBatch.setRemainingAmount(10); // 90 units already sold
+        BatchUpsertRequest request = new BatchUpsertRequest(
+                "BATCH-001", "Test Product", "Test Supplier",
+                LocalDate.now(), LocalDate.now().plusDays(30), 50, null, true, 10.00, ""
+        );
+        when(batchRepository.findById(1L)).thenReturn(Optional.of(testBatch));
+        when(productSupplierRepository.findByProductNameAndSupplierName("Test Product", "Test Supplier"))
+                .thenReturn(productSupplier);
+
+        assertThrows(IllegalArgumentException.class, () -> batchService.updateBatch(1L, request));
+        verify(batchRepository, never()).save(any());
     }
 
     @Test
     @DisplayName("Should delete a batch")
     void testDeleteBatch() {
         when(batchRepository.findById(1L)).thenReturn(Optional.of(testBatch));
-        doNothing().when(batchRepository).delete(any());
 
-        Response response = batchService.deleteBatch(1L);
+        batchService.deleteBatch(1L);
 
-        assertTrue(response.getSuccess());
-        assertEquals(200, response.getStatus());
-        verify(batchRepository, times(1)).delete(any());
+        verify(batchRepository, times(1)).delete(testBatch);
     }
 
     @Test

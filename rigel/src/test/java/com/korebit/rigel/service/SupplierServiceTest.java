@@ -1,10 +1,8 @@
 package com.korebit.rigel.service;
 
 import com.korebit.rigel.dto.SupplierDto;
-import com.korebit.rigel.dto.response.Response;
 import com.korebit.rigel.exception.EntityNotFundException;
 import com.korebit.rigel.model.beans.Supplier;
-import com.korebit.rigel.repository.ProductRepository;
 import com.korebit.rigel.repository.SupplierRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -18,6 +16,7 @@ import java.util.Arrays;
 import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -31,9 +30,6 @@ class SupplierServiceTest {
 
     @Mock
     private SupplierRepository supplierRepository;
-
-    @Mock
-    private ProductRepository productRepository;
 
     @InjectMocks
     private SupplierService supplierService;
@@ -83,14 +79,22 @@ class SupplierServiceTest {
     @DisplayName("Should save a new supplier")
     void testSaveSupplier() {
         when(supplierRepository.findSupplierByName("Test Supplier")).thenReturn(null);
-        when(supplierRepository.save(any())).thenReturn(testSupplier);
+        when(supplierRepository.save(any())).then(returnsFirstArg());
 
-        Response response = supplierService.saveSupplier(testSupplierDto);
+        SupplierDto result = supplierService.saveSupplier(testSupplierDto);
 
-        assertTrue(response.getSuccess());
-        assertEquals(200, response.getStatus());
-        assertTrue(response.getMessage().contains("saved successfully"));
+        assertEquals("Test Supplier", result.getName());
+        assertEquals("supplier@example.com", result.getContactEmail());
         verify(supplierRepository, times(1)).save(any());
+    }
+
+    @Test
+    @DisplayName("Should reject a supplier without name")
+    void testSaveSupplierBlankName() {
+        SupplierDto blank = new SupplierDto("  ", "a@b.c", "1", "", Collections.emptyList());
+
+        assertThrows(IllegalArgumentException.class, () -> supplierService.saveSupplier(blank));
+        verifyNoInteractions(supplierRepository);
     }
 
     @Test
@@ -135,13 +139,12 @@ class SupplierServiceTest {
 
         when(supplierRepository.findSupplierByName("Test Supplier")).thenReturn(testSupplier);
         when(supplierRepository.findSupplierByName("Updated Supplier")).thenReturn(null);
-        when(supplierRepository.save(any())).thenReturn(testSupplier);
+        when(supplierRepository.save(any())).then(returnsFirstArg());
 
-        Response response = supplierService.updateSupplier("Test Supplier", updatedDto);
+        SupplierDto result = supplierService.updateSupplier("Test Supplier", updatedDto);
 
-        assertTrue(response.getSuccess());
-        assertEquals(200, response.getStatus());
-        assertTrue(response.getMessage().contains("updated successfully"));
+        assertEquals("Updated Supplier", result.getName());
+        assertEquals("456 Oak St", result.getAddress());
         verify(supplierRepository, times(1)).save(any());
     }
 
@@ -158,14 +161,18 @@ class SupplierServiceTest {
     @DisplayName("Should delete an existing supplier")
     void testDeleteSupplier() {
         when(supplierRepository.findSupplierByName("Test Supplier")).thenReturn(testSupplier);
-        doNothing().when(supplierRepository).delete(any());
 
-        Response response = supplierService.deleteSupplier("Test Supplier");
+        supplierService.deleteSupplier("Test Supplier");
 
-        assertTrue(response.getSuccess());
-        assertEquals(200, response.getStatus());
-        assertTrue(response.getMessage().contains("deleted successfully"));
-        verify(supplierRepository, times(1)).delete(any());
+        verify(supplierRepository, times(1)).delete(testSupplier);
+    }
+
+    @Test
+    @DisplayName("A supplier without products returns an empty list instead of 404")
+    void testGetProductsBySupplierEmpty() {
+        when(supplierRepository.findSupplierByName("Test Supplier")).thenReturn(testSupplier);
+
+        assertTrue(supplierService.getProductsBySupplier("Test Supplier").isEmpty());
     }
 
     @Test

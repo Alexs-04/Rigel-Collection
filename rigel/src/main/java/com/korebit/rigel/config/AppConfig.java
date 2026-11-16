@@ -36,6 +36,11 @@ public class AppConfig {
         return config.getAuthenticationManager();
     }
 
+    /**
+     * Loads users by email. Invited users that have not activated their account yet have no
+     * password: they are mapped with an empty one (never matches a BCrypt hash) and disabled,
+     * instead of making {@link User} throw and turning a login attempt into a 500.
+     */
     @Bean
     public UserDetailsService userDetailsService() {
         return email -> {
@@ -43,11 +48,12 @@ public class AppConfig {
             if (consumer == null) {
                 throw new UsernameNotFoundException(email);
             }
+            final String password = consumer.getPassword();
             return User.builder()
                     .username(consumer.getEmail())
-                    .password(consumer.getPassword())
+                    .password(password != null ? password : "")
                     .authorities(List.of(new SimpleGrantedAuthority("ROLE_" + consumer.getRole().name())))
-                    .disabled(!consumer.getActive())
+                    .disabled(!consumer.getActive() || password == null)
                     .build();
         };
     }
@@ -57,11 +63,8 @@ public class AppConfig {
             UserDetailsService userDetailsService,
             PasswordEncoder passwordEncoder) {
 
-        DaoAuthenticationProvider provider =
-                new DaoAuthenticationProvider(userDetailsService);
-
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider(userDetailsService);
         provider.setPasswordEncoder(passwordEncoder);
-
         return provider;
     }
 }

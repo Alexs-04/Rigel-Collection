@@ -1,5 +1,6 @@
 package com.korebit.rigel.controller
 
+import com.korebit.rigel.dto.PurchaseDto
 import com.korebit.rigel.dto.request.PurchaseCreateRequest
 import com.korebit.rigel.service.PurchaseService
 import org.springframework.http.HttpStatus
@@ -18,20 +19,21 @@ class PurchaseRestController(
 ) {
 
     @GetMapping("/all")
-    fun getAllPurchases() = purchaseService.getAllPurchases()
+    fun getAllPurchases(): ResponseEntity<List<PurchaseDto>> = ResponseEntity.ok(purchaseService.getAllPurchases())
 
     @GetMapping("/{id}")
-    fun getPurchaseById(@PathVariable id: Long) = purchaseService.getPurchaseById(id)
+    fun getPurchaseById(@PathVariable id: Long): ResponseEntity<PurchaseDto> =
+        ResponseEntity.ok(purchaseService.getPurchaseById(id))
 
     @GetMapping("/product/{productName}")
-    fun getPurchasesByProduct(@PathVariable productName: String) = purchaseService.getPurchasesByProduct(productName)
+    fun getPurchasesByProduct(@PathVariable productName: String): ResponseEntity<List<PurchaseDto>> =
+        ResponseEntity.ok(purchaseService.getPurchasesByProduct(productName))
 
     @GetMapping("/supplier/{supplierName}")
-    fun getPurchasesBySupplier(@PathVariable supplierName: String) = purchaseService.getPurchasesBySupplier(supplierName)
+    fun getPurchasesBySupplier(@PathVariable supplierName: String): ResponseEntity<List<PurchaseDto>> =
+        ResponseEntity.ok(purchaseService.getPurchasesBySupplier(supplierName))
 
     @PostMapping("/add")
-    fun createPurchase(@RequestBody request: PurchaseCreateRequest): ResponseEntity<Any> {
-        return ResponseEntity.status(HttpStatus.CREATED).body(purchaseService.createPurchase(request))
-    }
+    fun createPurchase(@RequestBody request: PurchaseCreateRequest): ResponseEntity<PurchaseDto> =
+        ResponseEntity.status(HttpStatus.CREATED).body(purchaseService.createPurchase(request))
 }
-

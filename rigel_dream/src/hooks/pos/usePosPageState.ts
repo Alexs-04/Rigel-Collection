@@ -138,6 +138,7 @@ export function usePosPageState(currentConsumerEmail: string) {
     const submitSale = async () => {
         setCheckoutMessage('')
 
+        // The seller is resolved by the backend from the session; this only guards the UI.
         if (!currentConsumerEmail?.trim()) {
             setCheckoutMessage('No se detecto el usuario actual para registrar la venta.')
             return
@@ -151,7 +152,6 @@ export function usePosPageState(currentConsumerEmail: string) {
         const payload: PosTicketCreatePayload = {
             description: description.trim(),
             dateAndTime: toTodayIso(),
-            currentConsumerEmail: currentConsumerEmail.trim(),
             methodPayment,
             products: cart.map((item) => ({
                 barcode: item.barcode,

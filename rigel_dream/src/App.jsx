@@ -1,5 +1,5 @@
 import {BrowserRouter, Routes, Route, Navigate} from 'react-router-dom'
-import {useContext, useState} from 'react'
+import {useContext, useEffect, useState} from 'react'
 import LoginForm from './components/LoginForm'
 import Sidebar from './layout/Sidebar'
 import Topbar from './layout/Topbar'
@@ -44,13 +44,14 @@ function RoleRoute({children, allowedRoles}) {
 
 function AppRoutes() {
     const {user, logout} = useContext(AuthContext)
+    const inactive = user?.active === false
 
-    if (!user) return <Navigate to="/login" replace/>
+    // Side effects must not run during render
+    useEffect(() => {
+        if (inactive) logout()
+    }, [inactive, logout])
 
-    if (user.active === false) {
-        logout()
-        return <Navigate to="/login" replace/>
-    }
+    if (!user || inactive) return <Navigate to="/login" replace/>
 
     return (
         <AppLayout>

@@ -14,7 +14,7 @@ data class UserAdminDto(
     val active: Boolean,
 ) : Serializable {
     companion object {
-        fun fromConsumer(consumer: Consumer): UserAdminDto {
+        fun fromEntity(consumer: Consumer): UserAdminDto {
             return UserAdminDto(
                 id = consumer.id ?: throw IllegalArgumentException("Consumer id is null"),
                 name = consumer.name,

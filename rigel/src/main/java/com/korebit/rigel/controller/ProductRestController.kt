@@ -1,13 +1,15 @@
 package com.korebit.rigel.controller
 
+import com.korebit.rigel.dto.BatchDto
+import com.korebit.rigel.dto.ProductDto
 import com.korebit.rigel.dto.request.AddRelationRequest
+import com.korebit.rigel.dto.request.ImageUploadRequest
 import com.korebit.rigel.dto.request.ProductAddRequest
 import com.korebit.rigel.dto.request.ProductBatchRequest
-import com.korebit.rigel.dto.request.ImageUploadRequest
 import com.korebit.rigel.dto.response.ImageUploadResponse
-import com.korebit.rigel.dto.response.Response
 import com.korebit.rigel.service.ProductService
 import com.korebit.rigel.service.image.CloudinaryImageService
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
@@ -25,87 +27,74 @@ class ProductRestController(
     private val productService: ProductService,
     private val cloudinaryImageService: CloudinaryImageService,
 ) {
+    data class MinStockRequest(val minStock: Int? = null)
+
     @GetMapping("/all")
-    fun getAllProducts() = productService.getAllProducts()
+    fun getAllProducts(): ResponseEntity<List<ProductDto>> = ResponseEntity.ok(productService.getAllProducts())
 
     @GetMapping("/{name}")
-    fun getProductByName(@PathVariable name: String) = productService.findProductByName(name)
+    fun getProductByName(@PathVariable name: String): ResponseEntity<ProductDto> =
+        ResponseEntity.ok(productService.findProductByName(name))
 
     @GetMapping("/{name}/batches")
-    fun getProductBatches(@PathVariable name: String) = productService.getBatchesByProduct(name)
+    fun getProductBatches(@PathVariable name: String): ResponseEntity<List<BatchDto>> =
+        ResponseEntity.ok(productService.getBatchesByProduct(name))
 
     @PostMapping("/add")
-    fun saveProduct(@RequestBody product: ProductAddRequest): ResponseEntity<Any> {
-        return ResponseEntity.ok(productService.saveProduct(product))
-    }
+    fun saveProduct(@RequestBody product: ProductAddRequest): ResponseEntity<ProductDto> =
+        ResponseEntity.status(HttpStatus.CREATED).body(productService.saveProduct(product))
 
+    /**
+     * Keeps the `{success, message}` body because the frontend relies on it to show upload errors.
+     */
     @PostMapping("/upload-image")
     fun uploadProductImage(@RequestBody request: ImageUploadRequest): ResponseEntity<ImageUploadResponse> {
-        if (request.imageBase64.isNullOrBlank()) {
-            return ResponseEntity.badRequest().body(
-                ImageUploadResponse(
-                    success = false,
-                    message = "Imagen en Base64 requerida"
-                )
-            )
+        val imageBase64 = request.imageBase64
+        val fileName = request.fileName
+        if (imageBase64.isNullOrBlank()) {
+            return ResponseEntity.badRequest().body(ImageUploadResponse(success = false, message = "Imagen en Base64 requerida"))
         }
-
-        if (request.fileName.isNullOrBlank()) {
-            return ResponseEntity.badRequest().body(
-                ImageUploadResponse(
-                    success = false,
-                    message = "Nombre de archivo requerido"
-                )
-            )
+        if (fileName.isNullOrBlank()) {
+            return ResponseEntity.badRequest().body(ImageUploadResponse(success = false, message = "Nombre de archivo requerido"))
         }
 
         return try {
-            val response = cloudinaryImageService.uploadImage(request.imageBase64, request.fileName)
-            ResponseEntity.ok(response)
-        } catch (e: Exception) {
+            ResponseEntity.ok(cloudinaryImageService.uploadImage(imageBase64, fileName))
+        } catch (e: IllegalArgumentException) {
             ResponseEntity.badRequest().body(
-                ImageUploadResponse(
-                    success = false,
-                    message = e.message ?: "Error al cargar imagen"
-                )
+                ImageUploadResponse(success = false, message = e.message ?: "Error al cargar imagen")
             )
         }
     }
 
     @PutMapping("/{name}")
-    fun updateProduct(@PathVariable name: String, @RequestBody product: ProductAddRequest): ResponseEntity<Any> {
-        return ResponseEntity.ok(productService.updateProduct(name, product))
-    }
+    fun updateProduct(@PathVariable name: String, @RequestBody product: ProductAddRequest): ResponseEntity<ProductDto> =
+        ResponseEntity.ok(productService.updateProduct(name, product))
 
     @PutMapping("/{name}/batch")
-    fun addBatchToProduct(@PathVariable name: String, @RequestBody batch: ProductBatchRequest): ResponseEntity<Any> {
-        return ResponseEntity.ok(productService.addBatchToProduct(name, batch))
-    }
+    fun addBatchToProduct(@PathVariable name: String, @RequestBody batch: ProductBatchRequest): ResponseEntity<ProductDto> =
+        ResponseEntity.ok(productService.addBatchToProduct(name, batch))
 
     @DeleteMapping("/{name}")
-    fun deleteProduct(@PathVariable name: String): ResponseEntity<Any> {
-        return ResponseEntity.ok(productService.deleteProduct(name))
+    fun deleteProduct(@PathVariable name: String): ResponseEntity<Void> {
+        productService.deleteProduct(name)
+        return ResponseEntity.noContent().build()
     }
 
     @PutMapping("/add-relation")
-    fun addSupplierToProduct(@RequestBody relation : AddRelationRequest): ResponseEntity<Any> {
-        return ResponseEntity.ok(productService.addRelationToProduct(relation))
-    }
+    fun addSupplierToProduct(@RequestBody relation: AddRelationRequest): ResponseEntity<ProductDto> =
+        ResponseEntity.ok(productService.addRelationToProduct(relation))
 
     @DeleteMapping("/{productName}/relation/{supplierName}")
     fun removeSupplierFromProduct(
         @PathVariable productName: String,
         @PathVariable supplierName: String,
-    ): ResponseEntity<Any> {
-        return ResponseEntity.ok(productService.removeRelationFromProduct(productName, supplierName))
-    }
+    ): ResponseEntity<ProductDto> =
+        ResponseEntity.ok(productService.removeRelationFromProduct(productName, supplierName))
 
     @PatchMapping("/{barcode}/min-stock")
     fun updateMinStock(
         @PathVariable barcode: String,
-        @RequestBody body: Map<String, Int?>,
-    ): ResponseEntity<Response> {
-        val result = productService.updateMinStock(barcode, body["minStock"])
-        return ResponseEntity.ok(result)
-    }
+        @RequestBody body: MinStockRequest,
+    ): ResponseEntity<ProductDto> = ResponseEntity.ok(productService.updateMinStock(barcode, body.minStock))
 }

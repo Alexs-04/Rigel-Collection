@@ -2,7 +2,6 @@ package com.korebit.rigel.service;
 
 import com.korebit.rigel.dto.PurchaseDto;
 import com.korebit.rigel.dto.request.PurchaseCreateRequest;
-import com.korebit.rigel.dto.response.Response;
 import com.korebit.rigel.exception.EntityNotFundException;
 import com.korebit.rigel.model.beans.Batch;
 import com.korebit.rigel.model.beans.Product;
@@ -169,17 +168,17 @@ class PurchaseServiceTest {
 
         when(productSupplierRepository.findByProductNameAndSupplierName("Test Product", "Test Supplier"))
                 .thenReturn(productSupplier);
-        when(batchRepository.findByCode("BATCH-001"))
-                .thenReturn(Optional.of(testBatch));
+        when(batchRepository.findById(1L)).thenReturn(Optional.of(testBatch));
         when(batchRepository.save(any())).thenReturn(testBatch);
         when(purchaseRepository.save(any())).thenReturn(testPurchase);
 
-        Response response = purchaseService.createPurchase(request);
+        PurchaseDto result = purchaseService.createPurchase(request);
 
-        assertTrue(response.getSuccess());
-        assertEquals(201, response.getStatus());
+        assertEquals("PUR-20240101001", result.getCode());
+        assertEquals(150, testBatch.getReceivedAmount());
+        assertEquals(150, testBatch.getRemainingAmount());
         verify(batchRepository, times(1)).save(any());
-        verify(purchaseRepository, atLeastOnce()).save(any());
+        verify(purchaseRepository, times(1)).save(any());
     }
 
     @Test
@@ -274,12 +273,13 @@ class PurchaseServiceTest {
 
         when(productSupplierRepository.findByProductNameAndSupplierName("Test Product", "Test Supplier"))
                 .thenReturn(productSupplier);
-        when(batchRepository.findByCode("BATCH-001")).thenReturn(Optional.of(testBatch));
+        when(batchRepository.findById(1L)).thenReturn(Optional.of(testBatch));
         when(batchRepository.save(any())).thenReturn(testBatch);
         when(purchaseRepository.save(any())).thenReturn(testPurchase);
 
         purchaseService.createPurchase(request);
 
+        assertFalse(testBatch.getAvailable());
         verify(batchRepository, times(1)).save(any());
     }
 }

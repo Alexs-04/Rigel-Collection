@@ -13,73 +13,45 @@ Comprehensive unit tests have been implemented for most of the application's ser
 
 ## Test Structure
 
-The tests are located in: `src/test/java/com/korebit/rigel/service/`
+```
+src/test/java/com/korebit/rigel/
+├── RigelApplicationTests.java          # context loads with the H2 "test" profile
+├── integration/                        # full app + security filter chain + H2, via MockMvc
+│   ├── IntegrationTestSupport.java     # login helpers, JSON builder, mocked JavaMailSender
+│   ├── AuthFlowIntegrationTest.java    # JWT: login, 401 vs 403, refresh rotation, logout, deactivation
+│   └── ApiResponseIntegrationTest.java # HTTP contract: 201/200/204, error body, POS stock flow
+└── service/                            # Mockito unit tests (no Spring context)
+    ├── jwt/JwtServiceTest.java
+    ├── AuthServiceTest.java
+    ├── AmountServiceTest.java
+    ├── BatchServiceTest.java
+    ├── ConsumerServiceTest.java
+    ├── ProductServiceTest.java
+    ├── PurchaseServiceTest.java
+    └── SupplierServiceTest.java
+```
 
-### Services Covered
+### HTTP contract verified by the integration tests
 
-1. **JwtServiceTest.java** (8 tests)
-    - Generation of JWT and refresh tokens
-    - Token validation (valid, expired, invalid)
-    - Extract claims
-    - Edge case management (consumer without ID)
-
-2. **ConsumerServiceTest.java** (13 tests)
-    - CRUD for consumers
-    - Search by email and name
-    - Validation of duplicate emails
-    - Update of consumer status
-    - Filter and search functionality
-
-3. **AuthServiceTest.java** (6 tests)
-    - Login success
-    - Validation of credentials
-    - Inactive consumer login
-    - Revocation of tokens
-    - Management of token expiration
-
-4. **SupplierServiceTest.java** (11 tests)
-    - Complete CRUD for suppliers
-    - Search by name
-    - Validation of duplicate names
-    - Exception handling
-
-5. **ProductServiceTest.java** (13 tests)
-    - Product CRUD
-    - Supplier relationships
-    - Add/remove relationships
-    - Category validation
-    - Duplicate management
-
-6. **AmountServiceTest.java** (15 tests)
-    - Creation of amounts
-    - Updates and returns
-    - Expired amount purchases
-    - Date and quantity validation
-    - Filtering by folio
-
-7. **BatchServiceTest.java** (11 tests)
-    - Batch CRUD
-    - Search by product
-    - Expiration date validation
-    - Quantity management
-
-8. **PurchaseServiceTest.java** (13 tests)
-    - Purchase creation
-    - Search by product/supplier
-    - Batch updates
-    - Batch availability logic
+| Operation | Status | Body |
+|-----------|--------|------|
+| Create (`POST .../add`, `POST /tickets`, `POST /consumer/api/users`) | `201` | created resource DTO |
+| Update / state change (`PUT`, `PATCH`) | `200` | updated resource DTO |
+| Delete | `204` | empty |
+| Validation error | `400` | `{timestamp, status, error, message, correlationId}` |
+| Missing/invalid/revoked token | `401` | same error body |
+| Valid token, insufficient role | `403` | same error body |
+| Not found | `404` | same error body |
 
 ## Test Database Configuration
 
-An H2 test profile has been created:
-
 **File**: `src/test/resources/application-test.properties`
 
-Features:
-- In-memory database (cleared after each test)
-- Automatic DDL: `create-drop`
-- SQL logging disabled for better performance
-- Random port (0) to avoid conflicts
+- H2 in memory (`MODE=PostgreSQL`); the `rigel` schema is created on connect because the main
+  configuration sets `hibernate.default_schema=rigel`.
+- `ddl-auto=create-drop`, random port, Base64 test JWT secret.
+- `JavaMailSender` is replaced by a Mockito bean, so no email is ever sent.
+- `DataInit` seeds `root@root` / `root`, which the integration tests use to log in.
 
 ## Running Tests
 
@@ -90,17 +62,12 @@ cd rigel
 ./gradlew test
 ```
 
-### Run tests for a specific service
+### Run a subset
 
 ```bash
-# Example: ConsumerService tests
-./gradlew test --tests ConsumerServiceTest
-
-# Example: AuthService tests
-./gradlew test --tests AuthServiceTest
-
-# Example: Pattern matching
-./gradlew test --tests "*ServiceTest"
+./gradlew test --tests ConsumerServiceTest        # one class
+./gradlew test --tests "*ServiceTest"             # unit tests only
+./gradlew test --tests "*IntegrationTest"         # H2 + MockMvc integration tests
 ```
 
 ### Run with detailed report
@@ -159,22 +126,16 @@ void testSaveProductDuplicateName() {
 
 ## Test Dependencies
 
-The following dependencies were added to `build.gradle`:
-
-```groovy
-testImplementation 'com.h2database:h2'
-testImplementation 'org.mockito:mockito-core:5.7.1'
-testImplementation 'org.mockito:mockito-junit-jupiter:5.7.1'
-```
+Mockito, JUnit 5, MockMvc and json-path come from the Spring Boot test starters declared in
+`build.gradle`; H2 is declared as `testImplementation 'com.h2database:h2'`.
 
 ## Next Steps for Complete Coverage
 
 The following services can still have additional tests:
 
-1. **TicketService.kt** - Tests for complex ticket operations
-2. **DashboardService.kt** - Tests for data aggregation
-3. **SystemMovementService.kt** - Tests for movement logging
-4. **REST Controllers** - Integration tests
+1. **TicketService.kt** - unit tests for multi-batch allocation (covered end-to-end only)
+2. **DashboardService.kt** - data aggregation
+3. **SystemMovementService.kt** - movement logging and filters
 
 ## Best Practices Applied
 

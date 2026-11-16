@@ -2,7 +2,6 @@ package com.korebit.rigel.service
 
 import com.korebit.rigel.dto.BatchDto
 import com.korebit.rigel.dto.request.BatchUpsertRequest
-import com.korebit.rigel.dto.response.Response
 import com.korebit.rigel.exception.EntityNotFundException
 import com.korebit.rigel.model.beans.Batch
 import com.korebit.rigel.model.extra.ProductSupplier
@@ -12,10 +11,10 @@ import com.korebit.rigel.repository.ProductSupplierRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
-@Service
 /**
  * Manages inventory batches tied to product-supplier relations.
  */
+@Service
 class BatchService(
     private val batchRepository: BatchRepository,
     private val productRepository: ProductRepository,
@@ -23,12 +22,6 @@ class BatchService(
 ) {
 
     @Transactional(readOnly = true)
-    /**
-     * Retrieves all batches for a product name.
-     *
-     * @param productName product name.
-     * @return list of batches mapped to DTOs.
-     */
     fun getBatchesByProduct(productName: String): List<BatchDto> {
         val product = productRepository.findByName(productName)
             .orElseThrow { EntityNotFundException("Product $productName not found") }
@@ -38,95 +31,55 @@ class BatchService(
     }
 
     @Transactional(readOnly = true)
-    /**
-     * Retrieves a batch by identifier.
-     *
-     * @param batchId batch id.
-     * @return batch DTO.
-     */
-    fun getBatchById(batchId: Long): BatchDto {
-        val batch = batchRepository.findById(batchId)
-            .orElseThrow { EntityNotFundException("Batch with id $batchId not found") }
-        return BatchDto.fromEntity(batch)
-    }
+    fun getBatchById(batchId: Long): BatchDto = BatchDto.fromEntity(findBatch(batchId))
 
+    /** Creates a new batch for an existing product-supplier relation. */
     @Transactional
-    /**
-     * Creates a new batch for an existing product-supplier relation.
-     *
-     * @param request batch payload.
-     * @return operation response.
-     */
-    fun createBatch(request: BatchUpsertRequest): Response {
+    fun createBatch(request: BatchUpsertRequest): BatchDto {
         validateRequest(request)
-        val relation = findRelationOrThrow(request)
-        val initialRemaining = resolveRemainingAmountForCreate(request)
+        val code = request.code.trim()
+        if (batchRepository.findByCode(code).isPresent) {
+            throw IllegalArgumentException("Batch with code $code already exists")
+        }
 
+        val relation = findRelationOrThrow(request)
         val batch = Batch()
-        applyBatchFields(batch, request, relation, initialRemaining)
+        applyBatchFields(batch, request, relation, resolveRemainingAmountForCreate(request))
 
-        batchRepository.save(batch)
-
-        return Response(
-            success = true,
-            status = 200,
-            message = "Batch ${batch.code} created successfully",
-        )
+        return BatchDto.fromEntity(batchRepository.save(batch))
     }
 
+    /** Updates a batch without allowing the received amount to drop below what was already consumed. */
     @Transactional
-    /**
-     * Updates an existing batch and preserves consumed amount constraints.
-     *
-     * @param batchId batch id.
-     * @param request update payload.
-     * @return operation response.
-     */
-    fun updateBatch(batchId: Long, request: BatchUpsertRequest): Response {
+    fun updateBatch(batchId: Long, request: BatchUpsertRequest): BatchDto {
         validateRequest(request)
+        val batch = findBatch(batchId)
 
-        val batch = batchRepository.findById(batchId)
-            .orElseThrow { EntityNotFundException("Batch with id $batchId not found") }
+        val code = request.code.trim()
+        if (code != batch.code) {
+            batchRepository.findByCode(code).ifPresent {
+                throw IllegalArgumentException("Batch with code $code already exists")
+            }
+        }
 
         val relation = findRelationOrThrow(request)
-        val desiredRemaining = resolveRemainingAmountForUpdate(batch, request)
+        applyBatchFields(batch, request, relation, resolveRemainingAmountForUpdate(batch, request))
 
-        applyBatchFields(batch, request, relation, desiredRemaining)
-
-        batchRepository.save(batch)
-
-        return Response(
-            success = true,
-            status = 200,
-            message = "Batch ${batch.code} updated successfully",
-        )
+        return BatchDto.fromEntity(batchRepository.save(batch))
     }
 
     @Transactional
-    /**
-     * Deletes a batch by id.
-     *
-     * @param batchId batch id.
-     * @return operation response.
-     */
-    fun deleteBatch(batchId: Long): Response {
-        val batch = batchRepository.findById(batchId)
-            .orElseThrow { EntityNotFundException("Batch with id $batchId not found") }
-
-
-        batchRepository.delete(batch)
-
-        return Response(
-            success = true,
-            status = 200,
-            message = "Batch ${batch.code} deleted successfully",
-        )
+    fun deleteBatch(batchId: Long) {
+        batchRepository.delete(findBatch(batchId))
     }
+
+    private fun findBatch(batchId: Long): Batch = batchRepository.findById(batchId)
+        .orElseThrow { EntityNotFundException("Batch with id $batchId not found") }
 
     private fun validateRequest(request: BatchUpsertRequest) {
-        if (request.code.trim().isEmpty()) throw IllegalArgumentException("Batch code is required")
-        if (request.productName.trim().isEmpty()) throw IllegalArgumentException("Product name is required")
-        if (request.supplierName.trim().isEmpty()) throw IllegalArgumentException("Supplier name is required")
+        if (request.code.isBlank()) throw IllegalArgumentException("Batch code is required")
+        if (request.productName.isBlank()) throw IllegalArgumentException("Product name is required")
+        if (request.supplierName.isBlank()) throw IllegalArgumentException("Supplier name is required")
         if (request.receivedAmount <= 0) throw IllegalArgumentException("Received amount must be greater than zero")
         if (request.price < 0) throw IllegalArgumentException("Batch price cannot be negative")
         if (request.expirationDate.isBefore(request.receptionDate)) {
@@ -143,7 +96,7 @@ class BatchService(
 
     private fun resolveRemainingAmountForCreate(request: BatchUpsertRequest): Int {
         val initialRemaining = request.remainingAmount ?: request.receivedAmount
-        if (initialRemaining < 0 || initialRemaining > request.receivedAmount) {
+        if (initialRemaining !in 0..request.receivedAmount) {
             throw IllegalArgumentException("Remaining amount must be between 0 and received amount")
         }
         return initialRemaining
@@ -156,10 +109,9 @@ class BatchService(
         }
 
         val desiredRemaining = request.remainingAmount ?: (request.receivedAmount - consumedAmount)
-        if (desiredRemaining < 0 || desiredRemaining > request.receivedAmount) {
+        if (desiredRemaining !in 0..request.receivedAmount) {
             throw IllegalArgumentException("Remaining amount must be between 0 and received amount")
         }
-
         return desiredRemaining
     }
 
@@ -180,4 +132,3 @@ class BatchService(
         batch.productSupplier = relation
     }
 }
-

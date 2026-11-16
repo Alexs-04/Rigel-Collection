@@ -3,7 +3,6 @@ package com.korebit.rigel.service;
 import com.korebit.rigel.dto.ProductDto;
 import com.korebit.rigel.dto.request.AddRelationRequest;
 import com.korebit.rigel.dto.request.ProductAddRequest;
-import com.korebit.rigel.dto.response.Response;
 import com.korebit.rigel.enums.Category;
 import com.korebit.rigel.exception.EntityNotFundException;
 import com.korebit.rigel.model.beans.Product;
@@ -26,8 +25,8 @@ import java.util.Collections;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 /**
@@ -71,7 +70,7 @@ class ProductServiceTest {
         testProduct.setPrice(BigDecimal.valueOf(10.00));
         testProduct.setCategory(Category.SODA);
         testProduct.setDescription("Test Description");
-        testProduct.setSuppliers(Collections.emptyList());
+        testProduct.setSuppliers(new java.util.ArrayList<>());
 
         productRequest = new ProductAddRequest(
                 "Test Product",
@@ -84,6 +83,7 @@ class ProductServiceTest {
                 null,
                 "Test Supplier",
                 25.00,
+                null,
                 null
         );
     }
@@ -106,14 +106,13 @@ class ProductServiceTest {
         when(productRepository.findByName("Test Product")).thenReturn(Optional.empty());
         when(productRepository.findByBarcode("123456789")).thenReturn(Optional.empty());
         when(supplierRepository.findSupplierByName("Test Supplier")).thenReturn(testSupplier);
-        when(batchRepository.findByCode(anyString())).thenReturn(Optional.empty());
-        when(productRepository.save(any())).thenReturn(testProduct);
+        when(productRepository.save(any())).then(returnsFirstArg());
 
-        Response response = productService.saveProduct(productRequest);
+        ProductDto result = productService.saveProduct(productRequest);
 
-        assertTrue(response.getSuccess());
-        assertEquals(200, response.getStatus());
-        assertTrue(response.getMessage().contains("saved successfully"));
+        assertEquals("Test Product", result.getName());
+        assertEquals(1, result.getSuppliers().size());
+        assertEquals(25.0, result.getSuppliers().getFirst().getSupplyPrice());
         verify(productRepository, times(1)).save(any());
     }
 
@@ -178,6 +177,7 @@ class ProductServiceTest {
                 null,
                 "Test Supplier",
                 30.00,
+                null,
                 null
         );
 
@@ -185,12 +185,13 @@ class ProductServiceTest {
         when(productRepository.findByName("Updated Product")).thenReturn(Optional.empty());
         when(productRepository.findByBarcode("987654321")).thenReturn(Optional.empty());
         when(supplierRepository.findSupplierByName("Test Supplier")).thenReturn(testSupplier);
-        when(productRepository.save(any())).thenReturn(testProduct);
+        when(productRepository.save(any())).then(returnsFirstArg());
 
-        Response response = productService.updateProduct("Test Product", updatedRequest);
+        ProductDto result = productService.updateProduct("Test Product", updatedRequest);
 
-        assertTrue(response.getSuccess());
-        assertEquals(200, response.getStatus());
+        assertEquals("Updated Product", result.getName());
+        assertEquals("BEER", result.getCategory());
+        assertEquals(30.0, result.getSuppliers().getFirst().getSupplyPrice());
         verify(productRepository, times(1)).save(any());
     }
 
@@ -198,13 +199,10 @@ class ProductServiceTest {
     @DisplayName("Should delete a product")
     void testDeleteProduct() {
         when(productRepository.findByName("Test Product")).thenReturn(Optional.of(testProduct));
-        doNothing().when(productRepository).delete(any());
 
-        Response response = productService.deleteProduct("Test Product");
+        productService.deleteProduct("Test Product");
 
-        assertTrue(response.getSuccess());
-        assertEquals(200, response.getStatus());
-        verify(productRepository, times(1)).delete(any());
+        verify(productRepository, times(1)).delete(testProduct);
     }
 
     @Test
@@ -219,18 +217,26 @@ class ProductServiceTest {
     @Test
     @DisplayName("Should add relation to product")
     void testAddRelationToProduct() {
-        testProduct.setSuppliers(Collections.emptyList());
+        testProduct.setSuppliers(new java.util.ArrayList<>());
         AddRelationRequest request = new AddRelationRequest("Test Product", "Test Supplier", 25.00);
 
         when(productRepository.findByName("Test Product")).thenReturn(Optional.of(testProduct));
         when(supplierRepository.findSupplierByName("Test Supplier")).thenReturn(testSupplier);
-        when(productRepository.save(any())).thenReturn(testProduct);
+        when(productRepository.save(any())).then(returnsFirstArg());
 
-        Response response = productService.addRelationToProduct(request);
+        ProductDto result = productService.addRelationToProduct(request);
 
-        assertTrue(response.getSuccess());
-        assertEquals(200, response.getStatus());
+        assertEquals("Test Supplier", result.getSuppliers().getFirst().getName());
         verify(productRepository, times(1)).save(any());
+    }
+
+    @Test
+    @DisplayName("Should reject a negative minimum stock")
+    void testUpdateMinStockNegative() {
+        when(productRepository.findByBarcode("123456789")).thenReturn(Optional.of(testProduct));
+
+        assertThrows(IllegalArgumentException.class, () -> productService.updateMinStock("123456789", -1));
+        verify(productRepository, never()).save(any());
     }
 
     @Test
@@ -238,7 +244,7 @@ class ProductServiceTest {
     void testAddDuplicateRelation() {
         ProductSupplier existingRelation = new ProductSupplier();
         existingRelation.setSupplier(testSupplier);
-        testProduct.setSuppliers(Collections.singletonList(existingRelation));
+        testProduct.setSuppliers(new java.util.ArrayList<>(java.util.List.of(existingRelation)));
 
         AddRelationRequest request = new AddRelationRequest("Test Product", "Test Supplier", 25.00);
 
@@ -262,12 +268,15 @@ class ProductServiceTest {
                 null,
                 "Test Supplier",
                 25.00,
+                null,
                 null
         );
 
         when(productRepository.findByName("Test Product")).thenReturn(Optional.empty());
         when(productRepository.findByBarcode("123456789")).thenReturn(Optional.empty());
+        when(supplierRepository.findSupplierByName("Test Supplier")).thenReturn(testSupplier);
 
         assertThrows(IllegalArgumentException.class, () -> productService.saveProduct(invalidRequest));
+        verify(productRepository, never()).save(any());
     }
 }

@@ -1,116 +1,151 @@
 package com.korebit.rigel.service.jwt;
 
+import com.korebit.rigel.enums.TokenType;
 import com.korebit.rigel.model.beans.Consumer;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
+import java.time.Instant;
 import java.util.Date;
-import java.util.Map;
 import java.util.Objects;
-import java.util.function.Function;
+import java.util.UUID;
 
 /**
- * Provides JWT generation and validation utilities for authentication workflows.
+ * Issues and parses the JWTs used by the API.
+ *
+ * <p>Every token carries a random {@code jti} (persisted server side so it can be revoked)
+ * and a {@value #CLAIM_TOKEN_TYPE} claim that distinguishes access tokens from refresh tokens,
+ * so a refresh token can never be used to call the API and vice versa.</p>
  */
 @Service
 public class JwtService {
 
-    @Value("${jwt.secret}")
-    private String secretKet;
-    @Value("${jwt.expiration}")
-    private long jwtExpiration;
-    @Value("${jwt.refresh}")
-    private long jwtRefresh;
+    public static final String CLAIM_TOKEN_TYPE = "token_type";
+    public static final String CLAIM_USER_ID = "uid";
+    private static final int MIN_KEY_BYTES = 32;
 
-    /**
-     * Generates an access token for the provided consumer.
-     *
-     * @param consumer authenticated consumer.
-     * @return signed JWT access token.
-     */
-    public String generateToken(final Consumer consumer) {
-        return buildToken(consumer, jwtExpiration);
+    private final SecretKey secretKey;
+    private final long accessTokenTtlMs;
+    private final long refreshTokenTtlMs;
+
+    public JwtService(
+            @Value("${jwt.secret}") String secret,
+            @Value("${jwt.expiration}") long accessTokenTtlMs,
+            @Value("${jwt.refresh}") long refreshTokenTtlMs
+    ) {
+        this.secretKey = buildKey(secret);
+        if (accessTokenTtlMs <= 0 || refreshTokenTtlMs <= 0) {
+            throw new IllegalStateException("jwt.expiration and jwt.refresh must be positive");
+        }
+        if (refreshTokenTtlMs <= accessTokenTtlMs) {
+            throw new IllegalStateException("jwt.refresh must be greater than jwt.expiration");
+        }
+        this.accessTokenTtlMs = accessTokenTtlMs;
+        this.refreshTokenTtlMs = refreshTokenTtlMs;
     }
 
     /**
-     * Generates a refresh token for the provided consumer.
+     * A signed token together with the metadata needed to persist it.
      *
-     * @param consumer authenticated consumer.
-     * @return signed JWT refresh token.
+     * @param value     compact JWT sent to the client
+     * @param id        the token {@code jti}, used as the persisted lookup key
+     * @param expiresAt absolute expiration instant
      */
-    public String generateRefreshToken(final Consumer consumer) {
-        return buildToken(consumer, jwtRefresh);
+    public record IssuedToken(String value, String id, Instant expiresAt) {
+    }
+
+    public IssuedToken generateAccessToken(final Consumer consumer) {
+        return buildToken(consumer, TokenType.BEARER, accessTokenTtlMs);
+    }
+
+    public IssuedToken generateRefreshToken(final Consumer consumer) {
+        return buildToken(consumer, TokenType.REFRESH, refreshTokenTtlMs);
     }
 
     /**
-     * Extracts the username (token subject) from a token.
+     * Verifies signature and expiration and returns the claims.
      *
-     * @param token signed JWT token.
-     * @return token subject.
+     * @throws JwtException             when the token is malformed, tampered or expired
+     * @throws IllegalArgumentException when the token is null or blank
      */
-    public String extractUsername(final String token) {
-        return extractClaim(token, Claims::getSubject);
-    }
-
-    /**
-     * Validates that a token belongs to a user and has not expired.
-     *
-     * @param token signed JWT token.
-     * @param userDetails user details to compare against.
-     * @return true when token is valid for the provided user.
-     */
-    public boolean isTokenValid(final String token, final UserDetails userDetails) {
-        final String username = extractUsername(token);
-        return username.equals(userDetails.getUsername()) && !isTokenExpired(token);
-    }
-
-    /**
-     * Extracts a claim from a token using the given resolver function.
-     *
-     * @param token signed JWT token.
-     * @param claimResolver resolver function for claim extraction.
-     * @param <T> resolved claim type.
-     * @return extracted claim value.
-     */
-    public <T> T extractClaim(final String token, final Function<Claims, T> claimResolver) {
-        final Claims claims = extractAllClaims(token);
-        return claimResolver.apply(claims);
-    }
-
-    private String buildToken(final Consumer consumer, final long expiration) {
-        return Jwts.builder()
-                .id(Objects.requireNonNull(consumer.getId()).toString())
-                .claims(Map.of(
-                        "name", consumer.getName(),
-                        "role", consumer.getRole().name(),
-                        "active", consumer.getActive()
-                ))
-                .subject(consumer.getEmail())
-                .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + expiration))
-                .signWith(getSecretKey(), Jwts.SIG.HS256) // ahora se especifica algoritmo
-                .compact();
-    }
-    private boolean isTokenExpired(final String token) {
-        return extractClaim(token, Claims::getExpiration).before(new Date());
-    }
-
-    private Claims extractAllClaims(final String token) {
+    public Claims parseClaims(final String token) {
         return Jwts.parser()
-                .verifyWith(getSecretKey())   // antes setSigningKey
+                .verifyWith(secretKey)
                 .build()
-                .parseSignedClaims(token)     // antes parseClaimsJws
-                .getPayload();                // antes getBody
+                .parseSignedClaims(token)
+                .getPayload();
     }
 
-    private SecretKey getSecretKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(secretKet);
+    /**
+     * Same as {@link #parseClaims(String)} but still returns the claims of an expired token.
+     * The signature is always verified. Useful for logout, where an expired access token
+     * must still identify the session to revoke.
+     */
+    public Claims parseClaimsAllowingExpired(final String token) {
+        try {
+            return parseClaims(token);
+        } catch (ExpiredJwtException expired) {
+            return expired.getClaims();
+        }
+    }
+
+    /**
+     * @return the token kind declared in the claims, or {@code null} when absent/unknown.
+     */
+    public TokenType extractTokenType(final Claims claims) {
+        Object raw = claims.get(CLAIM_TOKEN_TYPE);
+        if (raw == null) {
+            return null;
+        }
+        try {
+            return TokenType.valueOf(raw.toString());
+        } catch (IllegalArgumentException unknown) {
+            return null;
+        }
+    }
+
+    public String extractUsername(final String token) {
+        return parseClaims(token).getSubject();
+    }
+
+    private IssuedToken buildToken(final Consumer consumer, final TokenType type, final long ttlMs) {
+        Objects.requireNonNull(consumer.getId(), "Consumer id is required to issue a token");
+        final String tokenId = UUID.randomUUID().toString();
+        final Instant issuedAt = Instant.now();
+        final Instant expiresAt = issuedAt.plusMillis(ttlMs);
+
+        final String value = Jwts.builder()
+                .id(tokenId)
+                .subject(consumer.getEmail())
+                .claim(CLAIM_TOKEN_TYPE, type.name())
+                .claim(CLAIM_USER_ID, consumer.getId())
+                .claim("name", consumer.getName())
+                .claim("role", consumer.getRole().name())
+                .claim("active", consumer.getActive())
+                .issuedAt(Date.from(issuedAt))
+                .expiration(Date.from(expiresAt))
+                .signWith(secretKey, Jwts.SIG.HS256)
+                .compact();
+
+        return new IssuedToken(value, tokenId, expiresAt);
+    }
+
+    private static SecretKey buildKey(final String secret) {
+        if (secret == null || secret.isBlank()) {
+            throw new IllegalStateException("jwt.secret must be configured");
+        }
+        final byte[] keyBytes = Decoders.BASE64.decode(secret.trim());
+        if (keyBytes.length < MIN_KEY_BYTES) {
+            throw new IllegalStateException(
+                    "jwt.secret must be a Base64 value of at least " + MIN_KEY_BYTES + " bytes (256 bits)");
+        }
         return Keys.hmacShaKeyFor(keyBytes);
     }
 }

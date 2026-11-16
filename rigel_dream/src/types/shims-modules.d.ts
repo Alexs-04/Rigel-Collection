@@ -4,6 +4,7 @@ import type {AxiosInstance} from 'axios'
 declare module '*context/AuthContext' {
     export interface AuthUser {
         username?: string
+        name?: string
         role?: string
         active?: boolean
     }
@@ -13,7 +14,7 @@ declare module '*context/AuthContext' {
         accessToken?: string | null
         hasRole?: (...roles: string[]) => boolean
         login?: (email: string, password: string) => Promise<{success: boolean}>
-        logout?: () => void
+        logout?: () => Promise<void>
     }
 
     export const AuthContext: Context<AuthContextValue | null>
