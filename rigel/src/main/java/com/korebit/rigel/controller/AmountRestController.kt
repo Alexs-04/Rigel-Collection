@@ -1,8 +1,9 @@
 package com.korebit.rigel.controller
 
+import com.korebit.rigel.dto.AmountDto
+import com.korebit.rigel.dto.ContainerTypeOptionDto
 import com.korebit.rigel.dto.request.AmountBuyoutRequest
-import com.korebit.rigel.dto.request.AmountCreateRequest
-import com.korebit.rigel.dto.request.AmountUpdateRequest
+import com.korebit.rigel.dto.request.AmountUpsertRequest
 import com.korebit.rigel.service.AmountService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -24,40 +25,40 @@ class AmountRestController(
 ) {
 
     @GetMapping("/all")
-    fun getAllAmounts() = amountService.getAllAmounts()
+    fun getAllAmounts(): ResponseEntity<List<AmountDto>> = ResponseEntity.ok(amountService.getAllAmounts())
 
     @GetMapping("/types")
-    fun getContainerTypes() = amountService.getContainerTypes()
+    fun getContainerTypes(): ResponseEntity<List<ContainerTypeOptionDto>> =
+        ResponseEntity.ok(amountService.getContainerTypes())
 
     @GetMapping("/{folio}")
-    fun getAmountByFolio(@PathVariable folio: Long) = amountService.getAmountByFolio(folio)
+    fun getAmountByFolio(@PathVariable folio: Long): ResponseEntity<AmountDto> =
+        ResponseEntity.ok(amountService.getAmountByFolio(folio))
 
     @PostMapping("/add")
     fun createAmount(
-        @RequestBody request: AmountCreateRequest,
+        @RequestBody request: AmountUpsertRequest,
         authentication: Authentication,
-    ): ResponseEntity<Any> {
-        return ResponseEntity.status(HttpStatus.CREATED).body(amountService.createAmount(request, authentication.name))
-    }
+    ): ResponseEntity<AmountDto> =
+        ResponseEntity.status(HttpStatus.CREATED).body(amountService.createAmount(request, authentication.name))
 
     @PutMapping("/{folio}")
-    fun updateAmount(@PathVariable folio: Long, @RequestBody request: AmountUpdateRequest): ResponseEntity<Any> {
-        return ResponseEntity.ok(amountService.updateAmount(folio, request))
-    }
+    fun updateAmount(@PathVariable folio: Long, @RequestBody request: AmountUpsertRequest): ResponseEntity<AmountDto> =
+        ResponseEntity.ok(amountService.updateAmount(folio, request))
 
     @PatchMapping("/{folio}/return")
-    fun markAsReturned(@PathVariable folio: Long): ResponseEntity<Any> {
-        return ResponseEntity.ok(amountService.markAsReturned(folio))
-    }
+    fun markAsReturned(@PathVariable folio: Long): ResponseEntity<AmountDto> =
+        ResponseEntity.ok(amountService.markAsReturned(folio))
 
     @PatchMapping("/{folio}/buyout")
-    fun markAsBoughtOut(@PathVariable folio: Long, @RequestBody request: AmountBuyoutRequest): ResponseEntity<Any> {
-        return ResponseEntity.ok(amountService.markAsBoughtOut(folio, request))
-    }
+    fun markAsBoughtOut(
+        @PathVariable folio: Long,
+        @RequestBody request: AmountBuyoutRequest,
+    ): ResponseEntity<AmountDto> = ResponseEntity.ok(amountService.markAsBoughtOut(folio, request))
 
     @DeleteMapping("/{folio}")
-    fun deleteAmount(@PathVariable folio: Long): ResponseEntity<Any> {
-        return ResponseEntity.ok(amountService.deleteAmount(folio))
+    fun deleteAmount(@PathVariable folio: Long): ResponseEntity<Void> {
+        amountService.deleteAmount(folio)
+        return ResponseEntity.noContent().build()
     }
 }
-

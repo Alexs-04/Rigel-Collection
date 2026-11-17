@@ -1,0 +1,11 @@
+.git
+.gradle
+.kotlin
+.idea
+*.iml
+build
+out
+uploads
+local.properties
+Dockerfile
+.dockerignore

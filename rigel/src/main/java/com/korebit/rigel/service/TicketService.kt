@@ -2,7 +2,6 @@ package com.korebit.rigel.service
 
 import com.korebit.rigel.dto.TicketDto
 import com.korebit.rigel.dto.request.TicketAddRequest
-import com.korebit.rigel.dto.response.Response
 import com.korebit.rigel.exception.EntityNotFundException
 import com.korebit.rigel.model.beans.Batch
 import com.korebit.rigel.model.beans.Product
@@ -12,16 +11,18 @@ import com.korebit.rigel.repository.BatchRepository
 import com.korebit.rigel.repository.ConsumerRepository
 import com.korebit.rigel.repository.ProductRepository
 import com.korebit.rigel.repository.TicketRepository
+import com.korebit.rigel.enums.MethodPayment
+import org.springframework.data.domain.Sort
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.UUID
 
-@Service
 /**
  * Handles point-of-sale ticket creation, stock allocation, and ticket retrieval.
  */
+@Service
 class TicketService(
     private val ticketRepository: TicketRepository,
     private val consumerRepository: ConsumerRepository,
@@ -37,14 +38,13 @@ class TicketService(
         val product: Product,
     )
 
+    /**
+     * Deletes a ticket and restores consumed batch stock.
+     *
+     * @param barcode ticket barcode.
+     */
     @Transactional
-            /**
-             * Deletes a ticket and restores consumed batch stock.
-             *
-             * @param barcode ticket barcode.
-             * @return operation response.
-             */
-    fun deleteTicket(barcode: String): Response {
+    fun deleteTicket(barcode: String) {
         val ticket = ticketRepository.findTicketByBarcode(barcode)
             ?: throw EntityNotFundException("Ticket with barcode $barcode not found")
 
@@ -67,28 +67,20 @@ class TicketService(
         }
 
         ticketRepository.delete(ticket)
-
-        return Response(
-            success = true,
-            message = "Ticket deleted successfully",
-            status = 200
-        )
     }
 
+    /**
+     * Creates a new ticket and allocates quantities from sellable batches.
+     *
+     * @param ticket ticket creation payload.
+     * @param sellerEmail email of the authenticated user registering the sale.
+     * @return the persisted ticket.
+     */
     @Transactional
-            /**
-             * Creates a new ticket and allocates quantities from sellable batches.
-             *
-             * @param ticket ticket creation payload.
-             * @return operation response.
-             */
-    fun addTicket(ticket: TicketAddRequest): Response {
-        val consumerEmail = ticket.currentConsumerEmail().trim()
-        if (consumerEmail.isBlank()) {
-            throw IllegalArgumentException("Current consumer email is required")
-        }
+    fun addTicket(ticket: TicketAddRequest, sellerEmail: String): TicketDto {
+        val consumerEmail = sellerEmail.trim()
 
-        val items = ticket.products()
+        val items = ticket.products
         if (items.isNullOrEmpty()) {
             throw IllegalArgumentException("Ticket must include at least one product")
         }
@@ -146,12 +138,12 @@ class TicketService(
         }
 
         val newTicket = Ticket(
-            description = ticket.description()?.trim().orEmpty(),
-            dateAndTime = ticket.dateAndTime() ?: LocalDate.now(),
+            description = ticket.description?.trim().orEmpty(),
+            dateAndTime = ticket.dateAndTime ?: LocalDate.now(),
             barcode = generateTicketBarcode(),
             totalAmount = BigDecimal.ZERO,
             consumer = currentConsumer,
-            payment = ticket.methodPayment
+            payment = ticket.methodPayment ?: MethodPayment.CASH,
         )
 
         val consumedByBatch = mutableMapOf<Batch, Int>()
@@ -225,13 +217,7 @@ class TicketService(
             batchRepository.saveAll(consumedByBatch.keys)
         }
 
-        ticketRepository.save(newTicket)
-
-        return Response(
-            success = true,
-            message = "Ticket added successfully",
-            status = 200
-        )
+        return TicketDto.fromEntity(ticketRepository.save(newTicket))
     }
 
     /**
@@ -245,7 +231,7 @@ class TicketService(
         val ticket = ticketRepository.findTicketByBarcode(barcode)
             ?: throw EntityNotFundException("Ticket with barcode $barcode not found")
 
-        return TicketDto.toDto(ticket)
+        return TicketDto.fromEntity(ticket)
     }
 
 
@@ -265,8 +251,7 @@ class TicketService(
      */
     @Transactional(readOnly = true)
     fun getAllTickets(): List<TicketDto> {
-        return ticketRepository.findAll().map { ticket ->
-            TicketDto.toDto(ticket)
-        }
+        return ticketRepository.findAll(Sort.by(Sort.Order.desc("dateAndTime"), Sort.Order.desc("folio")))
+            .map(TicketDto::fromEntity)
     }
 }

@@ -99,12 +99,29 @@ npm run dev
 
 The app starts on `http://localhost:5173`.
 
-### Docker (backend only)
+### Docker (database + backend + frontend)
 
 ```bash
-docker build -t rigel:1.0 .
-docker run -p 8080:8080 rigel:1.0
+cp .env.example .env          # set DB_PASSWORD and JWT_SECRET (openssl rand -base64 48)
+docker compose up -d --build
 ```
+
+| Service    | Image                | URL                     |
+|------------|----------------------|-------------------------|
+| `frontend` | nginx + Vite build   | `http://localhost:5173` |
+| `backend`  | Spring Boot (JRE 21) | `http://localhost:8080` |
+| `db`       | PostgreSQL 17        | internal only           |
+
+The frontend container proxies `/api/*` to the backend, so the browser only talks to one origin.
+Database data and locally stored product images live in the `db-data` and `uploads` volumes.
+
+### Sharing on the local network
+
+- **Docker:** open `http://<this-machine-ip>:5173` from any device on the network. Set
+  `ORIGIN` in `.env` to that URL so the links sent by email point to it.
+- **Without Docker:** start the backend with `CORS_LOCAL_NETWORK=true` (accepts browser origins from
+  `192.168.0.*`; change the range with `CORS_LOCAL_NETWORK_PATTERNS`), and the frontend with
+  `VITE_API_BASE=http://<this-machine-ip>:8080 npm run dev -- --host`.
 
 ### JAR (standalone)
 
@@ -118,26 +135,18 @@ java -jar build/libs/Rigel-*.jar
 
 ## Configuration
 
-Create an `application.yml` (or set environment variables) for the backend:
+The backend reads its settings from environment variables (defaults are meant for local development):
 
-```yaml
-spring:
-  datasource:
-    url: jdbc:postgresql://localhost:5432/rigel
-    username: your_user
-    password: your_password
-
-cloudinary:
-  cloud-name: ${CLOUDINARY_CLOUD_NAME}
-  api-key: ${CLOUDINARY_API_KEY}
-  api-secret: ${CLOUDINARY_API_SECRET}
-  folder: rigel/products      # optional, this is the default
-
-image:
-  storage:
-    local-path: ./uploads     # fallback if Cloudinary is not configured
-    public-path: /uploads
-```
+| Variable                                                              | Default                                     | Purpose                                             |
+|-----------------------------------------------------------------------|---------------------------------------------|-----------------------------------------------------|
+| `DB_URL`, `DB_USERNAME`, `DB_PASSWORD`                                | `jdbc:postgresql://localhost:5432/rigel_db` | PostgreSQL connection                               |
+| `JWT_SECRET`                                                          | development key                             | Base64 HMAC key, at least 32 bytes                  |
+| `ORIGIN`                                                              | `http://localhost:5173`                     | Frontend URL: CORS origin and base of emailed links |
+| `CORS_LOCAL_NETWORK`                                                  | `false`                                     | Also accept browser origins from the local network  |
+| `CORS_LOCAL_NETWORK_PATTERNS`                                         | `http://192.168.0.*:[*]`                    | Comma-separated origin patterns for the option above |
+| `EMAIL_HOST`, `EMAIL_PORT`, `EMAIL_ADDRESS`, `EMAIL_PASSWORD`         | empty                                       | SMTP (optional)                                     |
+| `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` | empty                                       | Image hosting (optional)                            |
+| `IMAGE_STORAGE_PATH`                                                  | `./uploads`                                 | Local image folder when Cloudinary is not set       |
 
 > If Cloudinary credentials are absent or blank, the service falls back to local disk storage automatically.
 

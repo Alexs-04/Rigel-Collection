@@ -2,9 +2,9 @@
 <project version="4">
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
-      <module name="rigel" options="-parameters" />
-      <module name="rigel.main" options="-parameters" />
-      <module name="rigel.test" options="-parameters" />
+      <module name="rigel" options="-parameters -proc:none" />
+      <module name="rigel.main" options="-parameters -proc:none" />
+      <module name="rigel.test" options="-parameters -proc:none" />
     </option>
   </component>
 </project>

@@ -3,81 +3,50 @@ package com.korebit.rigel.service
 import com.korebit.rigel.dto.AmountDto
 import com.korebit.rigel.dto.ContainerTypeOptionDto
 import com.korebit.rigel.dto.request.AmountBuyoutRequest
-import com.korebit.rigel.dto.request.AmountCreateRequest
-import com.korebit.rigel.dto.request.AmountUpdateRequest
-import com.korebit.rigel.dto.response.Response
+import com.korebit.rigel.dto.request.AmountUpsertRequest
 import com.korebit.rigel.enums.ContainerType
 import com.korebit.rigel.exception.EntityNotFundException
 import com.korebit.rigel.model.beans.Amount
 import com.korebit.rigel.model.beans.Consumer
 import com.korebit.rigel.repository.AmountRepository
 import com.korebit.rigel.repository.ConsumerRepository
+import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
 import java.time.LocalDateTime
 
-@Service
 /**
  * Handles amount voucher lifecycle operations used for returnable container charges.
  */
+@Service
 class AmountService(
     private val amountRepository: AmountRepository,
     private val consumerRepository: ConsumerRepository,
 ) {
 
+    /** Lists all vouchers, newest first. */
     @Transactional(readOnly = true)
-    /**
-     * Lists all amount vouchers ordered by creation date and folio.
-     *
-     * @return ordered list of amount DTOs.
-     */
     fun getAllAmounts(): List<AmountDto> {
-        return amountRepository.findAll()
-            .sortedWith(compareByDescending<Amount> { it.created }.thenByDescending { it.folio })
-            .map(AmountDto::fromEntity)
+        return amountRepository.findAll(NEWEST_FIRST).map(AmountDto::fromEntity)
     }
 
     @Transactional(readOnly = true)
-    /**
-     * Retrieves a single amount voucher by folio.
-     *
-     * @param folio voucher folio.
-     * @return amount DTO.
-     */
-    fun getAmountByFolio(folio: Long): AmountDto {
-        return AmountDto.fromEntity(findAmountByFolio(folio))
-    }
+    fun getAmountByFolio(folio: Long): AmountDto = AmountDto.fromEntity(findAmountByFolio(folio))
 
-    @Transactional(readOnly = true)
-    /**
-     * Returns all available container type options.
-     *
-     * @return container type catalog.
-     */
-    fun getContainerTypes(): List<ContainerTypeOptionDto> {
-        return ContainerType.entries.map(ContainerTypeOptionDto::fromType)
-    }
+    fun getContainerTypes(): List<ContainerTypeOptionDto> =
+        ContainerType.entries.map(ContainerTypeOptionDto::fromType)
 
+    /**
+     * Creates a new voucher owned by the authenticated user.
+     *
+     * @param actorEmail email (security principal name) of the user performing the action.
+     */
     @Transactional
-    /**
-     * Creates a new amount voucher.
-     *
-     * @param request creation payload.
-     * @param actorUsername username of the consumer performing the action.
-     * @return operation response.
-     */
-    fun createAmount(request: AmountCreateRequest, actorUsername: String): Response {
-        validateRequest(
-            customerName = request.customerName,
-            quantity = request.quantity,
-            saleUnitPrice = request.saleUnitPrice,
-            buyoutUnitPrice = request.buyoutUnitPrice,
-            expirationDate = request.expirationDate,
-        )
+    fun createAmount(request: AmountUpsertRequest, actorEmail: String): AmountDto {
+        validateRequest(request)
 
         val saleUnitPrice = request.saleUnitPrice.toBigDecimal()
-        val quantityDecimal = BigDecimal.valueOf(request.quantity.toLong())
         val amount = Amount(
             description = request.description.trim(),
             type = request.type,
@@ -85,39 +54,21 @@ class AmountService(
             quantity = request.quantity,
             saleUnitPrice = saleUnitPrice,
             buyoutUnitPrice = request.buyoutUnitPrice?.toBigDecimal(),
-            total = saleUnitPrice.multiply(quantityDecimal),
+            total = saleUnitPrice.multiply(BigDecimal.valueOf(request.quantity.toLong())),
             created = LocalDateTime.now(),
             expirationDate = request.expirationDate,
             returned = false,
             notes = request.notes.trim(),
-            consumer = resolveConsumer(actorUsername),
+            consumer = resolveConsumer(actorEmail),
         )
 
-        amountRepository.save(amount)
-
-        return Response(
-            success = true,
-            status = 201,
-            message = "Importe ${amount.folio} registrado correctamente"
-        )
+        return AmountDto.fromEntity(amountRepository.save(amount))
     }
 
+    /** Updates a voucher while it is still open (not returned nor bought out). */
     @Transactional
-    /**
-     * Updates an existing amount voucher while it is still open.
-     *
-     * @param folio voucher folio.
-     * @param request update payload.
-     * @return operation response.
-     */
-    fun updateAmount(folio: Long, request: AmountUpdateRequest): Response {
-        validateRequest(
-            customerName = request.customerName,
-            quantity = request.quantity,
-            saleUnitPrice = request.saleUnitPrice,
-            buyoutUnitPrice = request.buyoutUnitPrice,
-            expirationDate = request.expirationDate,
-        )
+    fun updateAmount(folio: Long, request: AmountUpsertRequest): AmountDto {
+        validateRequest(request)
 
         val amount = findAmountByFolio(folio)
         if (amount.returned || amount.boughtOutAt != null) {
@@ -135,58 +86,24 @@ class AmountService(
         amount.expirationDate = request.expirationDate
         amount.notes = request.notes.trim()
 
-        amountRepository.save(amount)
-
-        return Response(
-            success = true,
-            status = 200,
-            message = "Importe $folio actualizado correctamente"
-        )
+        return AmountDto.fromEntity(amountRepository.save(amount))
     }
 
     @Transactional
-    /**
-     * Marks an amount voucher as returned.
-     *
-     * @param folio voucher folio.
-     * @return operation response.
-     */
-    fun markAsReturned(folio: Long): Response {
+    fun markAsReturned(folio: Long): AmountDto {
         val amount = findAmountByFolio(folio)
-        if (amount.returned) {
-            throw IllegalArgumentException("El importe $folio ya fue devuelto")
-        }
-        if (amount.boughtOutAt != null) {
-            throw IllegalArgumentException("El importe $folio ya fue comprado")
-        }
+        requireOpen(amount)
 
         amount.returned = true
         amount.returnedAt = LocalDateTime.now()
-        amountRepository.save(amount)
-
-        return Response(
-            success = true,
-            status = 200,
-            message = "Importe $folio marcado como devuelto"
-        )
+        return AmountDto.fromEntity(amountRepository.save(amount))
     }
 
+    /** Registers the buyout of an expired, still open voucher. */
     @Transactional
-    /**
-     * Marks an expired amount voucher as bought out.
-     *
-     * @param folio voucher folio.
-     * @param request buyout payload.
-     * @return operation response.
-     */
-    fun markAsBoughtOut(folio: Long, request: AmountBuyoutRequest): Response {
+    fun markAsBoughtOut(folio: Long, request: AmountBuyoutRequest): AmountDto {
         val amount = findAmountByFolio(folio)
-        if (amount.returned) {
-            throw IllegalArgumentException("El importe $folio ya fue devuelto")
-        }
-        if (amount.boughtOutAt != null) {
-            throw IllegalArgumentException("El importe $folio ya fue comprado")
-        }
+        requireOpen(amount)
         if (request.buyoutUnitPrice < 0) {
             throw IllegalArgumentException("El precio de compra no puede ser negativo")
         }
@@ -202,58 +119,46 @@ class AmountService(
         if (extraNotes.isNotBlank()) {
             amount.notes = listOf(amount.notes, extraNotes).filter { it.isNotBlank() }.joinToString(" | ")
         }
-        amountRepository.save(amount)
-
-        return Response(
-            success = true,
-            status = 200,
-            message = "Compra del importe $folio registrada correctamente"
-        )
+        return AmountDto.fromEntity(amountRepository.save(amount))
     }
 
     @Transactional
-    /**
-     * Deletes an amount voucher by folio.
-     *
-     * @param folio voucher folio.
-     * @return operation response.
-     */
-    fun deleteAmount(folio: Long): Response {
-        val amount = findAmountByFolio(folio)
-        amountRepository.delete(amount)
-        return Response(
-            success = true,
-            status = 200,
-            message = "Importe $folio eliminado correctamente"
-        )
+    fun deleteAmount(folio: Long) {
+        amountRepository.delete(findAmountByFolio(folio))
+    }
+
+    private fun requireOpen(amount: Amount) {
+        if (amount.returned) {
+            throw IllegalArgumentException("El importe ${amount.folio} ya fue devuelto")
+        }
+        if (amount.boughtOutAt != null) {
+            throw IllegalArgumentException("El importe ${amount.folio} ya fue comprado")
+        }
     }
 
     private fun findAmountByFolio(folio: Long): Amount {
         return amountRepository.findById(folio)
-            .orElseThrow { EntityNotFundException("Amount with folio $folio not found") }
+            .orElseThrow { EntityNotFundException("Importe con folio $folio no encontrado") }
     }
 
-    private fun resolveConsumer(username: String): Consumer {
-        return consumerRepository.findByEmail(username)
-            ?: throw EntityNotFundException("Consumer with username $username not found")
+    private fun resolveConsumer(email: String): Consumer {
+        return consumerRepository.findByEmail(email)
+            ?: throw EntityNotFundException("Usuario $email no encontrado")
     }
 
-    private fun validateRequest(
-        customerName: String,
-        quantity: Int,
-        saleUnitPrice: Double,
-        buyoutUnitPrice: Double?,
-        expirationDate: LocalDateTime,
-    ) {
-        if (customerName.trim().isEmpty()) throw IllegalArgumentException("El nombre del cliente es obligatorio")
-        if (quantity <= 0) throw IllegalArgumentException("La cantidad debe ser mayor a 0")
-        if (saleUnitPrice < 0) throw IllegalArgumentException("El precio de venta no puede ser negativo")
-        if (buyoutUnitPrice != null && buyoutUnitPrice < 0) {
+    private fun validateRequest(request: AmountUpsertRequest) {
+        if (request.customerName.isBlank()) throw IllegalArgumentException("El nombre del cliente es obligatorio")
+        if (request.quantity <= 0) throw IllegalArgumentException("La cantidad debe ser mayor a 0")
+        if (request.saleUnitPrice < 0) throw IllegalArgumentException("El precio de venta no puede ser negativo")
+        if (request.buyoutUnitPrice != null && request.buyoutUnitPrice < 0) {
             throw IllegalArgumentException("El precio de compra no puede ser negativo")
         }
-        if (!expirationDate.isAfter(LocalDateTime.now().minusMinutes(1))) {
+        if (!request.expirationDate.isAfter(LocalDateTime.now().minusMinutes(1))) {
             throw IllegalArgumentException("La fecha limite debe ser posterior a la fecha actual")
         }
     }
-}
 
+    companion object {
+        private val NEWEST_FIRST: Sort = Sort.by(Sort.Order.desc("created"), Sort.Order.desc("folio"))
+    }
+}

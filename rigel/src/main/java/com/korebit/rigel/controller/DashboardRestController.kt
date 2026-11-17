@@ -5,6 +5,7 @@ import com.korebit.rigel.dto.DashboardStats
 import com.korebit.rigel.dto.DashboardTopItem
 import com.korebit.rigel.service.DashboardService
 import org.springframework.format.annotation.DateTimeFormat
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RequestMapping
@@ -17,8 +18,8 @@ import java.time.LocalDate
 class DashboardRestController(private val dashboardService: DashboardService) {
 
     @GetMapping("/stats")
-    fun getDashboardStats(): DashboardStats {
-        return dashboardService.getDashboardStats()
+    fun getDashboardStats(): ResponseEntity<DashboardStats> {
+        return ResponseEntity.ok(dashboardService.getDashboardStats())
     }
 
     @GetMapping("/snapshot")
@@ -28,8 +29,8 @@ class DashboardRestController(private val dashboardService: DashboardService) {
         date: LocalDate?,
         @RequestParam(required = false, defaultValue = "5")
         limit: Int,
-    ): DashboardSnapshot {
-        return dashboardService.getDashboardSnapshot(date, limit)
+    ): ResponseEntity<DashboardSnapshot> {
+        return ResponseEntity.ok(dashboardService.getDashboardSnapshot(date, limit))
     }
 
     @GetMapping("/sales/day")
@@ -37,8 +38,8 @@ class DashboardRestController(private val dashboardService: DashboardService) {
         @RequestParam(required = false)
         @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
         date: LocalDate?,
-    ): BigDecimal {
-        return dashboardService.getSalesForDay(date)
+    ): ResponseEntity<BigDecimal> {
+        return ResponseEntity.ok(dashboardService.getSalesForDay(date))
     }
 
     @GetMapping("/sales/month")
@@ -46,8 +47,8 @@ class DashboardRestController(private val dashboardService: DashboardService) {
         @RequestParam(required = false)
         @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
         date: LocalDate?,
-    ): BigDecimal {
-        return dashboardService.getSalesForMonth(date)
+    ): ResponseEntity<BigDecimal> {
+        return ResponseEntity.ok(dashboardService.getSalesForMonth(date))
     }
 
     @GetMapping("/sales/year")
@@ -55,8 +56,8 @@ class DashboardRestController(private val dashboardService: DashboardService) {
         @RequestParam(required = false)
         @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
         date: LocalDate?,
-    ): BigDecimal {
-        return dashboardService.getSalesForYear(date)
+    ): ResponseEntity<BigDecimal> {
+        return ResponseEntity.ok(dashboardService.getSalesForYear(date))
     }
 
     @GetMapping("/sales/top-products")
@@ -66,8 +67,8 @@ class DashboardRestController(private val dashboardService: DashboardService) {
         date: LocalDate?,
         @RequestParam(required = false, defaultValue = "5")
         limit: Int,
-    ): List<DashboardTopItem> {
-        return dashboardService.getMayorProductSale(date, limit)
+    ): ResponseEntity<List<DashboardTopItem>> {
+        return ResponseEntity.ok(dashboardService.getMayorProductSale(date, limit))
     }
 
     @GetMapping("/sales/top-suppliers")
@@ -77,7 +78,7 @@ class DashboardRestController(private val dashboardService: DashboardService) {
         date: LocalDate?,
         @RequestParam(required = false, defaultValue = "5")
         limit: Int,
-    ): List<DashboardTopItem> {
-        return dashboardService.getTopSellingSupplier(date, limit)
+    ): ResponseEntity<List<DashboardTopItem>> {
+        return ResponseEntity.ok(dashboardService.getTopSellingSupplier(date, limit))
     }
 }

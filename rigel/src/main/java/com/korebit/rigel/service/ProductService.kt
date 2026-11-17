@@ -5,7 +5,6 @@ import com.korebit.rigel.dto.ProductDto
 import com.korebit.rigel.dto.request.AddRelationRequest
 import com.korebit.rigel.dto.request.ProductAddRequest
 import com.korebit.rigel.dto.request.ProductBatchRequest
-import com.korebit.rigel.dto.response.Response
 import com.korebit.rigel.enums.Category
 import com.korebit.rigel.exception.EntityNotFundException
 import com.korebit.rigel.model.beans.Batch
@@ -18,11 +17,12 @@ import com.korebit.rigel.repository.ProductSupplierRepository
 import com.korebit.rigel.repository.SupplierRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.math.BigDecimal
 
-@Service
 /**
  * Manages products, product-supplier relations, and product-level batch operations.
  */
+@Service
 class ProductService(
     private val productRepository: ProductRepository,
     private val supplierRepository: SupplierRepository,
@@ -31,81 +31,92 @@ class ProductService(
 ) {
 
     @Transactional(readOnly = true)
-            /**
-             * Retrieves all products.
-             *
-             * @return list of product DTOs.
-             */
-    fun getAllProducts(): List<ProductDto> {
-        val products = productRepository.findAll()
-        return products.map { product -> ProductDto.toRequest(product) }
+    fun getAllProducts(): List<ProductDto> = productRepository.findAll().map(ProductDto::fromEntity)
+
+    @Transactional(readOnly = true)
+    fun findProductByName(name: String): ProductDto = ProductDto.fromEntity(findProduct(name))
+
+    /** Batches of every supplier of the product, newest reception first. */
+    @Transactional(readOnly = true)
+    fun getBatchesByProduct(name: String): List<BatchDto> {
+        return findProduct(name).suppliers
+            .flatMap { it.batches }
+            .sortedByDescending { it.receptionDate }
+            .map(BatchDto::fromEntity)
     }
 
+    /** Creates a product with its initial supplier relation (and optionally a first batch). */
     @Transactional
-            /**
-             * Creates a product with its initial supplier relation.
-             *
-             * @param productRequest product creation payload.
-             * @return operation response.
-             */
-    fun saveProduct(productRequest: ProductAddRequest): Response {
-        val name = productRequest.name.safeTrim()
-        val barcode = productRequest.barcode.safeTrim()
-        val supplierName = productRequest.supplierName.safeTrim()
-        val supplierPrice = productRequest.supplierPrice
+    fun saveProduct(productRequest: ProductAddRequest): ProductDto {
+        val fields = validateCommonFields(productRequest)
 
-        validateCommonFields(name, barcode, supplierName, supplierPrice)
-
-        productRepository.findByName(name).ifPresent {
-            throw IllegalArgumentException("Product with name $name already exists")
+        productRepository.findByName(fields.name).ifPresent {
+            throw IllegalArgumentException("Product with name ${fields.name} already exists")
+        }
+        productRepository.findByBarcode(fields.barcode).ifPresent {
+            throw IllegalArgumentException("Product with barcode ${fields.barcode} already exists")
         }
 
-        productRepository.findByBarcode(barcode).ifPresent {
-            throw IllegalArgumentException("Product with barcode $barcode already exists")
-        }
-
-        val supplier = resolveSupplier(supplierName)
-
+        val supplier = resolveSupplier(fields.supplierName)
         val newProduct = Product(
-            name = name,
+            name = fields.name,
             description = productRequest.description.safeTrim(),
-            barcode = barcode,
+            barcode = fields.barcode,
             price = (productRequest.price ?: 0.0).toBigDecimal(),
             category = parseCategory(productRequest.category.safeTrim()),
             imageUrl = productRequest.imageUrl.safeTrim(),
-            cloudinaryPublicId = productRequest.cloudinaryPublicId.safeTrim()
+            cloudinaryPublicId = productRequest.cloudinaryPublicId.safeTrim(),
+            minStock = validateMinStock(productRequest.minStock),
         )
 
-        val relation = ProductSupplier(
-            product = newProduct,
-            supplier = supplier,
-            supplyPrice = supplierPrice!!.toBigDecimal()
-        )
-
-        productRequest.batch?.let { initialBatch ->
-            validateBatchFields(initialBatch)
-            relation.batches.add(createBatchEntity(initialBatch, relation))
-        }
-
+        val relation = ProductSupplier(product = newProduct, supplier = supplier, supplyPrice = fields.supplierPrice)
+        productRequest.batch?.let { relation.batches.add(createBatchEntity(it, relation)) }
         newProduct.suppliers.add(relation)
 
-        productRepository.save(newProduct)
+        return ProductDto.fromEntity(productRepository.save(newProduct))
+    }
 
-        return Response(
-            success = true,
-            message = "Product saved successfully.",
-            status = 200
-        )
+    /** Updates core data and the price of the given supplier relation (created if missing). */
+    @Transactional
+    fun updateProduct(currentName: String, productRequest: ProductAddRequest): ProductDto {
+        val existingProduct = findProduct(currentName)
+        val fields = validateCommonFields(productRequest)
+
+        if (existingProduct.name != fields.name) {
+            productRepository.findByName(fields.name).ifPresent {
+                throw IllegalArgumentException("Product with name ${fields.name} already exists")
+            }
+        }
+        if (existingProduct.barcode != fields.barcode) {
+            productRepository.findByBarcode(fields.barcode).ifPresent {
+                throw IllegalArgumentException("Product with barcode ${fields.barcode} already exists")
+            }
+        }
+
+        val supplier = resolveSupplier(fields.supplierName)
+
+        existingProduct.name = fields.name
+        existingProduct.description = productRequest.description.safeTrim()
+        existingProduct.barcode = fields.barcode
+        existingProduct.price = (productRequest.price ?: 0.0).toBigDecimal()
+        existingProduct.category = parseCategory(productRequest.category.safeTrim())
+        existingProduct.imageUrl = productRequest.imageUrl.safeTrim()
+        existingProduct.cloudinaryPublicId = productRequest.cloudinaryPublicId.safeTrim()
+        productRequest.minStock?.let { existingProduct.minStock = validateMinStock(it) }
+
+        val activeRelation = upsertSupplierRelation(existingProduct, supplier, fields.supplierPrice)
+        productRequest.batch?.let { activeRelation.batches.add(createBatchEntity(it, activeRelation)) }
+
+        return ProductDto.fromEntity(productRepository.save(existingProduct))
     }
 
     @Transactional
-            /**
-             * Adds a supplier relation to an existing product.
-             *
-             * @param relation request containing product, supplier, and supply price.
-             * @return operation response.
-             */
-    fun addRelationToProduct(relation: AddRelationRequest): Response {
+    fun deleteProduct(name: String) {
+        productRepository.delete(findProduct(name))
+    }
+
+    @Transactional
+    fun addRelationToProduct(relation: AddRelationRequest): ProductDto {
         val productName = relation.productName.safeTrim()
         val supplierName = relation.supplierName.safeTrim()
 
@@ -113,50 +124,27 @@ class ProductService(
         if (supplierName.isBlank()) throw IllegalArgumentException("Supplier name is required")
         if (relation.price < 0) throw IllegalArgumentException("Supplier price cannot be negative")
 
-        val product = productRepository.findByName(productName)
-            .orElseThrow { EntityNotFundException("Product with name $productName not found") }
+        val product = findProduct(productName)
+        val supplier = resolveSupplier(supplierName)
 
-        val supplier = supplierRepository.findSupplierByName(supplierName)
-            ?: throw EntityNotFundException("Supplier with name $supplierName not found")
-
-        if (product.suppliers.any { it.supplier?.name.equals(supplierName, ignoreCase = true) }) {
+        if (product.suppliers.any { it.supplier?.id == supplier.id }) {
             throw IllegalArgumentException("Supplier $supplierName is already associated with product $productName")
         }
 
-        val newRelation = ProductSupplier(
-            product = product,
-            supplier = supplier,
-            supplyPrice = relation.price.toBigDecimal()
-        )
-
-        product.suppliers.add(newRelation)
-        productRepository.save(product)
-
-        return Response(
-            success = true,
-            message = "Supplier $supplierName was associated with product $productName",
-            status = 200
-        )
+        product.suppliers.add(ProductSupplier(product = product, supplier = supplier, supplyPrice = relation.price.toBigDecimal()))
+        return ProductDto.fromEntity(productRepository.save(product))
     }
 
+    /** Detaches a supplier unless it is the last one or it already has batches/purchases. */
     @Transactional
-            /**
-             * Removes a supplier relation from a product when business constraints allow it.
-             *
-             * @param productName product name.
-             * @param supplierName supplier name to detach.
-             * @return operation response.
-             */
-    fun removeRelationFromProduct(productName: String, supplierName: String): Response {
+    fun removeRelationFromProduct(productName: String, supplierName: String): ProductDto {
         val normalizedProductName = productName.safeTrim()
         val normalizedSupplierName = supplierName.safeTrim()
 
         if (normalizedProductName.isBlank()) throw IllegalArgumentException("Product name is required")
         if (normalizedSupplierName.isBlank()) throw IllegalArgumentException("Supplier name is required")
 
-        val product = productRepository.findByName(normalizedProductName)
-            .orElseThrow { EntityNotFundException("Product with name $normalizedProductName not found") }
-
+        val product = findProduct(normalizedProductName)
         val relation = productSupplierRepository.findByProductNameAndSupplierName(
             normalizedProductName,
             normalizedSupplierName
@@ -167,250 +155,104 @@ class ProductService(
         if (product.suppliers.size <= 1) {
             throw IllegalArgumentException("Product must keep at least one supplier associated")
         }
-
         if (relation.batches.isNotEmpty() || relation.purchases.isNotEmpty()) {
             throw IllegalArgumentException(
                 "Cannot remove supplier relation because it has batches or purchases associated"
             )
         }
 
-        product.suppliers.removeIf { relationItem ->
-            relationItem.supplier?.name.equals(normalizedSupplierName, ignoreCase = true)
-        }
-        productRepository.save(product)
-
-        return Response(
-            success = true,
-            message = "Supplier $normalizedSupplierName was removed from product $normalizedProductName",
-            status = 200
-        )
+        product.suppliers.removeIf { it.id == relation.id }
+        return ProductDto.fromEntity(productRepository.save(product))
     }
 
-    @Transactional(readOnly = true)
-            /**
-             * Finds a product by name.
-             *
-             * @param name product name.
-             * @return product DTO.
-             */
-    fun findProductByName(name: String): ProductDto {
-        val product = productRepository
-            .findByName(name)
-            .orElseThrow { EntityNotFundException("Product not found") }
-
-        return ProductDto.toRequest(product)
-    }
-
+    /** Adds a batch to the first supplier relation of the product. */
     @Transactional
-            /**
-             * Updates product core data and its active supplier relation.
-             *
-             * @param currentName current product name.
-             * @param productRequest updated payload.
-             * @return operation response.
-             */
-    fun updateProduct(currentName: String, productRequest: ProductAddRequest): Response {
-        val existingProduct = productRepository.findByName(currentName)
-            .orElseThrow { EntityNotFundException("Product not found") }
-
-        val newName = productRequest.name.safeTrim()
-        val newBarcode = productRequest.barcode.safeTrim()
-        val supplierName = productRequest.supplierName.safeTrim()
-        val supplierPrice = productRequest.supplierPrice
-
-        validateCommonFields(newName, newBarcode, supplierName, supplierPrice)
-
-        if (!currentName.equals(newName, ignoreCase = false)) {
-            productRepository.findByName(newName).ifPresent {
-                throw IllegalArgumentException("Product with name $newName already exists")
-            }
-        }
-
-        if (existingProduct.barcode != newBarcode) {
-            productRepository.findByBarcode(newBarcode).ifPresent {
-                throw IllegalArgumentException("Product with barcode $newBarcode already exists")
-            }
-        }
-
-        val supplier = resolveSupplier(supplierName)
-
-        existingProduct.name = newName
-        existingProduct.description = productRequest.description.safeTrim()
-        existingProduct.barcode = newBarcode
-        existingProduct.price = (productRequest.price ?: 0.0).toBigDecimal()
-        existingProduct.category = parseCategory(productRequest.category.safeTrim())
-        existingProduct.imageUrl = productRequest.imageUrl.safeTrim()
-        existingProduct.cloudinaryPublicId = productRequest.cloudinaryPublicId.safeTrim()
-
-        val activeRelation = updateSupplierRelation(
-            product = existingProduct,
-            supplier = supplier,
-            supplierPrice = supplierPrice!!
-        )
-
-        productRequest.batch?.let { newBatch ->
-            validateBatchFields(newBatch)
-            activeRelation.batches.add(createBatchEntity(newBatch, activeRelation))
-        }
-
-        productRepository.save(existingProduct)
-
-        return Response(
-            success = true,
-            status = 200,
-            message = "Product ${existingProduct.name} has been updated successfully"
-        )
-    }
-
-    @Transactional
-            /**
-             * Deletes a product by name.
-             *
-             * @param name product name.
-             * @return operation response.
-             */
-    fun deleteProduct(name: String): Response {
-        val product = productRepository.findByName(name)
-            .orElseThrow { EntityNotFundException("Product not found") }
-
-        productRepository.delete(product)
-
-        return Response(
-            success = true,
-            status = 200,
-            message = "Product ${product.name} has been deleted successfully"
-        )
-    }
-
-    @Transactional(readOnly = true)
-            /**
-             * Returns all batches linked to a product across its suppliers.
-             *
-             * @param name product name.
-             * @return batch DTO list sorted by reception date descending.
-             */
-    fun getBatchesByProduct(name: String): List<BatchDto> {
-        val product = productRepository.findByName(name)
-            .orElseThrow { EntityNotFundException("Product not found") }
-
-        return product.suppliers
-            .flatMap { it.batches }
-            .sortedByDescending { it.receptionDate }
-            .map(BatchDto::fromEntity)
-    }
-
-    @Transactional
-            /**
-             * Adds a batch to the first available supplier relation of a product.
-             *
-             * @param name product name.
-             * @param batchRequest batch payload.
-             * @return operation response.
-             */
-    fun addBatchToProduct(name: String, batchRequest: ProductBatchRequest): Response {
-        val product = productRepository.findByName(name)
-            .orElseThrow { EntityNotFundException("Product not found") }
-
+    fun addBatchToProduct(name: String, batchRequest: ProductBatchRequest): ProductDto {
+        val product = findProduct(name)
         val activeRelation = product.suppliers.firstOrNull()
             ?: throw IllegalArgumentException("Product $name does not have a supplier relation")
 
-        validateBatchFields(batchRequest)
         activeRelation.batches.add(createBatchEntity(batchRequest, activeRelation))
-        productRepository.save(product)
-
-        return Response(
-            success = true,
-            status = 200,
-            message = "Batch ${batchRequest.code.safeTrim()} added to product ${product.name} successfully"
-        )
+        return ProductDto.fromEntity(productRepository.save(product))
     }
 
-    /**
-     * Updates the minimum stock for a product.
-     * @param barcode product barcode.
-     * @param minStock new minimum stock value.
-     * @return operation response.
-     */
+    /** Sets (or clears, with `null`) the low-stock alert threshold. */
     @Transactional
-    fun updateMinStock(barcode: String, minStock: Int?): Response {
+    fun updateMinStock(barcode: String, minStock: Int?): ProductDto {
         val product = productRepository.findByBarcode(barcode)
-            .orElseThrow { EntityNotFundException("Product not found") }
-        product.minStock = minStock
-        productRepository.save(product)
-        return Response(success = true, status = 200, message = "Umbral actualizado")
+            .orElseThrow { EntityNotFundException("Product with barcode $barcode not found") }
+        product.minStock = validateMinStock(minStock)
+        return ProductDto.fromEntity(productRepository.save(product))
     }
 
-    private fun updateSupplierRelation(product: Product, supplier: Supplier, supplierPrice: Double): ProductSupplier {
-        val normalizedPrice = supplierPrice.toBigDecimal()
-        val currentRelationForSupplier = product.suppliers.firstOrNull { relation ->
-            relation.supplier?.id == supplier.id
+    private fun findProduct(name: String): Product = productRepository.findByName(name.trim())
+        .orElseThrow { EntityNotFundException("Product $name not found") }
+
+    private fun upsertSupplierRelation(product: Product, supplier: Supplier, supplierPrice: BigDecimal): ProductSupplier {
+        product.suppliers.firstOrNull { it.supplier?.id == supplier.id }?.let { existing ->
+            existing.supplyPrice = supplierPrice
+            return existing
         }
 
-        if (currentRelationForSupplier != null) {
-            currentRelationForSupplier.supplyPrice = normalizedPrice
-            return currentRelationForSupplier
-        }
-
-        val newRelation = ProductSupplier(
-            product = product,
-            supplier = supplier,
-            supplyPrice = normalizedPrice
-        )
+        val newRelation = ProductSupplier(product = product, supplier = supplier, supplyPrice = supplierPrice)
         product.suppliers.add(newRelation)
         return newRelation
     }
 
     private fun createBatchEntity(batchRequest: ProductBatchRequest, relation: ProductSupplier): Batch {
-        val code = batchRequest.code.safeTrim()
-        val receivedAmount = batchRequest.receivedAmount ?: 0
-        if (batchRepository.findByCode(code).isPresent) {
-            throw IllegalArgumentException("Batch with code $code already exists")
+        val batch = validateBatchFields(batchRequest)
+        if (batchRepository.findByCode(batch.code).isPresent) {
+            throw IllegalArgumentException("Batch with code ${batch.code} already exists")
         }
-
-        val remaining = batchRequest.remainingAmount ?: receivedAmount
-        return Batch().apply {
-            this.code = code
-            this.receptionDate = batchRequest.receptionDate!!
-            this.expirationDate = batchRequest.expirationDate!!
-            this.receivedAmount = receivedAmount
-            this.remainingAmount = remaining
-            this.available = batchRequest.available ?: true
-            this.price = (batchRequest.price ?: 0.0).toBigDecimal()
-            this.notes = batchRequest.notes.safeTrim()
-            this.productSupplier = relation
-        }
+        batch.productSupplier = relation
+        return batch
     }
 
-
     private fun resolveSupplier(name: String): Supplier {
-        val normalizedName = name.trim()
-        return supplierRepository.findSupplierByName(normalizedName)
-            ?: throw EntityNotFundException("Supplier not found")
+        return supplierRepository.findSupplierByName(name.trim())
+            ?: throw EntityNotFundException("Supplier $name not found")
     }
 
     private fun parseCategory(rawCategory: String): Category {
-        val normalized = rawCategory.trim().uppercase()
-        return runCatching { Category.valueOf(normalized) }
-            .getOrElse {
-                throw IllegalArgumentException("Invalid category: $rawCategory")
-            }
+        return runCatching { Category.valueOf(rawCategory.trim().uppercase()) }
+            .getOrElse { throw IllegalArgumentException("Invalid category: $rawCategory") }
     }
 
-    private fun validateCommonFields(name: String, barcode: String, supplierName: String, supplierPrice: Double?) {
+    private fun validateMinStock(minStock: Int?): Int? {
+        if (minStock != null && minStock < 0) throw IllegalArgumentException("Minimum stock cannot be negative")
+        return minStock
+    }
+
+    private data class CommonFields(
+        val name: String,
+        val barcode: String,
+        val supplierName: String,
+        val supplierPrice: BigDecimal,
+    )
+
+    private fun validateCommonFields(request: ProductAddRequest): CommonFields {
+        val name = request.name.safeTrim()
+        val barcode = request.barcode.safeTrim()
+        val supplierName = request.supplierName.safeTrim()
+        val supplierPrice = request.supplierPrice
+
         if (name.isBlank()) throw IllegalArgumentException("Product name is required")
         if (barcode.isBlank()) throw IllegalArgumentException("Product barcode is required")
         if (supplierName.isBlank()) throw IllegalArgumentException("Supplier name is required")
         if (supplierPrice == null) throw IllegalArgumentException("Supplier price is required")
         if (supplierPrice < 0) throw IllegalArgumentException("Supplier price cannot be negative")
+        if ((request.price ?: 0.0) < 0) throw IllegalArgumentException("Product price cannot be negative")
+
+        return CommonFields(name, barcode, supplierName, supplierPrice.toBigDecimal())
     }
 
-    private fun validateBatchFields(batchRequest: ProductBatchRequest) {
+    /** Validates the batch payload and returns an unattached [Batch] entity. */
+    private fun validateBatchFields(batchRequest: ProductBatchRequest): Batch {
         val code = batchRequest.code.safeTrim()
         val receptionDate = batchRequest.receptionDate
         val expirationDate = batchRequest.expirationDate
         val receivedAmount = batchRequest.receivedAmount
         val price = batchRequest.price
-        val remaining = batchRequest.remainingAmount ?: receivedAmount ?: 0
 
         if (code.isBlank()) throw IllegalArgumentException("Batch code is required")
         if (receptionDate == null) throw IllegalArgumentException("Batch reception date is required")
@@ -418,6 +260,7 @@ class ProductService(
         if (receivedAmount == null || receivedAmount <= 0) {
             throw IllegalArgumentException("Batch received amount must be greater than zero")
         }
+        val remaining = batchRequest.remainingAmount ?: receivedAmount
         if (remaining !in 0..receivedAmount) {
             throw IllegalArgumentException("Batch remaining amount must be between 0 and received amount")
         }
@@ -425,6 +268,17 @@ class ProductService(
         if (price < 0) throw IllegalArgumentException("Batch price cannot be negative")
         if (expirationDate.isBefore(receptionDate)) {
             throw IllegalArgumentException("Batch expiration date cannot be before reception date")
+        }
+
+        return Batch().apply {
+            this.code = code
+            this.receptionDate = receptionDate
+            this.expirationDate = expirationDate
+            this.receivedAmount = receivedAmount
+            this.remainingAmount = remaining
+            this.available = batchRequest.available ?: true
+            this.price = price.toBigDecimal()
+            this.notes = batchRequest.notes.safeTrim()
         }
     }
 

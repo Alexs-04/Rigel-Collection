@@ -1,7 +1,7 @@
 import {useEffect, useMemo, useState} from 'react'
 import type {FormEvent} from 'react'
 import api from '../../services/api'
-import type {ProductBatch, ProductSummary, ProductSupplier} from '../../types/products'
+import type {BatchSummary, ProductSummary, SupplierSummary} from '../../types/products'
 import type {PurchaseDto, PurchaseFormValues} from '../../types/purchases'
 
 function toDateInputValue(date: Date): string {
@@ -52,7 +52,7 @@ export function usePurchasesPageState() {
         return products.find((product) => product.name === form.productName) || null
     }, [products, form.productName])
 
-    const supplierOptions: ProductSupplier[] = useMemo(() => {
+    const supplierOptions: SupplierSummary[] = useMemo(() => {
         return selectedProduct?.suppliers || []
     }, [selectedProduct])
 
@@ -60,7 +60,7 @@ export function usePurchasesPageState() {
         return supplierOptions.find((supplier) => supplier.name === form.supplierName) || null
     }, [supplierOptions, form.supplierName])
 
-    const batchOptions: ProductBatch[] = useMemo(() => {
+    const batchOptions: BatchSummary[] = useMemo(() => {
         if (!selectedSupplier) return []
         return selectedSupplier.batches || []
     }, [selectedSupplier])

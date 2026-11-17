@@ -14,7 +14,7 @@ data class SupplierDto(
     val products: List<ProductDto> = emptyList()
 ) : Serializable {
     companion object {
-        fun toRequest(supplier: Supplier): SupplierDto {
+        fun fromEntity(supplier: Supplier): SupplierDto {
             return SupplierDto(
                 name = supplier.name,
                 contactEmail = supplier.email,

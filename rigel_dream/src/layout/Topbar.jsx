@@ -7,8 +7,8 @@ export default function Topbar() {
     const {user, logout} = useContext(AuthContext)
     const navigate = useNavigate()
 
-    const doLogout = () => {
-        logout()
+    const doLogout = async () => {
+        await logout()
         navigate('/login')
     }
 
@@ -26,7 +26,7 @@ export default function Topbar() {
 
             {/* Right area: user + logout */}
             <div className="ml-auto flex items-center gap-3">
-                <div className="ui-title text-sm font-medium">{user?.username || 'Invitado'}</div>
+                <div className="ui-title text-sm font-medium">{user?.name || user?.username || 'Invitado'}</div>
                 <button
                     onClick={doLogout}
                     className="rounded-md p-2 text-slate-700 transition hover:bg-brand-50 hover:text-brand-700 dark:text-slate-100 dark:hover:bg-slate-800 dark:hover:text-brand-300"

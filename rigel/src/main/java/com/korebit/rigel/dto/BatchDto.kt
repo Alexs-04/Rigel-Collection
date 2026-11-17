@@ -25,7 +25,7 @@ data class BatchDto(
             val supplier = relation.supplier ?: throw IllegalStateException("Batch without supplier")
 
             return BatchDto(
-                id = batch.id,
+                id = batch.id ?: throw IllegalStateException("Batch without id"),
                 code = batch.code,
                 productName = product.name,
                 supplierName = supplier.name,

@@ -16,20 +16,8 @@ data class ProductDto(
     val minStock : Int? = null,
 ) : Serializable {
     companion object {
-        fun toRequest(product: Product): ProductDto {
-            val suppliers = product.suppliers.mapNotNull { relation ->
-                val supplier = relation.supplier ?: return@mapNotNull null
-                val batches = relation.batches
-                    .sortedByDescending { it.receptionDate }
-                    .map(ProductBatchDto::fromEntity)
-
-                ProductSupplierDto(
-                    name = supplier.name,
-                    supplyPrice = relation.supplyPrice.toDouble(),
-                    batches = batches,
-                )
-            }
-
+        fun fromEntity(product: Product): ProductDto {
+            val suppliers = product.suppliers.mapNotNull(ProductSupplierDto::fromEntity)
             return ProductDto(
                 name = product.name,
                 description = product.description,
@@ -42,7 +30,7 @@ data class ProductDto(
                 imageUrl = product.imageUrl,
                 cloudinaryPublicId = product.cloudinaryPublicId,
                 suppliers = suppliers,
-                product.minStock
+                minStock = product.minStock,
             )
         }
     }

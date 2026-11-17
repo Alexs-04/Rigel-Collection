@@ -1,7 +1,9 @@
 package com.korebit.rigel.controller
 
+import com.korebit.rigel.dto.BatchDto
 import com.korebit.rigel.dto.request.BatchUpsertRequest
 import com.korebit.rigel.service.BatchService
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
@@ -19,24 +21,23 @@ class BatchRestController(
 ) {
 
     @GetMapping("/product/{productName}")
-    fun getByProduct(@PathVariable productName: String) = batchService.getBatchesByProduct(productName)
+    fun getByProduct(@PathVariable productName: String): ResponseEntity<List<BatchDto>> =
+        ResponseEntity.ok(batchService.getBatchesByProduct(productName))
 
     @GetMapping("/{id}")
-    fun getById(@PathVariable id: Long) = batchService.getBatchById(id)
+    fun getById(@PathVariable id: Long): ResponseEntity<BatchDto> = ResponseEntity.ok(batchService.getBatchById(id))
 
     @PostMapping("/add")
-    fun create(@RequestBody request: BatchUpsertRequest): ResponseEntity<Any> {
-        return ResponseEntity.ok(batchService.createBatch(request))
-    }
+    fun create(@RequestBody request: BatchUpsertRequest): ResponseEntity<BatchDto> =
+        ResponseEntity.status(HttpStatus.CREATED).body(batchService.createBatch(request))
 
     @PutMapping("/{id}")
-    fun update(@PathVariable id: Long, @RequestBody request: BatchUpsertRequest): ResponseEntity<Any> {
-        return ResponseEntity.ok(batchService.updateBatch(id, request))
-    }
+    fun update(@PathVariable id: Long, @RequestBody request: BatchUpsertRequest): ResponseEntity<BatchDto> =
+        ResponseEntity.ok(batchService.updateBatch(id, request))
 
     @DeleteMapping("/{id}")
-    fun delete(@PathVariable id: Long): ResponseEntity<Any> {
-        return ResponseEntity.ok(batchService.deleteBatch(id))
+    fun delete(@PathVariable id: Long): ResponseEntity<Void> {
+        batchService.deleteBatch(id)
+        return ResponseEntity.noContent().build()
     }
 }
-

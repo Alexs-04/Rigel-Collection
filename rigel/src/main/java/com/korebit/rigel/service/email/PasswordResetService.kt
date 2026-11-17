@@ -3,6 +3,7 @@ package com.korebit.rigel.service.email
 import com.korebit.rigel.enums.TokenType
 import com.korebit.rigel.repository.ConsumerRepository
 import com.korebit.rigel.repository.TokenRepository
+import com.korebit.rigel.service.SessionTokenService
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
@@ -15,6 +16,7 @@ class PasswordResetService(
     private val passwordEncoder: PasswordEncoder,
     private val emailService: EmailService,
     private val invitationService: UserInvitationService,
+    private val sessionTokenService: SessionTokenService,
 
     @param:Value("\${app.mail.reset-token-expiration-hours:1}")
     private val resetTokenExpirationHours: Long,
@@ -54,6 +56,7 @@ class PasswordResetService(
      */
     @Transactional
     fun resetPassword(rawToken: String, newPassword: String) {
+        if (newPassword.isBlank()) throw IllegalArgumentException("La contraseña es obligatoria")
         val token = invitationService.resolveToken(rawToken, TokenType.PASSWORD_RESET)
 
         val consumer = token.consumer
@@ -63,5 +66,7 @@ class PasswordResetService(
         consumerRepository.save(consumer)
 
         invitationService.consumeToken(token)
+        // A password change must close every open session (e.g. a stolen token).
+        sessionTokenService.revokeAllSessions(consumer)
     }
 }

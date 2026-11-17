@@ -1,7 +1,9 @@
 package com.korebit.rigel.controller
 
+import com.korebit.rigel.dto.ProductDto
 import com.korebit.rigel.dto.SupplierDto
 import com.korebit.rigel.service.SupplierService
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
@@ -19,23 +21,27 @@ class SupplierRestController(
 ) {
 
     @GetMapping("/all")
-    fun getAllSuppliers() = supplierService.getAllSuppliers()
+    fun getAllSuppliers(): ResponseEntity<List<SupplierDto>> = ResponseEntity.ok(supplierService.getAllSuppliers())
 
     @GetMapping("/{supplierName}/products")
-    fun getProductsBySupplier(@PathVariable supplierName: String) = supplierService.getProductsBySupplier(supplierName)
+    fun getProductsBySupplier(@PathVariable supplierName: String): ResponseEntity<List<ProductDto>> =
+        ResponseEntity.ok(supplierService.getProductsBySupplier(supplierName))
 
     @GetMapping("/{name}")
-    fun findSupplierByName(@PathVariable name: String): SupplierDto = supplierService.findSupplierByName(name)
+    fun findSupplierByName(@PathVariable name: String): ResponseEntity<SupplierDto> =
+        ResponseEntity.ok(supplierService.findSupplierByName(name))
 
     @PostMapping("/add")
-    fun saveSupplier(@RequestBody supplier: SupplierDto): ResponseEntity<Any> =
-        ResponseEntity.ok(supplierService.saveSupplier(supplier))
+    fun saveSupplier(@RequestBody supplier: SupplierDto): ResponseEntity<SupplierDto> =
+        ResponseEntity.status(HttpStatus.CREATED).body(supplierService.saveSupplier(supplier))
 
     @PutMapping("/{name}")
-    fun updateSupplier(@PathVariable name: String, @RequestBody supplier: SupplierDto): ResponseEntity<Any> =
+    fun updateSupplier(@PathVariable name: String, @RequestBody supplier: SupplierDto): ResponseEntity<SupplierDto> =
         ResponseEntity.ok(supplierService.updateSupplier(name, supplier))
 
     @DeleteMapping("/{name}")
-    fun deleteSupplier(@PathVariable name: String): ResponseEntity<Any> =
-        ResponseEntity.ok(supplierService.deleteSupplier(name))
+    fun deleteSupplier(@PathVariable name: String): ResponseEntity<Void> {
+        supplierService.deleteSupplier(name)
+        return ResponseEntity.noContent().build()
+    }
 }

@@ -45,6 +45,9 @@ class UserInvitationService(
         if (consumerRepository.findByEmail(email) != null) {
             throw IllegalArgumentException("El correo '$email' ya está registrado")
         }
+        if (consumerRepository.existsByUsername(username)) {
+            throw IllegalArgumentException("El usuario '$username' ya está registrado")
+        }
 
         // Consumer starts inactive and without a password —
         // they set their own password when they activate the account.
@@ -76,6 +79,7 @@ class UserInvitationService(
      */
     @Transactional
     fun activateAccount(rawToken: String, newPassword: String) {
+        if (newPassword.isBlank()) throw IllegalArgumentException("La contraseña es obligatoria")
         val token = resolveToken(rawToken, TokenType.EMAIL_VERIFICATION)
 
         val consumer = token.consumer

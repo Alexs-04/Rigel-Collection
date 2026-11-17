@@ -1,67 +1,63 @@
-import React, {useEffect, useMemo, useState} from 'react';
-import api from '../services/api';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
+import api, {
+    AUTH_INVALIDATED_EVENT,
+    AUTH_REFRESHED_EVENT,
+    getAccessToken,
+    logoutRequest,
+    storeTokens,
+} from '../services/api';
+import {decodeJwtPayload} from '../utils/jwt';
 import {AuthContext} from './AuthContext';
-
-function parseJwt(token) {
-    try {
-        const payload = token.split('.')[1];
-        return JSON.parse(atob(payload));
-    } catch {
-        return null;
-    }
-}
 
 function mapPayloadToUser(payload) {
     if (!payload) return null;
     return {
-        username: payload.sub || payload.name || payload.email,
+        username: payload.sub,
+        name: payload.name,
         role: payload.role || 'USER',
         active: payload.active !== false,
     };
 }
 
 export function AuthProvider({children}) {
-    const [accessToken, setAccessToken] = useState(localStorage.getItem('access_token'));
+    const [accessToken, setAccessToken] = useState(getAccessToken);
 
     useEffect(() => {
-        const syncSession = () => setAccessToken(localStorage.getItem('access_token'));
-        window.addEventListener('auth:invalidated', syncSession);
-        window.addEventListener('storage', syncSession);
+        const syncSession = () => setAccessToken(getAccessToken());
+        window.addEventListener(AUTH_INVALIDATED_EVENT, syncSession);
+        window.addEventListener(AUTH_REFRESHED_EVENT, syncSession);
+        window.addEventListener('storage', syncSession); // other tabs
 
         return () => {
-            window.removeEventListener('auth:invalidated', syncSession);
+            window.removeEventListener(AUTH_INVALIDATED_EVENT, syncSession);
+            window.removeEventListener(AUTH_REFRESHED_EVENT, syncSession);
             window.removeEventListener('storage', syncSession);
         };
     }, []);
 
-    const user = useMemo(() => mapPayloadToUser(parseJwt(accessToken)), [accessToken]);
+    const user = useMemo(() => mapPayloadToUser(decodeJwtPayload(accessToken)), [accessToken]);
 
-    const hasRole = (...roles) => {
-        if (!user?.role) return false;
-        return roles.includes(user.role);
-    };
+    const hasRole = useCallback((...roles) => Boolean(user?.role) && roles.includes(user.role), [user]);
 
-    const login = async (email, password) => {
-        const res = await api.post('/auth/login', {email, password});
-        const data = res.data;
-        if (data?.access_token) {
-            localStorage.setItem('access_token', data.access_token);
-            localStorage.setItem('refresh_token', data.refresh_token);
+    const login = useCallback(async (email, password) => {
+        const {data} = await api.post('/auth/login', {email, password});
+        if (data?.access_token && data?.refresh_token) {
+            storeTokens(data.access_token, data.refresh_token);
             setAccessToken(data.access_token);
             return {success: true};
         }
         return {success: false};
-    };
+    }, []);
 
-    const logout = () => {
-        localStorage.removeItem('access_token');
-        localStorage.removeItem('refresh_token');
+    const logout = useCallback(async () => {
         setAccessToken(null);
-    };
+        await logoutRequest();
+    }, []);
 
-    return (
-        <AuthContext.Provider value={{user, accessToken, hasRole, login, logout}}>
-            {children}
-        </AuthContext.Provider>
+    const value = useMemo(
+        () => ({user, accessToken, hasRole, login, logout}),
+        [user, accessToken, hasRole, login, logout]
     );
+
+    return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

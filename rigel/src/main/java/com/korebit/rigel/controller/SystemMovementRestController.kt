@@ -1,9 +1,10 @@
 package com.korebit.rigel.controller
 
 import com.korebit.rigel.dto.SystemMovementDto
-import com.korebit.rigel.dto.SystemMovementPageDto
+import com.korebit.rigel.dto.PageDto
 import com.korebit.rigel.service.SystemMovementService
 import org.springframework.format.annotation.DateTimeFormat
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
@@ -31,13 +32,13 @@ class SystemMovementRestController(
         @RequestParam(required = false, defaultValue = "true") importantOnly: Boolean,
         @RequestParam(required = false, defaultValue = "0") page: Int,
         @RequestParam(required = false, defaultValue = "20") size: Int,
-    ): SystemMovementPageDto {
-        return systemMovementService.getMovements(search, method, status, fromDate, toDate, importantOnly, page, size)
+    ): ResponseEntity<PageDto<SystemMovementDto>> {
+        return ResponseEntity.ok(systemMovementService.getMovements(search, method, status, fromDate, toDate, importantOnly, page, size))
     }
 
     @GetMapping("/{id}")
-    fun getMovementById(@PathVariable id: Long): SystemMovementDto {
-        return systemMovementService.getMovementById(id)
+    fun getMovementById(@PathVariable id: Long): ResponseEntity<SystemMovementDto> {
+        return ResponseEntity.ok(systemMovementService.getMovementById(id))
     }
 }
 

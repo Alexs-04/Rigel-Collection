@@ -1,10 +1,18 @@
 package com.korebit.rigel.service.email
 
+import jakarta.annotation.PostConstruct
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.mail.javamail.MimeMessageHelper
 import org.springframework.stereotype.Service
 
+/**
+ * Sends transactional emails.
+ *
+ * Email is optional: when `app.mail.from` is blank (no `EMAIL_ADDRESS` configured) nothing is sent and
+ * the one-time link is written to the server log instead, so the application can run without SMTP.
+ */
 @Service
 class EmailService(
     private val mailSender: JavaMailSender,
@@ -12,11 +20,26 @@ class EmailService(
     @param:Value("\${app.base-url}")
     private val baseUrl: String,
 
-    @param:Value("\${app.mail.from}")
+    @param:Value("\${app.mail.from:}")
     private val fromEmail: String,
 ) {
 
+    private val log = LoggerFactory.getLogger(EmailService::class.java)
     private val normalizedBaseUrl = baseUrl.trimEnd('/')
+
+    /** `true` when a sender address is configured and emails are actually delivered. */
+    val enabled: Boolean = fromEmail.isNotBlank()
+
+    @PostConstruct
+    fun reportStatus() {
+        if (!enabled) {
+            log.warn(
+                "Email is not configured (EMAIL_ADDRESS is empty): activation and password-reset " +
+                    "links will be logged instead of sent."
+            )
+        }
+    }
+
     /**
      * Sends an account activation email with a one-time link.
      */
@@ -26,6 +49,7 @@ class EmailService(
             to = to,
             subject = "Activa tu cuenta en Rigel",
             body = buildActivationBody(recipientName, link),
+            link = link,
         )
     }
 
@@ -38,12 +62,17 @@ class EmailService(
             to = to,
             subject = "Restablecer contraseña — Rigel",
             body = buildPasswordResetBody(recipientName, link),
+            link = link,
         )
     }
 
     // ─── Private helpers ──────────────────────────────────────────────────────
 
-    private fun send(to: String, subject: String, body: String) {
+    private fun send(to: String, subject: String, body: String, link: String) {
+        if (!enabled) {
+            log.warn("Email disabled, not sending \"{}\" to {}. Link: {}", subject, to, link)
+            return
+        }
         val message = mailSender.createMimeMessage()
         val helper = MimeMessageHelper(message, true, "UTF-8")
         helper.setFrom(fromEmail)

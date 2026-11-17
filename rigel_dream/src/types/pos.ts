@@ -46,7 +46,6 @@ export interface PosTicketCreatePayload {
         price: number
         discount: number
     }>
-    currentConsumerEmail: string
     methodPayment: MethodPayment
 }
 

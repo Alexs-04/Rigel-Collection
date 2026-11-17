@@ -15,16 +15,14 @@ data class TicketDto(
     val payment: MethodPayment = MethodPayment.CASH
 ) : Serializable {
     companion object {
-        fun toDto(ticket : Ticket): TicketDto {
+        fun fromEntity(ticket: Ticket): TicketDto {
             return TicketDto(
                 ticket.consumer?.email ?: "Unknown",
                 ticket.barcode,
                 ticket.description,
                 ticket.dateAndTime,
                 ticket.totalAmount.toDouble(),
-                ticket.ticketDetails.map { x ->
-                    TicketDetailDto(x.product?.barcode ?: "", x.quantity, x.price, x.discount, x.batch?.code, x.product?.name ?: "")
-                },
+                ticket.ticketDetails.map(TicketDetailDto::fromEntity),
                 ticket.payment
             )
         }
