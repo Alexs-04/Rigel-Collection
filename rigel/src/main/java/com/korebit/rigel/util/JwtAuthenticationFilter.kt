@@ -1,109 +1,84 @@
-package com.korebit.rigel.util;
+package com.korebit.rigel.util
 
-import com.korebit.rigel.enums.TokenType;
-import com.korebit.rigel.service.SessionTokenService;
-import com.korebit.rigel.service.jwt.JwtService;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.JwtException;
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import org.jspecify.annotations.NonNull;
-import org.springframework.http.HttpHeaders;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
-import org.springframework.stereotype.Component;
-import org.springframework.web.filter.OncePerRequestFilter;
-
-import java.io.IOException;
+import com.korebit.rigel.enums.TokenType
+import com.korebit.rigel.service.SessionTokenService
+import com.korebit.rigel.service.jwt.JwtService
+import io.jsonwebtoken.JwtException
+import jakarta.servlet.FilterChain
+import jakarta.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletResponse
+import org.springframework.http.HttpHeaders
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
+import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.security.core.userdetails.UserDetailsService
+import org.springframework.security.core.userdetails.UsernameNotFoundException
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource
+import org.springframework.stereotype.Component
+import org.springframework.web.filter.OncePerRequestFilter
 
 /**
  * Stateless JWT authentication filter.
  *
- * <p>A request is authenticated only when <b>all</b> of these hold:</p>
- * <ol>
- *   <li>the {@code Authorization} header carries a {@code Bearer} token with a valid signature that is not expired;</li>
- *   <li>the token is an <em>access</em> token (refresh tokens are rejected here);</li>
- *   <li>its {@code jti} is persisted, not revoked and not expired;</li>
- *   <li>the user still exists and is enabled.</li>
- * </ol>
+ * A request is authenticated only when **all** of these hold:
+ * 1. the `Authorization` header carries a `Bearer` token with a valid signature that is not expired;
+ * 2. the token is an *access* token (refresh tokens are rejected here);
+ * 3. its `jti` is persisted, not revoked and not expired;
+ * 4. the user still exists and is enabled.
  *
- * <p>Otherwise the request continues anonymously and Spring Security answers {@code 401}
- * for protected endpoints. Requests under {@code /auth/**} are skipped.</p>
+ * Otherwise the request continues anonymously and Spring Security answers `401`
+ * for protected endpoints. Requests under `/auth/` are skipped.
  */
 @Component
-public class JwtAuthenticationFilter extends OncePerRequestFilter {
+class JwtAuthenticationFilter(
+    private val jwtService: JwtService,
+    private val userDetailsService: UserDetailsService,
+    private val sessionTokenService: SessionTokenService,
+) : OncePerRequestFilter() {
 
-    private static final String BEARER_PREFIX = "Bearer ";
+    override fun shouldNotFilter(request: HttpServletRequest): Boolean =
+        request.servletPath.startsWith("/auth/")
 
-    private final JwtService jwtService;
-    private final UserDetailsService userDetailsService;
-    private final SessionTokenService sessionTokenService;
-
-    public JwtAuthenticationFilter(JwtService jwtService,
-                                   UserDetailsService userDetailsService,
-                                   SessionTokenService sessionTokenService) {
-        this.jwtService = jwtService;
-        this.userDetailsService = userDetailsService;
-        this.sessionTokenService = sessionTokenService;
+    override fun doFilterInternal(
+        request: HttpServletRequest,
+        response: HttpServletResponse,
+        filterChain: FilterChain,
+    ) {
+        if (SecurityContextHolder.getContext().authentication == null) {
+            authenticate(request)
+        }
+        filterChain.doFilter(request, response)
     }
 
-    @Override
-    protected boolean shouldNotFilter(@NonNull HttpServletRequest request) {
-        return request.getServletPath().startsWith("/auth/");
+    private fun authenticate(request: HttpServletRequest) {
+        val header = request.getHeader(HttpHeaders.AUTHORIZATION)
+        if (header == null || !header.startsWith(BEARER_PREFIX)) return
+
+        val claims = try {
+            jwtService.parseClaims(header.substring(BEARER_PREFIX.length).trim())
+        } catch (_: JwtException) {
+            return
+        } catch (_: IllegalArgumentException) {
+            return
+        }
+
+        if (jwtService.extractTokenType(claims) != TokenType.BEARER) return
+
+        val username = claims.subject
+        if (username == null || !sessionTokenService.isActive(claims.id, TokenType.BEARER)) return
+
+        val userDetails = try {
+            userDetailsService.loadUserByUsername(username)
+        } catch (_: UsernameNotFoundException) {
+            return
+        }
+        if (!userDetails.isEnabled || !userDetails.isAccountNonLocked || !userDetails.isAccountNonExpired) return
+
+        val authentication = UsernamePasswordAuthenticationToken(userDetails, null, userDetails.authorities)
+        authentication.details = WebAuthenticationDetailsSource().buildDetails(request)
+        SecurityContextHolder.getContext().authentication = authentication
     }
 
-    @Override
-    protected void doFilterInternal(
-            @NonNull HttpServletRequest request,
-            @NonNull HttpServletResponse response,
-            @NonNull FilterChain filterChain
-    ) throws ServletException, IOException {
-        if (SecurityContextHolder.getContext().getAuthentication() == null) {
-            authenticate(request);
-        }
-        filterChain.doFilter(request, response);
-    }
-
-    private void authenticate(HttpServletRequest request) {
-        final String header = request.getHeader(HttpHeaders.AUTHORIZATION);
-        if (header == null || !header.startsWith(BEARER_PREFIX)) {
-            return;
-        }
-
-        final Claims claims;
-        try {
-            claims = jwtService.parseClaims(header.substring(BEARER_PREFIX.length()).trim());
-        } catch (JwtException | IllegalArgumentException invalidToken) {
-            return;
-        }
-
-        if (jwtService.extractTokenType(claims) != TokenType.BEARER) {
-            return;
-        }
-        final String username = claims.getSubject();
-        if (username == null || !sessionTokenService.isActive(claims.getId(), TokenType.BEARER)) {
-            return;
-        }
-
-        final UserDetails userDetails;
-        try {
-            userDetails = userDetailsService.loadUserByUsername(username);
-        } catch (UsernameNotFoundException unknownUser) {
-            return;
-        }
-        if (!userDetails.isEnabled() || !userDetails.isAccountNonLocked() || !userDetails.isAccountNonExpired()) {
-            return;
-        }
-
-        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                userDetails, null, userDetails.getAuthorities());
-        authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+    private companion object {
+        const val BEARER_PREFIX = "Bearer "
     }
 }

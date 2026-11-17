@@ -1,5 +1,5 @@
-package com.korebit.rigel.enums;
+package com.korebit.rigel.enums
 
-public enum Role {
+enum class Role {
     ROOT, USER, ADMIN, SUPPLIER
 }

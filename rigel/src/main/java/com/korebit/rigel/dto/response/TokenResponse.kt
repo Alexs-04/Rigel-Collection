@@ -1,13 +1,13 @@
-package com.korebit.rigel.dto.response;
+package com.korebit.rigel.dto.response
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonProperty
+import java.io.Serializable
 
-import java.io.Serializable;
-
-public record TokenResponse(
-        @JsonProperty("access_token")
-        String accessToken,
-        @JsonProperty("refresh_token")
-        String refreshToken
-) implements Serializable {
-}
+data class TokenResponse(
+    @param:JsonProperty("access_token")
+    @get:JsonProperty("access_token")
+    val accessToken: String,
+    @param:JsonProperty("refresh_token")
+    @get:JsonProperty("refresh_token")
+    val refreshToken: String,
+) : Serializable

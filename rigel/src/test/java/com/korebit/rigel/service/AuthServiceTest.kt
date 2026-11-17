@@ -1,181 +1,190 @@
-package com.korebit.rigel.service;
+package com.korebit.rigel.service
 
-import com.korebit.rigel.dto.request.LoginRequest;
-import com.korebit.rigel.dto.response.TokenResponse;
-import com.korebit.rigel.enums.Role;
-import com.korebit.rigel.enums.TokenType;
-import com.korebit.rigel.model.beans.Consumer;
-import com.korebit.rigel.model.beans.Token;
-import com.korebit.rigel.repository.ConsumerRepository;
-import com.korebit.rigel.service.jwt.JwtService;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.DisabledException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import com.korebit.rigel.any
+import com.korebit.rigel.dto.request.LoginRequest
+import com.korebit.rigel.dto.response.TokenResponse
+import com.korebit.rigel.enums.Role
+import com.korebit.rigel.enums.TokenType
+import com.korebit.rigel.model.beans.Consumer
+import com.korebit.rigel.model.beans.Token
+import com.korebit.rigel.repository.ConsumerRepository
+import com.korebit.rigel.service.jwt.JwtService
+import com.korebit.rigel.whenever
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
+import org.mockito.Mock
+import org.mockito.Mockito.never
+import org.mockito.Mockito.verify
+import org.mockito.Mockito.verifyNoInteractions
+import org.mockito.junit.jupiter.MockitoExtension
+import org.springframework.security.authentication.AuthenticationManager
+import org.springframework.security.authentication.BadCredentialsException
+import org.springframework.security.authentication.DisabledException
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
+import org.springframework.security.core.Authentication
+import kotlin.test.assertFailsWith
+import kotlin.test.assertSame
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
-
-@ExtendWith(MockitoExtension.class)
+@ExtendWith(MockitoExtension::class)
 @DisplayName("AuthService Tests")
 class AuthServiceTest {
 
-    private static final String SECRET = "dGVzdC1vbmx5LWtleS1yaWdlbC1qd3QtMjU2LWJpdHMtbWluaW11bS0xMjM0NTY=";
+    @Mock
+    private lateinit var authenticationManager: AuthenticationManager
 
     @Mock
-    private AuthenticationManager authenticationManager;
-    @Mock
-    private ConsumerRepository consumerRepository;
-    @Mock
-    private SessionTokenService sessionTokenService;
+    private lateinit var consumerRepository: ConsumerRepository
 
-    private final JwtService jwtService = new JwtService(SECRET, 60_000, 120_000);
-    private AuthService authService;
-    private Consumer consumer;
+    @Mock
+    private lateinit var sessionTokenService: SessionTokenService
+
+    private val jwtService = JwtService(SECRET, 60_000, 120_000)
+    private lateinit var authService: AuthService
+    private lateinit var consumer: Consumer
 
     @BeforeEach
-    void setUp() {
-        authService = new AuthService(authenticationManager, jwtService, consumerRepository, sessionTokenService);
+    fun setUp() {
+        authService = AuthService(authenticationManager, jwtService, consumerRepository, sessionTokenService)
 
-        consumer = new Consumer();
-        consumer.setId(1L);
-        consumer.setName("Test User");
-        consumer.setEmail("test@example.com");
-        consumer.setUsername("testuser");
-        consumer.setRole(Role.ADMIN);
-        consumer.setActive(true);
+        consumer = Consumer(
+            id = 1L,
+            name = "Test User",
+            email = "test@example.com",
+            username = "testuser",
+            role = Role.ADMIN,
+            active = true,
+        )
     }
 
-    private Token stored(String jti, TokenType type) {
-        Token token = new Token();
-        token.setToken(jti);
-        token.setTokenType(type);
-        token.setConsumer(consumer);
-        return token;
-    }
+    private fun stored(jti: String, type: TokenType) = Token(token = jti, tokenType = type, consumer = consumer)
 
     // ── login ───────────────────────────────────────────────────────────────
 
     @Test
     @DisplayName("Valid credentials open a new session")
-    void testLoginSuccess() {
-        TokenResponse tokens = new TokenResponse("access", "refresh");
-        when(consumerRepository.findByEmail("test@example.com")).thenReturn(consumer);
-        when(sessionTokenService.startSession(consumer)).thenReturn(tokens);
+    fun testLoginSuccess() {
+        val tokens = TokenResponse("access", "refresh")
+        whenever(consumerRepository.findByEmail("test@example.com")).thenReturn(consumer)
+        whenever(sessionTokenService.startSession(consumer)).thenReturn(tokens)
 
-        assertSame(tokens, authService.login(new LoginRequest(" test@example.com ", "password123")));
+        assertSame(tokens, authService.login(LoginRequest(" test@example.com ", "password123")))
         verify(authenticationManager).authenticate(
-                new UsernamePasswordAuthenticationToken("test@example.com", "password123"));
+            UsernamePasswordAuthenticationToken("test@example.com", "password123")
+        )
     }
 
     @Test
     @DisplayName("Wrong credentials propagate BadCredentialsException (401) and open no session")
-    void testLoginInvalidCredentials() {
-        when(authenticationManager.authenticate(any())).thenThrow(new BadCredentialsException("Bad credentials"));
+    fun testLoginInvalidCredentials() {
+        whenever(authenticationManager.authenticate(any<Authentication>()))
+            .thenThrow(BadCredentialsException("Bad credentials"))
 
-        assertThrows(BadCredentialsException.class,
-                () -> authService.login(new LoginRequest("test@example.com", "wrong")));
-        verifyNoInteractions(sessionTokenService);
+        assertFailsWith<BadCredentialsException> {
+            authService.login(LoginRequest("test@example.com", "wrong"))
+        }
+        verifyNoInteractions(sessionTokenService)
     }
 
     @Test
     @DisplayName("Missing email or password is rejected before hitting the authentication manager")
-    void testLoginMissingFields() {
-        assertThrows(BadCredentialsException.class, () -> authService.login(new LoginRequest(null, "x")));
-        assertThrows(BadCredentialsException.class, () -> authService.login(new LoginRequest("a@b.c", "")));
-        verifyNoInteractions(authenticationManager, sessionTokenService);
+    fun testLoginMissingFields() {
+        assertFailsWith<BadCredentialsException> { authService.login(LoginRequest(null, "x")) }
+        assertFailsWith<BadCredentialsException> { authService.login(LoginRequest("a@b.c", "")) }
+        verifyNoInteractions(authenticationManager, sessionTokenService)
     }
 
     @Test
     @DisplayName("Inactive user cannot log in")
-    void testLoginInactiveUser() {
-        consumer.setActive(false);
-        when(consumerRepository.findByEmail("test@example.com")).thenReturn(consumer);
+    fun testLoginInactiveUser() {
+        consumer.active = false
+        whenever(consumerRepository.findByEmail("test@example.com")).thenReturn(consumer)
 
-        assertThrows(DisabledException.class,
-                () -> authService.login(new LoginRequest("test@example.com", "password123")));
-        verifyNoInteractions(sessionTokenService);
+        assertFailsWith<DisabledException> {
+            authService.login(LoginRequest("test@example.com", "password123"))
+        }
+        verifyNoInteractions(sessionTokenService)
     }
 
     // ── refresh ─────────────────────────────────────────────────────────────
 
     @Test
     @DisplayName("A valid, persisted refresh token is rotated into a new pair")
-    void testRefreshSuccess() {
-        JwtService.IssuedToken refresh = jwtService.generateRefreshToken(consumer);
-        TokenResponse rotated = new TokenResponse("new-access", "new-refresh");
-        when(sessionTokenService.findActive(refresh.id(), TokenType.REFRESH)).thenReturn(stored(refresh.id(), TokenType.REFRESH));
-        when(sessionTokenService.startSession(consumer)).thenReturn(rotated);
+    fun testRefreshSuccess() {
+        val refresh = jwtService.generateRefreshToken(consumer)
+        val rotated = TokenResponse("new-access", "new-refresh")
+        whenever(sessionTokenService.findActive(refresh.id, TokenType.REFRESH))
+            .thenReturn(stored(refresh.id, TokenType.REFRESH))
+        whenever(sessionTokenService.startSession(consumer)).thenReturn(rotated)
 
-        assertSame(rotated, authService.refresh(refresh.value()));
+        assertSame(rotated, authService.refresh(refresh.value))
     }
 
     @Test
     @DisplayName("An access token cannot be used as refresh token")
-    void testRefreshWithAccessToken() {
-        String access = jwtService.generateAccessToken(consumer).value();
+    fun testRefreshWithAccessToken() {
+        val access = jwtService.generateAccessToken(consumer).value
 
-        assertThrows(BadCredentialsException.class, () -> authService.refresh(access));
-        verify(sessionTokenService, never()).startSession(any());
+        assertFailsWith<BadCredentialsException> { authService.refresh(access) }
+        verify(sessionTokenService, never()).startSession(any())
     }
 
     @Test
     @DisplayName("A revoked or unknown refresh token is rejected (replay protection)")
-    void testRefreshRevoked() {
-        JwtService.IssuedToken refresh = jwtService.generateRefreshToken(consumer);
-        when(sessionTokenService.findActive(refresh.id(), TokenType.REFRESH)).thenReturn(null);
+    fun testRefreshRevoked() {
+        val refresh = jwtService.generateRefreshToken(consumer)
+        whenever(sessionTokenService.findActive(refresh.id, TokenType.REFRESH)).thenReturn(null)
 
-        assertThrows(BadCredentialsException.class, () -> authService.refresh(refresh.value()));
+        assertFailsWith<BadCredentialsException> { authService.refresh(refresh.value) }
     }
 
     @Test
     @DisplayName("Garbage or empty refresh tokens are rejected")
-    void testRefreshGarbage() {
-        assertThrows(BadCredentialsException.class, () -> authService.refresh("garbage"));
-        assertThrows(BadCredentialsException.class, () -> authService.refresh(""));
-        assertThrows(BadCredentialsException.class, () -> authService.refresh(null));
+    fun testRefreshGarbage() {
+        assertFailsWith<BadCredentialsException> { authService.refresh("garbage") }
+        assertFailsWith<BadCredentialsException> { authService.refresh("") }
+        assertFailsWith<BadCredentialsException> { authService.refresh(null) }
     }
 
     @Test
     @DisplayName("Refreshing for a deactivated user fails and closes their sessions")
-    void testRefreshInactiveUser() {
-        JwtService.IssuedToken refresh = jwtService.generateRefreshToken(consumer);
-        consumer.setActive(false);
-        when(sessionTokenService.findActive(refresh.id(), TokenType.REFRESH)).thenReturn(stored(refresh.id(), TokenType.REFRESH));
+    fun testRefreshInactiveUser() {
+        val refresh = jwtService.generateRefreshToken(consumer)
+        consumer.active = false
+        whenever(sessionTokenService.findActive(refresh.id, TokenType.REFRESH))
+            .thenReturn(stored(refresh.id, TokenType.REFRESH))
 
-        assertThrows(DisabledException.class, () -> authService.refresh(refresh.value()));
-        verify(sessionTokenService).revokeAllSessions(consumer);
-        verify(sessionTokenService, never()).startSession(any());
+        assertFailsWith<DisabledException> { authService.refresh(refresh.value) }
+        verify(sessionTokenService).revokeAllSessions(consumer)
+        verify(sessionTokenService, never()).startSession(any())
     }
 
     // ── logout ──────────────────────────────────────────────────────────────
 
     @Test
     @DisplayName("Logout revokes every session of the token owner")
-    void testLogout() {
-        String access = jwtService.generateAccessToken(consumer).value();
-        when(consumerRepository.findByEmail("test@example.com")).thenReturn(consumer);
+    fun testLogout() {
+        val access = jwtService.generateAccessToken(consumer).value
+        whenever(consumerRepository.findByEmail("test@example.com")).thenReturn(consumer)
 
-        authService.logout("Bearer " + access);
+        authService.logout("Bearer $access")
 
-        verify(sessionTokenService).revokeAllSessions(consumer);
+        verify(sessionTokenService).revokeAllSessions(consumer)
     }
 
     @Test
     @DisplayName("Logout ignores missing, malformed or refresh tokens")
-    void testLogoutIgnoresInvalidInput() {
-        authService.logout(null);
-        authService.logout("Basic abc");
-        authService.logout("Bearer garbage");
-        authService.logout("Bearer " + jwtService.generateRefreshToken(consumer).value());
+    fun testLogoutIgnoresInvalidInput() {
+        authService.logout(null)
+        authService.logout("Basic abc")
+        authService.logout("Bearer garbage")
+        authService.logout("Bearer ${jwtService.generateRefreshToken(consumer).value}")
 
-        verifyNoInteractions(sessionTokenService, consumerRepository);
+        verifyNoInteractions(sessionTokenService, consumerRepository)
+    }
+
+    private companion object {
+        const val SECRET = "dGVzdC1vbmx5LWtleS1yaWdlbC1qd3QtMjU2LWJpdHMtbWluaW11bS0xMjM0NTY="
     }
 }

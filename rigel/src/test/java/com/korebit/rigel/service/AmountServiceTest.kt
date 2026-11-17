@@ -1,300 +1,285 @@
-package com.korebit.rigel.service;
+package com.korebit.rigel.service
 
-import com.korebit.rigel.dto.AmountDto;
-import com.korebit.rigel.dto.request.AmountBuyoutRequest;
-import com.korebit.rigel.dto.request.AmountUpsertRequest;
-import com.korebit.rigel.enums.AmountStatus;
-import com.korebit.rigel.enums.ContainerType;
-import com.korebit.rigel.exception.EntityNotFundException;
-import com.korebit.rigel.model.beans.Amount;
-import com.korebit.rigel.model.beans.Consumer;
-import com.korebit.rigel.repository.AmountRepository;
-import com.korebit.rigel.repository.ConsumerRepository;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Sort;
-
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.AdditionalAnswers.returnsFirstArg;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.*;
+import com.korebit.rigel.any
+import com.korebit.rigel.dto.request.AmountBuyoutRequest
+import com.korebit.rigel.dto.request.AmountUpsertRequest
+import com.korebit.rigel.enums.AmountStatus
+import com.korebit.rigel.enums.ContainerType
+import com.korebit.rigel.exception.EntityNotFundException
+import com.korebit.rigel.model.beans.Amount
+import com.korebit.rigel.model.beans.Consumer
+import com.korebit.rigel.repository.AmountRepository
+import com.korebit.rigel.repository.ConsumerRepository
+import com.korebit.rigel.whenever
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
+import org.mockito.AdditionalAnswers.returnsFirstArg
+import org.mockito.ArgumentMatchers.anyLong
+import org.mockito.InjectMocks
+import org.mockito.Mock
+import org.mockito.Mockito.never
+import org.mockito.Mockito.times
+import org.mockito.Mockito.verify
+import org.mockito.Mockito.verifyNoInteractions
+import org.mockito.junit.jupiter.MockitoExtension
+import org.springframework.data.domain.Sort
+import java.math.BigDecimal
+import java.time.LocalDateTime
+import java.util.Optional
+import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
 
 /**
  * Unit tests for AmountService.
  * Tests amount creation, updates, buyout operations, and returns.
  */
-@ExtendWith(MockitoExtension.class)
+@ExtendWith(MockitoExtension::class)
 @DisplayName("AmountService Tests")
 class AmountServiceTest {
 
     @Mock
-    private AmountRepository amountRepository;
+    private lateinit var amountRepository: AmountRepository
 
     @Mock
-    private ConsumerRepository consumerRepository;
+    private lateinit var consumerRepository: ConsumerRepository
 
     @InjectMocks
-    private AmountService amountService;
+    private lateinit var amountService: AmountService
 
-    private Amount testAmount;
-    private Consumer testConsumer;
-    private AmountUpsertRequest createRequest;
+    private lateinit var testAmount: Amount
+    private lateinit var testConsumer: Consumer
+    private lateinit var createRequest: AmountUpsertRequest
 
     @BeforeEach
-    void setUp() {
-        testConsumer = new Consumer();
-        testConsumer.setId(1L);
-        testConsumer.setUsername("testuser");
-        testConsumer.setEmail("test@example.com");
+    fun setUp() {
+        testConsumer = Consumer(id = 1L, username = "testuser", email = "test@example.com")
 
-        testAmount = new Amount();
-        testAmount.setFolio(1L);
-        testAmount.setDescription("Test Amount");
-        testAmount.setType(ContainerType.BEER_CONTAINER);
-        testAmount.setCustomerName("Test Customer");
-        testAmount.setQuantity(5);
-        testAmount.setSaleUnitPrice(BigDecimal.valueOf(10.00));
-        testAmount.setBuyoutUnitPrice(BigDecimal.valueOf(5.00));
-        testAmount.setTotal(BigDecimal.valueOf(50.00));
-        testAmount.setCreated(LocalDateTime.now());
-        testAmount.setExpirationDate(LocalDateTime.now().plusDays(7));
-        testAmount.setReturned(false);
-        testAmount.setConsumer(testConsumer);
-        testAmount.setNotes("Test notes");
+        testAmount = Amount(
+            folio = 1L,
+            description = "Test Amount",
+            type = ContainerType.BEER_CONTAINER,
+            customerName = "Test Customer",
+            quantity = 5,
+            saleUnitPrice = BigDecimal.valueOf(10.00),
+            buyoutUnitPrice = BigDecimal.valueOf(5.00),
+            total = BigDecimal.valueOf(50.00),
+            created = LocalDateTime.now(),
+            expirationDate = LocalDateTime.now().plusDays(7),
+            returned = false,
+            consumer = testConsumer,
+            notes = "Test notes",
+        )
 
-        createRequest = new AmountUpsertRequest(
-                "Test Description",
-                ContainerType.BEER_CONTAINER,
-                "Test Customer",
-                5,
-                10.00,
-                5.00,
-                LocalDateTime.now().plusDays(7),
-                "Test notes"
-        );
+        createRequest = upsertRequest()
     }
+
+    private fun upsertRequest(
+        description: String = "Test Description",
+        type: ContainerType = ContainerType.BEER_CONTAINER,
+        customerName: String = "Test Customer",
+        quantity: Int = 5,
+        saleUnitPrice: Double = 10.00,
+        buyoutUnitPrice: Double = 5.00,
+        expirationDate: LocalDateTime = LocalDateTime.now().plusDays(7),
+        notes: String = "Test notes",
+    ) = AmountUpsertRequest(
+        description, type, customerName, quantity, saleUnitPrice, buyoutUnitPrice, expirationDate, notes,
+    )
 
     @Test
     @DisplayName("Should retrieve all amounts")
-    void testGetAllAmounts() {
-        when(amountRepository.findAll(any(Sort.class))).thenReturn(Collections.singletonList(testAmount));
+    fun testGetAllAmounts() {
+        whenever(amountRepository.findAll(any<Sort>())).thenReturn(listOf(testAmount))
 
-        var result = amountService.getAllAmounts();
+        val result = amountService.getAllAmounts()
 
-        assertEquals(1, result.size());
-        assertEquals("Test Amount", result.getFirst().getDescription());
-        verify(amountRepository, times(1)).findAll(any(Sort.class));
+        assertEquals(1, result.size)
+        assertEquals("Test Amount", result.first().description)
+        verify(amountRepository, times(1)).findAll(any<Sort>())
     }
 
     @Test
     @DisplayName("Should get amount by folio")
-    void testGetAmountByFolio() {
-        when(amountRepository.findById(1L)).thenReturn(Optional.of(testAmount));
+    fun testGetAmountByFolio() {
+        whenever(amountRepository.findById(1L)).thenReturn(Optional.of(testAmount))
 
-        AmountDto result = amountService.getAmountByFolio(1L);
+        val result = amountService.getAmountByFolio(1L)
 
-        assertNotNull(result);
-        assertEquals("Test Amount", result.getDescription());
+        assertNotNull(result)
+        assertEquals("Test Amount", result.description)
     }
 
     @Test
     @DisplayName("Should throw exception when amount not found by folio")
-    void testGetAmountByFolioNotFound() {
-        when(amountRepository.findById(anyLong())).thenReturn(Optional.empty());
+    fun testGetAmountByFolioNotFound() {
+        whenever(amountRepository.findById(anyLong())).thenReturn(Optional.empty())
 
-        assertThrows(EntityNotFundException.class, () -> amountService.getAmountByFolio(1L));
+        assertFailsWith<EntityNotFundException> { amountService.getAmountByFolio(1L) }
     }
 
     @Test
     @DisplayName("Should create a new amount owned by the authenticated user")
-    void testCreateAmount() {
-        when(consumerRepository.findByEmail("test@example.com")).thenReturn(testConsumer);
-        when(amountRepository.save(any())).then(returnsFirstArg());
+    fun testCreateAmount() {
+        whenever(consumerRepository.findByEmail("test@example.com")).thenReturn(testConsumer)
+        whenever(amountRepository.save(any<Amount>())).then(returnsFirstArg<Amount>())
 
-        AmountDto result = amountService.createAmount(createRequest, "test@example.com");
+        val result = amountService.createAmount(createRequest, "test@example.com")
 
-        assertEquals("Test Customer", result.getCustomerName());
-        assertEquals(50.0, result.getTotal());
-        assertEquals(AmountStatus.ACTIVE, result.getStatus());
-        assertEquals(1L, result.getOwnerId());
-        verify(amountRepository, times(1)).save(any());
+        assertEquals("Test Customer", result.customerName)
+        assertEquals(50.0, result.total)
+        assertEquals(AmountStatus.ACTIVE, result.status)
+        assertEquals(1L, result.ownerId)
+        verify(amountRepository, times(1)).save(any<Amount>())
     }
 
     @Test
     @DisplayName("Should throw exception when creating amount with empty customer name")
-    void testCreateAmountEmptyCustomerName() {
-        AmountUpsertRequest invalidRequest = new AmountUpsertRequest(
-                "Test Description",
-                ContainerType.BEER_CONTAINER,
-                "   ",
-                5,
-                10.00,
-                5.00,
-                LocalDateTime.now().plusDays(7),
-                "Test notes"
-        );
+    fun testCreateAmountEmptyCustomerName() {
+        val invalidRequest = upsertRequest(customerName = "   ")
 
-        assertThrows(IllegalArgumentException.class,
-                () -> amountService.createAmount(invalidRequest, "test@example.com"));
-        verifyNoInteractions(consumerRepository, amountRepository);
+        assertFailsWith<IllegalArgumentException> {
+            amountService.createAmount(invalidRequest, "test@example.com")
+        }
+        verifyNoInteractions(consumerRepository, amountRepository)
     }
 
     @Test
     @DisplayName("Should throw exception when creating amount with invalid quantity")
-    void testCreateAmountInvalidQuantity() {
-        AmountUpsertRequest invalidRequest = new AmountUpsertRequest(
-                "Test Description",
-                ContainerType.BEER_CONTAINER,
-                "Test Customer",
-                0,
-                10.00,
-                5.00,
-                LocalDateTime.now().plusDays(7),
-                "Test notes"
-        );
+    fun testCreateAmountInvalidQuantity() {
+        val invalidRequest = upsertRequest(quantity = 0)
 
-        assertThrows(IllegalArgumentException.class,
-                () -> amountService.createAmount(invalidRequest, "test@example.com"));
-        verifyNoInteractions(consumerRepository, amountRepository);
+        assertFailsWith<IllegalArgumentException> {
+            amountService.createAmount(invalidRequest, "test@example.com")
+        }
+        verifyNoInteractions(consumerRepository, amountRepository)
     }
 
     @Test
     @DisplayName("Should throw exception when creating amount with consumer not found")
-    void testCreateAmountConsumerNotFound() {
-        when(consumerRepository.findByEmail("notfound@example.com")).thenReturn(null);
+    fun testCreateAmountConsumerNotFound() {
+        whenever(consumerRepository.findByEmail("notfound@example.com")).thenReturn(null)
 
-        assertThrows(EntityNotFundException.class,
-                () -> amountService.createAmount(createRequest, "notfound@example.com"));
-        verify(amountRepository, never()).save(any());
+        assertFailsWith<EntityNotFundException> {
+            amountService.createAmount(createRequest, "notfound@example.com")
+        }
+        verify(amountRepository, never()).save(any<Amount>())
     }
 
     @Test
     @DisplayName("Should update an amount")
-    void testUpdateAmount() {
-        AmountUpsertRequest updateRequest = new AmountUpsertRequest(
-                "Updated Description",
-                ContainerType.LARGE_GLASS_CONTAINER,
-                "Updated Customer",
-                10,
-                15.00,
-                7.50,
-                LocalDateTime.now().plusDays(14),
-                "Updated notes"
-        );
+    fun testUpdateAmount() {
+        val updateRequest = upsertRequest(
+            description = "Updated Description",
+            type = ContainerType.LARGE_GLASS_CONTAINER,
+            customerName = "Updated Customer",
+            quantity = 10,
+            saleUnitPrice = 15.00,
+            buyoutUnitPrice = 7.50,
+            expirationDate = LocalDateTime.now().plusDays(14),
+            notes = "Updated notes",
+        )
 
-        when(amountRepository.findById(1L)).thenReturn(Optional.of(testAmount));
-        when(amountRepository.save(any())).then(returnsFirstArg());
+        whenever(amountRepository.findById(1L)).thenReturn(Optional.of(testAmount))
+        whenever(amountRepository.save(any<Amount>())).then(returnsFirstArg<Amount>())
 
-        AmountDto result = amountService.updateAmount(1L, updateRequest);
+        val result = amountService.updateAmount(1L, updateRequest)
 
-        assertEquals("Updated Customer", result.getCustomerName());
-        assertEquals(ContainerType.LARGE_GLASS_CONTAINER, result.getType());
-        assertEquals(150.0, result.getTotal());
-        verify(amountRepository, times(1)).save(any());
+        assertEquals("Updated Customer", result.customerName)
+        assertEquals(ContainerType.LARGE_GLASS_CONTAINER, result.type)
+        assertEquals(150.0, result.total)
+        verify(amountRepository, times(1)).save(any<Amount>())
     }
 
     @Test
     @DisplayName("Should throw exception when updating closed amount")
-    void testUpdateClosedAmount() {
-        testAmount.setReturned(true);
-        AmountUpsertRequest updateRequest = new AmountUpsertRequest(
-                "Updated", ContainerType.BEER_CONTAINER, "Customer", 5, 10.0, 5.0,
-                LocalDateTime.now().plusDays(7), "notes"
-        );
+    fun testUpdateClosedAmount() {
+        testAmount.returned = true
+        val updateRequest = upsertRequest(description = "Updated", customerName = "Customer", notes = "notes")
 
-        when(amountRepository.findById(1L)).thenReturn(Optional.of(testAmount));
+        whenever(amountRepository.findById(1L)).thenReturn(Optional.of(testAmount))
 
-        assertThrows(IllegalArgumentException.class,
-                () -> amountService.updateAmount(1L, updateRequest));
+        assertFailsWith<IllegalArgumentException> { amountService.updateAmount(1L, updateRequest) }
     }
 
     @Test
     @DisplayName("Should mark amount as returned")
-    void testMarkAsReturned() {
-        when(amountRepository.findById(1L)).thenReturn(Optional.of(testAmount));
-        when(amountRepository.save(any())).then(returnsFirstArg());
+    fun testMarkAsReturned() {
+        whenever(amountRepository.findById(1L)).thenReturn(Optional.of(testAmount))
+        whenever(amountRepository.save(any<Amount>())).then(returnsFirstArg<Amount>())
 
-        AmountDto result = amountService.markAsReturned(1L);
+        val result = amountService.markAsReturned(1L)
 
-        assertEquals(AmountStatus.RETURNED, result.getStatus());
-        assertNotNull(result.getReturnedAt());
-        verify(amountRepository, times(1)).save(any());
+        assertEquals(AmountStatus.RETURNED, result.status)
+        assertNotNull(result.returnedAt)
+        verify(amountRepository, times(1)).save(any<Amount>())
     }
 
     @Test
     @DisplayName("Should throw exception when marking already returned amount")
-    void testMarkAlreadyReturnedAmount() {
-        testAmount.setReturned(true);
+    fun testMarkAlreadyReturnedAmount() {
+        testAmount.returned = true
 
-        when(amountRepository.findById(1L)).thenReturn(Optional.of(testAmount));
+        whenever(amountRepository.findById(1L)).thenReturn(Optional.of(testAmount))
 
-        assertThrows(IllegalArgumentException.class, () -> amountService.markAsReturned(1L));
+        assertFailsWith<IllegalArgumentException> { amountService.markAsReturned(1L) }
     }
 
     @Test
     @DisplayName("Should mark amount as bought out")
-    void testMarkAsBoughtOut() {
-        testAmount.setExpirationDate(LocalDateTime.now().minusDays(1));
-        AmountBuyoutRequest buyoutRequest = new AmountBuyoutRequest(3.00, "Buyout notes");
+    fun testMarkAsBoughtOut() {
+        testAmount.expirationDate = LocalDateTime.now().minusDays(1)
+        val buyoutRequest = AmountBuyoutRequest(3.00, "Buyout notes")
 
-        when(amountRepository.findById(1L)).thenReturn(Optional.of(testAmount));
-        when(amountRepository.save(any())).then(returnsFirstArg());
+        whenever(amountRepository.findById(1L)).thenReturn(Optional.of(testAmount))
+        whenever(amountRepository.save(any<Amount>())).then(returnsFirstArg<Amount>())
 
-        AmountDto result = amountService.markAsBoughtOut(1L, buyoutRequest);
+        val result = amountService.markAsBoughtOut(1L, buyoutRequest)
 
-        assertEquals(AmountStatus.BOUGHT_OUT, result.getStatus());
-        assertEquals(15.0, result.getBuyoutTotal());
-        assertEquals("Test notes | Buyout notes", result.getNotes());
-        verify(amountRepository, times(1)).save(any());
+        assertEquals(AmountStatus.BOUGHT_OUT, result.status)
+        assertEquals(15.0, result.buyoutTotal)
+        assertEquals("Test notes | Buyout notes", result.notes)
+        verify(amountRepository, times(1)).save(any<Amount>())
     }
 
     @Test
     @DisplayName("Should throw exception when buying out non-expired amount")
-    void testMarkAsBoughtOutNonExpiredAmount() {
-        testAmount.setExpirationDate(LocalDateTime.now().plusDays(7));
-        AmountBuyoutRequest buyoutRequest = new AmountBuyoutRequest(3.00, "Buyout notes");
+    fun testMarkAsBoughtOutNonExpiredAmount() {
+        testAmount.expirationDate = LocalDateTime.now().plusDays(7)
+        val buyoutRequest = AmountBuyoutRequest(3.00, "Buyout notes")
 
-        when(amountRepository.findById(1L)).thenReturn(Optional.of(testAmount));
+        whenever(amountRepository.findById(1L)).thenReturn(Optional.of(testAmount))
 
-        assertThrows(IllegalArgumentException.class,
-                () -> amountService.markAsBoughtOut(1L, buyoutRequest));
+        assertFailsWith<IllegalArgumentException> { amountService.markAsBoughtOut(1L, buyoutRequest) }
     }
 
     @Test
     @DisplayName("Should delete an amount")
-    void testDeleteAmount() {
-        when(amountRepository.findById(1L)).thenReturn(Optional.of(testAmount));
+    fun testDeleteAmount() {
+        whenever(amountRepository.findById(1L)).thenReturn(Optional.of(testAmount))
 
-        amountService.deleteAmount(1L);
+        amountService.deleteAmount(1L)
 
-        verify(amountRepository, times(1)).delete(testAmount);
+        verify(amountRepository, times(1)).delete(testAmount)
     }
 
     @Test
     @DisplayName("Should throw exception when deleting non-existent amount")
-    void testDeleteAmountNotFound() {
-        when(amountRepository.findById(anyLong())).thenReturn(Optional.empty());
+    fun testDeleteAmountNotFound() {
+        whenever(amountRepository.findById(anyLong())).thenReturn(Optional.empty())
 
-        assertThrows(EntityNotFundException.class, () -> amountService.deleteAmount(1L));
+        assertFailsWith<EntityNotFundException> { amountService.deleteAmount(1L) }
     }
 
     @Test
     @DisplayName("Should get all container types")
-    void testGetContainerTypes() {
-        var result = amountService.getContainerTypes();
+    fun testGetContainerTypes() {
+        val result = amountService.getContainerTypes()
 
-        assertNotNull(result);
-        assertFalse(result.isEmpty());
+        assertNotNull(result)
+        assertFalse(result.isEmpty())
     }
 }

@@ -1,219 +1,220 @@
-package com.korebit.rigel.service;
+package com.korebit.rigel.service
 
-import com.korebit.rigel.dto.UserAdminDto;
-import com.korebit.rigel.dto.request.UserStatusRequest;
-import com.korebit.rigel.dto.request.UserUpsertRequest;
-import com.korebit.rigel.enums.Role;
-import com.korebit.rigel.exception.EntityNotFundException;
-import com.korebit.rigel.model.beans.Consumer;
-import com.korebit.rigel.repository.ConsumerRepository;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import com.korebit.rigel.any
+import com.korebit.rigel.dto.request.UserStatusRequest
+import com.korebit.rigel.dto.request.UserUpsertRequest
+import com.korebit.rigel.enums.Role
+import com.korebit.rigel.exception.EntityNotFundException
+import com.korebit.rigel.model.beans.Consumer
+import com.korebit.rigel.repository.ConsumerRepository
+import com.korebit.rigel.whenever
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
+import org.mockito.AdditionalAnswers.returnsFirstArg
+import org.mockito.InjectMocks
+import org.mockito.Mock
+import org.mockito.Mockito.never
+import org.mockito.Mockito.verify
+import org.mockito.Mockito.verifyNoInteractions
+import org.mockito.junit.jupiter.MockitoExtension
+import org.springframework.security.crypto.password.PasswordEncoder
+import java.util.Optional
+import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
-import java.util.Arrays;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.AdditionalAnswers.returnsFirstArg;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
-
-@ExtendWith(MockitoExtension.class)
+@ExtendWith(MockitoExtension::class)
 @DisplayName("ConsumerService Tests")
 class ConsumerServiceTest {
 
     @Mock
-    private ConsumerRepository consumerRepository;
+    private lateinit var consumerRepository: ConsumerRepository
 
     @Mock
-    private PasswordEncoder passwordEncoder;
+    private lateinit var passwordEncoder: PasswordEncoder
 
     @Mock
-    private SessionTokenService sessionTokenService;
+    private lateinit var sessionTokenService: SessionTokenService
 
     @InjectMocks
-    private ConsumerService consumerService;
+    private lateinit var consumerService: ConsumerService
 
-    private Consumer testConsumer;
+    private lateinit var testConsumer: Consumer
 
     @BeforeEach
-    void setUp() {
-        testConsumer = new Consumer();
-        testConsumer.setId(1L);
-        testConsumer.setName("Test User");
-        testConsumer.setEmail("test@example.com");
-        testConsumer.setUsername("testuser");
-        testConsumer.setPassword("hashedPassword");
-        testConsumer.setRole(Role.USER);
-        testConsumer.setActive(true);
-        testConsumer.setPhoneNumber("1234567890");
+    fun setUp() {
+        testConsumer = Consumer(
+            id = 1L,
+            name = "Test User",
+            email = "test@example.com",
+            username = "testuser",
+            password = "hashedPassword",
+            role = Role.USER,
+            active = true,
+            phoneNumber = "1234567890",
+        )
     }
 
-    private static UserUpsertRequest request(String name, String username, String password,
-                                             String email, Role role) {
-        return new UserUpsertRequest(name, username, password, email, "9876543210", role);
-    }
+    private fun request(name: String, username: String, password: String?, email: String, role: Role) =
+        UserUpsertRequest(name, username, password, email, "9876543210", role)
 
     @Test
     @DisplayName("Should find consumer by username without exposing the password")
-    void testFindByUsername() {
-        when(consumerRepository.findByUsername("testuser")).thenReturn(testConsumer);
+    fun testFindByUsername() {
+        whenever(consumerRepository.findByUsername("testuser")).thenReturn(testConsumer)
 
-        UserAdminDto result = consumerService.findByUsername("testuser");
+        val result = consumerService.findByUsername("testuser")
 
-        assertEquals("test@example.com", result.getEmail());
-        assertEquals(Role.USER, result.getRole());
+        assertEquals("test@example.com", result.email)
+        assertEquals(Role.USER, result.role)
     }
 
     @Test
     @DisplayName("Should throw when consumer not found by username")
-    void testFindByUsernameNotFound() {
-        when(consumerRepository.findByUsername("notfound")).thenReturn(null);
+    fun testFindByUsernameNotFound() {
+        whenever(consumerRepository.findByUsername("notfound")).thenReturn(null)
 
-        assertThrows(EntityNotFundException.class, () -> consumerService.findByUsername("notfound"));
+        assertFailsWith<EntityNotFundException> { consumerService.findByUsername("notfound") }
     }
 
     @Test
     @DisplayName("Should find consumer by email")
-    void testFindByEmail() {
-        when(consumerRepository.findByEmail("test@example.com")).thenReturn(testConsumer);
+    fun testFindByEmail() {
+        whenever(consumerRepository.findByEmail("test@example.com")).thenReturn(testConsumer)
 
-        assertEquals("testuser", consumerService.findByEmail("test@example.com").getUsername());
+        assertEquals("testuser", consumerService.findByEmail("test@example.com").username)
     }
 
     @Test
     @DisplayName("Should throw when consumer not found by email")
-    void testFindByEmailNotFound() {
-        when(consumerRepository.findByEmail("notfound@example.com")).thenReturn(null);
+    fun testFindByEmailNotFound() {
+        whenever(consumerRepository.findByEmail("notfound@example.com")).thenReturn(null)
 
-        assertThrows(EntityNotFundException.class, () -> consumerService.findByEmail("notfound@example.com"));
+        assertFailsWith<EntityNotFundException> { consumerService.findByEmail("notfound@example.com") }
     }
 
     @Test
     @DisplayName("Should create a user with an encoded password")
-    void testCreateUser() {
-        UserUpsertRequest req = request("New User", "newuser", "password123", "newuser@example.com", Role.ADMIN);
+    fun testCreateUser() {
+        val req = request("New User", "newuser", "password123", "newuser@example.com", Role.ADMIN)
 
-        when(consumerRepository.existsByUsername("newuser")).thenReturn(false);
-        when(consumerRepository.existsByEmail("newuser@example.com")).thenReturn(false);
-        when(passwordEncoder.encode("password123")).thenReturn("hashed");
-        when(consumerRepository.save(any())).then(invocation -> {
-            Consumer saved = invocation.getArgument(0);
-            saved.setId(10L);
-            return saved;
-        });
+        whenever(consumerRepository.existsByUsername("newuser")).thenReturn(false)
+        whenever(consumerRepository.existsByEmail("newuser@example.com")).thenReturn(false)
+        whenever(passwordEncoder.encode("password123")).thenReturn("hashed")
+        whenever(consumerRepository.save(any<Consumer>())).then { invocation ->
+            invocation.getArgument<Consumer>(0).apply { id = 10L }
+        }
 
-        UserAdminDto result = consumerService.createUser(req);
+        val result = consumerService.createUser(req)
 
-        assertEquals(10L, result.getId());
-        assertEquals("newuser", result.getUsername());
-        assertEquals(Role.ADMIN, result.getRole());
-        assertTrue(result.getActive());
-        verify(passwordEncoder).encode("password123");
+        assertEquals(10L, result.id)
+        assertEquals("newuser", result.username)
+        assertEquals(Role.ADMIN, result.role)
+        assertTrue(result.active)
+        verify(passwordEncoder).encode("password123")
     }
 
     @Test
     @DisplayName("Should require a password when creating a user")
-    void testCreateUserWithoutPassword() {
-        UserUpsertRequest req = request("New User", "newuser", "  ", "newuser@example.com", Role.USER);
+    fun testCreateUserWithoutPassword() {
+        val req = request("New User", "newuser", "  ", "newuser@example.com", Role.USER)
 
-        assertThrows(IllegalArgumentException.class, () -> consumerService.createUser(req));
-        verify(consumerRepository, never()).save(any());
+        assertFailsWith<IllegalArgumentException> { consumerService.createUser(req) }
+        verify(consumerRepository, never()).save(any<Consumer>())
     }
 
     @Test
     @DisplayName("Should throw when username already exists")
-    void testCreateUserWithExistingUsername() {
-        UserUpsertRequest req = request("New User", "testuser", "password123", "newuser@example.com", Role.USER);
-        when(consumerRepository.existsByUsername("testuser")).thenReturn(true);
+    fun testCreateUserWithExistingUsername() {
+        val req = request("New User", "testuser", "password123", "newuser@example.com", Role.USER)
+        whenever(consumerRepository.existsByUsername("testuser")).thenReturn(true)
 
-        assertThrows(IllegalArgumentException.class, () -> consumerService.createUser(req));
-        verify(consumerRepository, never()).save(any());
+        assertFailsWith<IllegalArgumentException> { consumerService.createUser(req) }
+        verify(consumerRepository, never()).save(any<Consumer>())
     }
 
     @Test
     @DisplayName("Should throw when email already exists")
-    void testCreateUserWithExistingEmail() {
-        UserUpsertRequest req = request("New User", "newuser", "password123", "test@example.com", Role.USER);
-        when(consumerRepository.existsByUsername("newuser")).thenReturn(false);
-        when(consumerRepository.existsByEmail("test@example.com")).thenReturn(true);
+    fun testCreateUserWithExistingEmail() {
+        val req = request("New User", "newuser", "password123", "test@example.com", Role.USER)
+        whenever(consumerRepository.existsByUsername("newuser")).thenReturn(false)
+        whenever(consumerRepository.existsByEmail("test@example.com")).thenReturn(true)
 
-        assertThrows(IllegalArgumentException.class, () -> consumerService.createUser(req));
+        assertFailsWith<IllegalArgumentException> { consumerService.createUser(req) }
     }
 
     @Test
     @DisplayName("Changing role or password must revoke the user's sessions")
-    void testUpdateUserRevokesSessions() {
-        UserUpsertRequest req = request("Updated", "updateduser", "newpassword123", "updated@example.com", Role.ADMIN);
+    fun testUpdateUserRevokesSessions() {
+        val req = request("Updated", "updateduser", "newpassword123", "updated@example.com", Role.ADMIN)
 
-        when(consumerRepository.findById(1L)).thenReturn(Optional.of(testConsumer));
-        when(consumerRepository.existsByUsernameAndIdNot("updateduser", 1L)).thenReturn(false);
-        when(consumerRepository.existsByEmailAndIdNot("updated@example.com", 1L)).thenReturn(false);
-        when(passwordEncoder.encode("newpassword123")).thenReturn("hashedNewPassword");
-        when(consumerRepository.save(any())).then(returnsFirstArg());
+        whenever(consumerRepository.findById(1L)).thenReturn(Optional.of(testConsumer))
+        whenever(consumerRepository.existsByUsernameAndIdNot("updateduser", 1L)).thenReturn(false)
+        whenever(consumerRepository.existsByEmailAndIdNot("updated@example.com", 1L)).thenReturn(false)
+        whenever(passwordEncoder.encode("newpassword123")).thenReturn("hashedNewPassword")
+        whenever(consumerRepository.save(any<Consumer>())).then(returnsFirstArg<Consumer>())
 
-        UserAdminDto result = consumerService.updateUser(1L, req);
+        val result = consumerService.updateUser(1L, req)
 
-        assertEquals(Role.ADMIN, result.getRole());
-        assertEquals("hashedNewPassword", testConsumer.getPassword());
-        verify(sessionTokenService).revokeAllSessions(testConsumer);
+        assertEquals(Role.ADMIN, result.role)
+        assertEquals("hashedNewPassword", testConsumer.password)
+        verify(sessionTokenService).revokeAllSessions(testConsumer)
     }
 
     @Test
     @DisplayName("Updating only profile data keeps sessions open")
-    void testUpdateUserProfileOnlyKeepsSessions() {
-        UserUpsertRequest req = request("Renamed", "testuser", null, "test@example.com", Role.USER);
+    fun testUpdateUserProfileOnlyKeepsSessions() {
+        val req = request("Renamed", "testuser", null, "test@example.com", Role.USER)
 
-        when(consumerRepository.findById(1L)).thenReturn(Optional.of(testConsumer));
-        when(consumerRepository.existsByUsernameAndIdNot("testuser", 1L)).thenReturn(false);
-        when(consumerRepository.existsByEmailAndIdNot("test@example.com", 1L)).thenReturn(false);
-        when(consumerRepository.save(any())).then(returnsFirstArg());
+        whenever(consumerRepository.findById(1L)).thenReturn(Optional.of(testConsumer))
+        whenever(consumerRepository.existsByUsernameAndIdNot("testuser", 1L)).thenReturn(false)
+        whenever(consumerRepository.existsByEmailAndIdNot("test@example.com", 1L)).thenReturn(false)
+        whenever(consumerRepository.save(any<Consumer>())).then(returnsFirstArg<Consumer>())
 
-        assertEquals("Renamed", consumerService.updateUser(1L, req).getName());
-        verifyNoInteractions(sessionTokenService, passwordEncoder);
+        assertEquals("Renamed", consumerService.updateUser(1L, req).name)
+        verifyNoInteractions(sessionTokenService, passwordEncoder)
     }
 
     @Test
     @DisplayName("Deactivating a user revokes their sessions")
-    void testUpdateUserStatus() {
-        when(consumerRepository.findById(1L)).thenReturn(Optional.of(testConsumer));
-        when(consumerRepository.save(any())).then(returnsFirstArg());
+    fun testUpdateUserStatus() {
+        whenever(consumerRepository.findById(1L)).thenReturn(Optional.of(testConsumer))
+        whenever(consumerRepository.save(any<Consumer>())).then(returnsFirstArg<Consumer>())
 
-        UserAdminDto result = consumerService.updateUserStatus(1L, new UserStatusRequest(false), "admin@example.com");
+        val result = consumerService.updateUserStatus(1L, UserStatusRequest(false), "admin@example.com")
 
-        assertFalse(result.getActive());
-        verify(sessionTokenService).revokeAllSessions(testConsumer);
+        assertFalse(result.active)
+        verify(sessionTokenService).revokeAllSessions(testConsumer)
     }
 
     @Test
     @DisplayName("Should prevent a user from deactivating their own account")
-    void testUpdateOwnUserStatusToInactive() {
-        when(consumerRepository.findById(1L)).thenReturn(Optional.of(testConsumer));
+    fun testUpdateOwnUserStatusToInactive() {
+        whenever(consumerRepository.findById(1L)).thenReturn(Optional.of(testConsumer))
 
-        assertThrows(IllegalArgumentException.class,
-                () -> consumerService.updateUserStatus(1L, new UserStatusRequest(false), "TEST@example.com"));
-        verify(consumerRepository, never()).save(any());
+        assertFailsWith<IllegalArgumentException> {
+            consumerService.updateUserStatus(1L, UserStatusRequest(false), "TEST@example.com")
+        }
+        verify(consumerRepository, never()).save(any<Consumer>())
     }
 
     @Test
     @DisplayName("Should filter users by search text")
-    void testGetUsers() {
-        Consumer admin = new Consumer();
-        admin.setId(2L);
-        admin.setName("Admin User");
-        admin.setEmail("admin@example.com");
-        admin.setUsername("adminuser");
-        admin.setRole(Role.ADMIN);
+    fun testGetUsers() {
+        val admin = Consumer(
+            id = 2L,
+            name = "Admin User",
+            email = "admin@example.com",
+            username = "adminuser",
+            role = Role.ADMIN,
+        )
 
-        when(consumerRepository.findAll()).thenReturn(Arrays.asList(testConsumer, admin));
+        whenever(consumerRepository.findAll()).thenReturn(listOf(testConsumer, admin))
 
-        assertEquals(1, consumerService.getUsers("test").size());
-        assertEquals(2, consumerService.getUsers(null).size());
+        assertEquals(1, consumerService.getUsers("test").size)
+        assertEquals(2, consumerService.getUsers(null).size)
     }
 }

@@ -1,13 +1,11 @@
-package com.korebit.rigel;
+package com.korebit.rigel
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication
+import org.springframework.boot.runApplication
 
 @SpringBootApplication
-public class RigelApplication {
+class RigelApplication
 
-    public static void main(String[] args) {
-        SpringApplication.run(RigelApplication.class, args);
-    }
-
+fun main(args: Array<String>) {
+    runApplication<RigelApplication>(*args)
 }

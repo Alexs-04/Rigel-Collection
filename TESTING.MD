@@ -15,20 +15,23 @@ Comprehensive unit tests have been implemented for most of the application's ser
 
 ```
 src/test/java/com/korebit/rigel/
-├── RigelApplicationTests.java          # context loads with the H2 "test" profile
-├── integration/                        # full app + security filter chain + H2, via MockMvc
-│   ├── IntegrationTestSupport.java     # login helpers, JSON builder, mocked JavaMailSender
-│   ├── AuthFlowIntegrationTest.java    # JWT: login, 401 vs 403, refresh rotation, logout, deactivation
-│   └── ApiResponseIntegrationTest.java # HTTP contract: 201/200/204, error body, POS stock flow
-└── service/                            # Mockito unit tests (no Spring context)
-    ├── jwt/JwtServiceTest.java
-    ├── AuthServiceTest.java
-    ├── AmountServiceTest.java
-    ├── BatchServiceTest.java
-    ├── ConsumerServiceTest.java
-    ├── ProductServiceTest.java
-    ├── PurchaseServiceTest.java
-    └── SupplierServiceTest.java
+├── RigelApplicationTests.kt          # context loads with the H2 "test" profile
+├── MockitoKotlin.kt                  # null-safe any() and whenever() for Mockito in Kotlin
+├── integration/                      # full app + security filter chain + H2, via MockMvc
+│   ├── IntegrationTestSupport.kt     # login helpers, JSON builder, mocked JavaMailSender
+│   ├── AuthFlowIntegrationTest.kt    # JWT: login, 401 vs 403, refresh rotation, logout, deactivation
+│   ├── ApiResponseIntegrationTest.kt # HTTP contract: 201/200/204, error body, POS stock flow
+│   ├── CorsIntegrationTest.kt        # allowed origins, with and without the local-network option
+│   └── MailOptionalIntegrationTest.kt # the app works without email configuration
+└── service/                          # Mockito unit tests (no Spring context)
+    ├── jwt/JwtServiceTest.kt
+    ├── AuthServiceTest.kt
+    ├── AmountServiceTest.kt
+    ├── BatchServiceTest.kt
+    ├── ConsumerServiceTest.kt
+    ├── ProductServiceTest.kt
+    ├── PurchaseServiceTest.kt
+    └── SupplierServiceTest.kt
 ```
 
 ### HTTP contract verified by the integration tests
@@ -109,20 +112,23 @@ cd rigel
 
 ### Structure Example
 
-```java
+```kotlin
 @Test
 @DisplayName("Should throw exception when product name already exists")
-void testSaveProductDuplicateName() {
+fun testSaveProductDuplicateName() {
     // Arrange
-    when(productRepository.findByName("Test Product"))
-        .thenReturn(Optional.of(testProduct));
+    whenever(productRepository.findByName("Test Product"))
+        .thenReturn(Optional.of(testProduct))
 
     // Act & Assert
-    assertThrows(IllegalArgumentException.class, 
-        () -> productService.saveProduct(productRequest));
-    verify(productRepository, never()).save(any());
+    assertFailsWith<IllegalArgumentException> { productService.saveProduct(productRequest) }
+    verify(productRepository, never()).save(any<Product>())
 }
 ```
+
+Tests are written in Kotlin with `kotlin.test` assertions. Import `any` and `whenever` from
+`com.korebit.rigel` (see `MockitoKotlin.kt`) instead of Mockito's `any()` / `when`: the Java
+matcher returns `null`, which Kotlin rejects for non-null parameters.
 
 ## Test Dependencies
 
@@ -197,8 +203,8 @@ To generate a coverage report with JaCoCo:
 
 When adding new tests, follow these guidelines:
 
-1. Create `<ServiceName>Test.java` in `src/test/java/com/korebit/rigel/service/`
-2. Use `@ExtendWith(MockitoExtension.class)`
+1. Create `<ServiceName>Test.kt` in `src/test/java/com/korebit/rigel/service/`
+2. Use `@ExtendWith(MockitoExtension::class)`
 3. Apply `@DisplayName` to each test
 4. Keep the AAA pattern (Arrange-Act-Assert)
 5. Verify interactions with `verify()`

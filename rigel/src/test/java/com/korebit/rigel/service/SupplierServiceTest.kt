@@ -1,186 +1,191 @@
-package com.korebit.rigel.service;
+package com.korebit.rigel.service
 
-import com.korebit.rigel.dto.SupplierDto;
-import com.korebit.rigel.exception.EntityNotFundException;
-import com.korebit.rigel.model.beans.Supplier;
-import com.korebit.rigel.repository.SupplierRepository;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.Arrays;
-import java.util.Collections;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.AdditionalAnswers.returnsFirstArg;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import com.korebit.rigel.any
+import com.korebit.rigel.dto.SupplierDto
+import com.korebit.rigel.exception.EntityNotFundException
+import com.korebit.rigel.model.beans.Supplier
+import com.korebit.rigel.repository.SupplierRepository
+import com.korebit.rigel.whenever
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
+import org.mockito.AdditionalAnswers.returnsFirstArg
+import org.mockito.InjectMocks
+import org.mockito.Mock
+import org.mockito.Mockito.never
+import org.mockito.Mockito.times
+import org.mockito.Mockito.verify
+import org.mockito.Mockito.verifyNoInteractions
+import org.mockito.junit.jupiter.MockitoExtension
+import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
 
 /**
  * Unit tests for SupplierService.
  * Tests supplier CRUD operations, product associations, and pricing.
  */
-@ExtendWith(MockitoExtension.class)
+@ExtendWith(MockitoExtension::class)
 @DisplayName("SupplierService Tests")
 class SupplierServiceTest {
 
     @Mock
-    private SupplierRepository supplierRepository;
+    private lateinit var supplierRepository: SupplierRepository
 
     @InjectMocks
-    private SupplierService supplierService;
+    private lateinit var supplierService: SupplierService
 
-    private Supplier testSupplier;
-    private SupplierDto testSupplierDto;
+    private lateinit var testSupplier: Supplier
+    private lateinit var testSupplierDto: SupplierDto
 
     @BeforeEach
-    void setUp() {
-        testSupplier = new Supplier();
-        testSupplier.setId(1L);
-        testSupplier.setName("Test Supplier");
-        testSupplier.setEmail("supplier@example.com");
-        testSupplier.setNumberPhone("1234567890");
-        testSupplier.setAddress("123 Main St");
-        testSupplier.setProducts(Collections.emptyList());
+    fun setUp() {
+        testSupplier = Supplier(
+            id = 1L,
+            name = "Test Supplier",
+            email = "supplier@example.com",
+            numberPhone = "1234567890",
+            address = "123 Main St",
+            products = mutableListOf(),
+        )
 
-        testSupplierDto = new SupplierDto(
-                "Test Supplier",
-                "supplier@example.com",
-                "1234567890",
-                "123 Main St",
-                Collections.emptyList()
-        );
+        testSupplierDto = SupplierDto(
+            "Test Supplier",
+            "supplier@example.com",
+            "1234567890",
+            "123 Main St",
+            emptyList(),
+        )
     }
 
     @Test
     @DisplayName("Should retrieve all suppliers")
-    void testGetAllSuppliers() {
-        Supplier supplier2 = new Supplier();
-        supplier2.setId(2L);
-        supplier2.setName("Test Supplier 2");
-        supplier2.setEmail("supplier2@example.com");
-        supplier2.setProducts(Collections.emptyList());
+    fun testGetAllSuppliers() {
+        val supplier2 = Supplier(
+            id = 2L,
+            name = "Test Supplier 2",
+            email = "supplier2@example.com",
+            products = mutableListOf(),
+        )
 
-        when(supplierRepository.findAll()).thenReturn(Arrays.asList(testSupplier, supplier2));
+        whenever(supplierRepository.findAll()).thenReturn(listOf(testSupplier, supplier2))
 
-        var result = supplierService.getAllSuppliers();
+        val result = supplierService.getAllSuppliers()
 
-        assertEquals(2, result.size());
-        assertEquals("Test Supplier", result.get(0).getName());
-        assertEquals("Test Supplier 2", result.get(1).getName());
-        verify(supplierRepository, times(1)).findAll();
+        assertEquals(2, result.size)
+        assertEquals("Test Supplier", result[0].name)
+        assertEquals("Test Supplier 2", result[1].name)
+        verify(supplierRepository, times(1)).findAll()
     }
 
     @Test
     @DisplayName("Should save a new supplier")
-    void testSaveSupplier() {
-        when(supplierRepository.findSupplierByName("Test Supplier")).thenReturn(null);
-        when(supplierRepository.save(any())).then(returnsFirstArg());
+    fun testSaveSupplier() {
+        whenever(supplierRepository.findSupplierByName("Test Supplier")).thenReturn(null)
+        whenever(supplierRepository.save(any<Supplier>())).then(returnsFirstArg<Supplier>())
 
-        SupplierDto result = supplierService.saveSupplier(testSupplierDto);
+        val result = supplierService.saveSupplier(testSupplierDto)
 
-        assertEquals("Test Supplier", result.getName());
-        assertEquals("supplier@example.com", result.getContactEmail());
-        verify(supplierRepository, times(1)).save(any());
+        assertEquals("Test Supplier", result.name)
+        assertEquals("supplier@example.com", result.contactEmail)
+        verify(supplierRepository, times(1)).save(any<Supplier>())
     }
 
     @Test
     @DisplayName("Should reject a supplier without name")
-    void testSaveSupplierBlankName() {
-        SupplierDto blank = new SupplierDto("  ", "a@b.c", "1", "", Collections.emptyList());
+    fun testSaveSupplierBlankName() {
+        val blank = SupplierDto("  ", "a@b.c", "1", "", emptyList())
 
-        assertThrows(IllegalArgumentException.class, () -> supplierService.saveSupplier(blank));
-        verifyNoInteractions(supplierRepository);
+        assertFailsWith<IllegalArgumentException> { supplierService.saveSupplier(blank) }
+        verifyNoInteractions(supplierRepository)
     }
 
     @Test
     @DisplayName("Should throw exception when supplier name already exists")
-    void testSaveSupplierDuplicate() {
-        when(supplierRepository.findSupplierByName("Test Supplier")).thenReturn(testSupplier);
+    fun testSaveSupplierDuplicate() {
+        whenever(supplierRepository.findSupplierByName("Test Supplier")).thenReturn(testSupplier)
 
-        assertThrows(IllegalArgumentException.class, () -> supplierService.saveSupplier(testSupplierDto));
-        verify(supplierRepository, never()).save(any());
+        assertFailsWith<IllegalArgumentException> { supplierService.saveSupplier(testSupplierDto) }
+        verify(supplierRepository, never()).save(any<Supplier>())
     }
 
     @Test
     @DisplayName("Should find supplier by name")
-    void testFindSupplierByName() {
-        when(supplierRepository.findSupplierByName("Test Supplier")).thenReturn(testSupplier);
+    fun testFindSupplierByName() {
+        whenever(supplierRepository.findSupplierByName("Test Supplier")).thenReturn(testSupplier)
 
-        SupplierDto result = supplierService.findSupplierByName("Test Supplier");
+        val result = supplierService.findSupplierByName("Test Supplier")
 
-        assertNotNull(result);
-        assertEquals("Test Supplier", result.getName());
-        assertEquals("supplier@example.com", result.getContactEmail());
+        assertNotNull(result)
+        assertEquals("Test Supplier", result.name)
+        assertEquals("supplier@example.com", result.contactEmail)
     }
 
     @Test
     @DisplayName("Should throw exception when supplier not found")
-    void testFindSupplierByNameNotFound() {
-        when(supplierRepository.findSupplierByName("NotFound")).thenReturn(null);
+    fun testFindSupplierByNameNotFound() {
+        whenever(supplierRepository.findSupplierByName("NotFound")).thenReturn(null)
 
-        assertThrows(EntityNotFundException.class, () -> supplierService.findSupplierByName("NotFound"));
+        assertFailsWith<EntityNotFundException> { supplierService.findSupplierByName("NotFound") }
     }
 
     @Test
     @DisplayName("Should update an existing supplier")
-    void testUpdateSupplier() {
-        SupplierDto updatedDto = new SupplierDto(
-                "Updated Supplier",
-                "updated@example.com",
-                "9876543210",
-                "456 Oak St",
-                Collections.emptyList()
-        );
+    fun testUpdateSupplier() {
+        val updatedDto = SupplierDto(
+            "Updated Supplier",
+            "updated@example.com",
+            "9876543210",
+            "456 Oak St",
+            emptyList(),
+        )
 
-        when(supplierRepository.findSupplierByName("Test Supplier")).thenReturn(testSupplier);
-        when(supplierRepository.findSupplierByName("Updated Supplier")).thenReturn(null);
-        when(supplierRepository.save(any())).then(returnsFirstArg());
+        whenever(supplierRepository.findSupplierByName("Test Supplier")).thenReturn(testSupplier)
+        whenever(supplierRepository.findSupplierByName("Updated Supplier")).thenReturn(null)
+        whenever(supplierRepository.save(any<Supplier>())).then(returnsFirstArg<Supplier>())
 
-        SupplierDto result = supplierService.updateSupplier("Test Supplier", updatedDto);
+        val result = supplierService.updateSupplier("Test Supplier", updatedDto)
 
-        assertEquals("Updated Supplier", result.getName());
-        assertEquals("456 Oak St", result.getAddress());
-        verify(supplierRepository, times(1)).save(any());
+        assertEquals("Updated Supplier", result.name)
+        assertEquals("456 Oak St", result.address)
+        verify(supplierRepository, times(1)).save(any<Supplier>())
     }
 
     @Test
     @DisplayName("Should throw exception when updating non-existent supplier")
-    void testUpdateSupplierNotFound() {
-        when(supplierRepository.findSupplierByName("NotFound")).thenReturn(null);
+    fun testUpdateSupplierNotFound() {
+        whenever(supplierRepository.findSupplierByName("NotFound")).thenReturn(null)
 
-        assertThrows(EntityNotFundException.class, () -> supplierService.updateSupplier("NotFound", testSupplierDto));
-        verify(supplierRepository, never()).save(any());
+        assertFailsWith<EntityNotFundException> { supplierService.updateSupplier("NotFound", testSupplierDto) }
+        verify(supplierRepository, never()).save(any<Supplier>())
     }
 
     @Test
     @DisplayName("Should delete an existing supplier")
-    void testDeleteSupplier() {
-        when(supplierRepository.findSupplierByName("Test Supplier")).thenReturn(testSupplier);
+    fun testDeleteSupplier() {
+        whenever(supplierRepository.findSupplierByName("Test Supplier")).thenReturn(testSupplier)
 
-        supplierService.deleteSupplier("Test Supplier");
+        supplierService.deleteSupplier("Test Supplier")
 
-        verify(supplierRepository, times(1)).delete(testSupplier);
+        verify(supplierRepository, times(1)).delete(testSupplier)
     }
 
     @Test
     @DisplayName("A supplier without products returns an empty list instead of 404")
-    void testGetProductsBySupplierEmpty() {
-        when(supplierRepository.findSupplierByName("Test Supplier")).thenReturn(testSupplier);
+    fun testGetProductsBySupplierEmpty() {
+        whenever(supplierRepository.findSupplierByName("Test Supplier")).thenReturn(testSupplier)
 
-        assertTrue(supplierService.getProductsBySupplier("Test Supplier").isEmpty());
+        assertTrue(supplierService.getProductsBySupplier("Test Supplier").isEmpty())
     }
 
     @Test
     @DisplayName("Should throw exception when deleting non-existent supplier")
-    void testDeleteSupplierNotFound() {
-        when(supplierRepository.findSupplierByName("NotFound")).thenReturn(null);
+    fun testDeleteSupplierNotFound() {
+        whenever(supplierRepository.findSupplierByName("NotFound")).thenReturn(null)
 
-        assertThrows(EntityNotFundException.class, () -> supplierService.deleteSupplier("NotFound"));
-        verify(supplierRepository, never()).delete(any());
+        assertFailsWith<EntityNotFundException> { supplierService.deleteSupplier("NotFound") }
+        verify(supplierRepository, never()).delete(any<Supplier>())
     }
 }

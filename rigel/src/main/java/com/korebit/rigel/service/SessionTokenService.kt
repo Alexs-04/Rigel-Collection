@@ -39,7 +39,7 @@ class SessionTokenService(
                 toEntity(refresh, TokenType.REFRESH, consumer),
             )
         )
-        return TokenResponse(access.value(), refresh.value())
+        return TokenResponse(access.value, refresh.value)
     }
 
     /**
@@ -75,11 +75,11 @@ class SessionTokenService(
     }
 
     private fun toEntity(issued: JwtService.IssuedToken, type: TokenType, consumer: Consumer) = Token(
-        token = issued.id(),
+        token = issued.id,
         tokenType = type,
         revoked = false,
         expired = false,
-        expiresAt = LocalDateTime.ofInstant(issued.expiresAt(), ZoneId.systemDefault()),
+        expiresAt = LocalDateTime.ofInstant(issued.expiresAt, ZoneId.systemDefault()),
         consumer = consumer,
     )
 

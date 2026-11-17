@@ -80,7 +80,7 @@ class TicketService(
     fun addTicket(ticket: TicketAddRequest, sellerEmail: String): TicketDto {
         val consumerEmail = sellerEmail.trim()
 
-        val items = ticket.products()
+        val items = ticket.products
         if (items.isNullOrEmpty()) {
             throw IllegalArgumentException("Ticket must include at least one product")
         }
@@ -138,12 +138,12 @@ class TicketService(
         }
 
         val newTicket = Ticket(
-            description = ticket.description()?.trim().orEmpty(),
-            dateAndTime = ticket.dateAndTime() ?: LocalDate.now(),
+            description = ticket.description?.trim().orEmpty(),
+            dateAndTime = ticket.dateAndTime ?: LocalDate.now(),
             barcode = generateTicketBarcode(),
             totalAmount = BigDecimal.ZERO,
             consumer = currentConsumer,
-            payment = ticket.methodPayment() ?: MethodPayment.CASH,
+            payment = ticket.methodPayment ?: MethodPayment.CASH,
         )
 
         val consumedByBatch = mutableMapOf<Batch, Int>()

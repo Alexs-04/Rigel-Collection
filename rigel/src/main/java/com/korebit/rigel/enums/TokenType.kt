@@ -1,15 +1,13 @@
-package com.korebit.rigel.enums;
+package com.korebit.rigel.enums
 
 /**
- * Kinds of tokens persisted in the {@code tokens} table.
+ * Kinds of tokens persisted in the `tokens` table.
  *
- * <ul>
- *   <li>{@link #BEARER}: JWT access token (stored by its {@code jti}).</li>
- *   <li>{@link #REFRESH}: JWT refresh token (stored by its {@code jti}).</li>
- *   <li>{@link #EMAIL_VERIFICATION} / {@link #PASSWORD_RESET}: one-time UUID links sent by email.</li>
- * </ul>
+ * - [BEARER]: JWT access token (stored by its `jti`).
+ * - [REFRESH]: JWT refresh token (stored by its `jti`).
+ * - [EMAIL_VERIFICATION] / [PASSWORD_RESET]: one-time UUID links sent by email.
  */
-public enum TokenType {
+enum class TokenType {
     BEARER,
     REFRESH,
     EMAIL_VERIFICATION,

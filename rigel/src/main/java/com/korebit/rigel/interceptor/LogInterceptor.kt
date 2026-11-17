@@ -1,189 +1,141 @@
-package com.korebit.rigel.interceptor;
+package com.korebit.rigel.interceptor
 
-import com.korebit.rigel.filter.RequestCorrelationFilter;
-import com.korebit.rigel.service.SystemMovementService;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import org.jspecify.annotations.NonNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Component;
-import org.springframework.web.method.HandlerMethod;
-import org.springframework.web.servlet.HandlerInterceptor;
+import com.korebit.rigel.filter.RequestCorrelationFilter
+import com.korebit.rigel.service.SystemMovementService
+import jakarta.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletResponse
+import org.slf4j.LoggerFactory
+import org.springframework.security.authentication.AnonymousAuthenticationToken
+import org.springframework.security.core.Authentication
+import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.stereotype.Component
+import org.springframework.web.method.HandlerMethod
+import org.springframework.web.servlet.HandlerInterceptor
 
 @Component
-public class LogInterceptor implements HandlerInterceptor {
+class LogInterceptor(
+    private val systemMovementService: SystemMovementService,
+) : HandlerInterceptor {
 
-    private static final Logger log = LoggerFactory.getLogger(LogInterceptor.class);
-    private static final String START_TIME_ATTR = "requestStartNano";
-    private static final String LOGS_PATH_PREFIX = "/logs";
-    private final SystemMovementService systemMovementService;
+    override fun preHandle(request: HttpServletRequest, response: HttpServletResponse, handler: Any): Boolean {
+        request.setAttribute(START_TIME_ATTR, System.nanoTime())
 
-    public LogInterceptor(SystemMovementService systemMovementService) {
-        this.systemMovementService = systemMovementService;
-    }
-
-    @Override
-    public boolean preHandle(HttpServletRequest request,
-                             @NonNull HttpServletResponse response,
-                             @NonNull Object handler) {
-
-        request.setAttribute(START_TIME_ATTR, System.nanoTime());
-
-        if (log.isDebugEnabled()) {
+        if (log.isDebugEnabled) {
             log.debug(
-                    "request_start correlationId={} method={} path={} user={} handler={}",
-                    getCorrelationId(request),
-                    request.getMethod(),
-                    request.getRequestURI(),
-                    getUsername(),
-                    resolveHandler(handler)
-            );
+                "request_start correlationId={} method={} path={} user={} handler={}",
+                getCorrelationId(request),
+                request.method,
+                request.requestURI,
+                getUsername(),
+                resolveHandler(handler),
+            )
         }
 
-        return true;
+        return true
     }
 
-    @Override
-    public void afterCompletion(@NonNull HttpServletRequest request,
-                                @NonNull HttpServletResponse response,
-                                @NonNull Object handler,
-                                Exception ex) {
+    override fun afterCompletion(
+        request: HttpServletRequest,
+        response: HttpServletResponse,
+        handler: Any,
+        ex: Exception?,
+    ) {
+        val durationMs = resolveDurationMs(request)
+        val status = response.status
 
-        long durationMs = resolveDurationMs(request);
-        int status = response.getStatus();
+        val message = "request_end correlationId={} method={} path={} status={} durationMs={} user={} handler={}"
+        val arguments = arrayOf<Any?>(
+            getCorrelationId(request),
+            request.method,
+            request.requestURI,
+            status,
+            durationMs,
+            getUsername(),
+            resolveHandler(handler),
+        )
 
-        String message = "request_end correlationId={} method={} path={} status={} durationMs={} user={} handler={}";
-
-        if (ex != null || status >= 500) {
-            log.error(message,
-                    getCorrelationId(request),
-                    request.getMethod(),
-                    request.getRequestURI(),
-                    status,
-                    durationMs,
-                    getUsername(),
-                    resolveHandler(handler),
-                    ex
-            );
-            if (shouldPersistMovement(request, response, ex)) {
-                persistMovement(request, response, durationMs);
-            }
-            return;
+        when {
+            // The trailing exception is picked up by SLF4J as the throwable to log.
+            ex != null || status >= 500 -> log.error(message, *arguments, ex)
+            status >= 400 -> log.warn(message, *arguments)
+            else -> log.info(message, *arguments)
         }
-
-        if (status >= 400) {
-            log.warn(message,
-                    getCorrelationId(request),
-                    request.getMethod(),
-                    request.getRequestURI(),
-                    status,
-                    durationMs,
-                    getUsername(),
-                    resolveHandler(handler)
-            );
-            if (shouldPersistMovement(request, response, ex)) {
-                persistMovement(request, response, durationMs);
-            }
-            return;
-        }
-
-        log.info(message,
-                getCorrelationId(request),
-                request.getMethod(),
-                request.getRequestURI(),
-                status,
-                durationMs,
-                getUsername(),
-                resolveHandler(handler)
-        );
 
         if (shouldPersistMovement(request, response, ex)) {
-            persistMovement(request, response, durationMs);
+            persistMovement(request, response, durationMs)
         }
     }
 
-    private boolean shouldPersistMovement(HttpServletRequest request, HttpServletResponse response, Exception ex) {
-        String path = request.getRequestURI();
-        if (path != null && path.startsWith(LOGS_PATH_PREFIX)) {
-            return false;
-        }
+    private fun shouldPersistMovement(
+        request: HttpServletRequest,
+        response: HttpServletResponse,
+        ex: Exception?,
+    ): Boolean {
+        val path = request.requestURI
+        if (path != null && path.startsWith(LOGS_PATH_PREFIX)) return false
 
-        int status = response.getStatus();
-        if (ex != null || status >= 400) {
-            return true;
-        }
+        if (ex != null || response.status >= 400) return true
 
-        String method = request.getMethod();
-        return "POST".equalsIgnoreCase(method)
-                || "PUT".equalsIgnoreCase(method)
-                || "PATCH".equalsIgnoreCase(method)
-                || "DELETE".equalsIgnoreCase(method);
+        return request.method.uppercase() in MUTATING_METHODS
     }
 
-    private void persistMovement(HttpServletRequest request, HttpServletResponse response, long durationMs) {
+    private fun persistMovement(request: HttpServletRequest, response: HttpServletResponse, durationMs: Long) {
         try {
             systemMovementService.recordMovement(
-                    getUsername(),
-                    getRole(),
-                    request.getMethod(),
-                    request.getRequestURI(),
-                    response.getStatus(),
-                    Math.max(durationMs, 0),
-                    getCorrelationId(request)
-            );
-        } catch (RuntimeException persistenceError) {
-            log.warn("movement_persist_failed correlationId={} method={} path={} reason={}",
-                    getCorrelationId(request),
-                    request.getMethod(),
-                    request.getRequestURI(),
-                    persistenceError.getMessage());
+                getUsername(),
+                getRole(),
+                request.method,
+                request.requestURI,
+                response.status,
+                maxOf(durationMs, 0),
+                getCorrelationId(request),
+            )
+        } catch (persistenceError: RuntimeException) {
+            log.warn(
+                "movement_persist_failed correlationId={} method={} path={} reason={}",
+                getCorrelationId(request),
+                request.method,
+                request.requestURI,
+                persistenceError.message,
+            )
         }
     }
 
-    private long resolveDurationMs(HttpServletRequest request) {
-        Object startAttr = request.getAttribute(START_TIME_ATTR);
-        if (startAttr instanceof Long startTime) {
-            return (System.nanoTime() - startTime) / 1_000_000;
-        }
-        return -1;
+    private fun resolveDurationMs(request: HttpServletRequest): Long {
+        val startTime = request.getAttribute(START_TIME_ATTR) as? Long ?: return -1
+        return (System.nanoTime() - startTime) / 1_000_000
     }
 
-    private String resolveHandler(Object handler) {
-        if (handler instanceof HandlerMethod method) {
-            return method.getBeanType().getSimpleName() + "#" + method.getMethod().getName();
+    private fun resolveHandler(handler: Any): String =
+        if (handler is HandlerMethod) {
+            "${handler.beanType.simpleName}#${handler.method.name}"
+        } else {
+            handler.javaClass.simpleName
         }
-        return handler.getClass().getSimpleName();
+
+    private fun getCorrelationId(request: HttpServletRequest): String =
+        request.getAttribute(RequestCorrelationFilter.CORRELATION_ID_KEY)?.toString() ?: "N/A"
+
+    private fun currentAuthentication(): Authentication? =
+        SecurityContextHolder.getContext().authentication
+            ?.takeIf { it.isAuthenticated && it !is AnonymousAuthenticationToken }
+
+    private fun getUsername(): String = currentAuthentication()?.name ?: "anonymous"
+
+    private fun getRole(): String {
+        val authentication = currentAuthentication() ?: return "ANONYMOUS"
+        return authentication.authorities
+            .mapNotNull { it.authority }
+            .firstOrNull { it.startsWith(ROLE_PREFIX) }
+            ?.removePrefix(ROLE_PREFIX)
+            ?: "UNKNOWN"
     }
 
-    private String getCorrelationId(HttpServletRequest request) {
-        Object correlationId = request.getAttribute(RequestCorrelationFilter.CORRELATION_ID_KEY);
-        return correlationId != null ? correlationId.toString() : "N/A";
-    }
-
-    private String getUsername() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated() || authentication instanceof AnonymousAuthenticationToken) {
-            return "anonymous";
-        }
-        return authentication.getName();
-    }
-
-    private String getRole() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated() || authentication instanceof AnonymousAuthenticationToken) {
-            return "ANONYMOUS";
-        }
-        for (GrantedAuthority authority : authentication.getAuthorities()) {
-            String value = authority.getAuthority();
-            if (value != null && value.startsWith("ROLE_")) {
-                return value.substring("ROLE_".length());
-            }
-        }
-        return "UNKNOWN";
+    private companion object {
+        val log = LoggerFactory.getLogger(LogInterceptor::class.java)
+        const val START_TIME_ATTR = "requestStartNano"
+        const val LOGS_PATH_PREFIX = "/logs"
+        const val ROLE_PREFIX = "ROLE_"
+        val MUTATING_METHODS = setOf("POST", "PUT", "PATCH", "DELETE")
     }
 }

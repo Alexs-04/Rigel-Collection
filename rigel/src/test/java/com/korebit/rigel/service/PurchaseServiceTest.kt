@@ -1,285 +1,234 @@
-package com.korebit.rigel.service;
+package com.korebit.rigel.service
 
-import com.korebit.rigel.dto.PurchaseDto;
-import com.korebit.rigel.dto.request.PurchaseCreateRequest;
-import com.korebit.rigel.exception.EntityNotFundException;
-import com.korebit.rigel.model.beans.Batch;
-import com.korebit.rigel.model.beans.Product;
-import com.korebit.rigel.model.beans.Purchase;
-import com.korebit.rigel.model.beans.Supplier;
-import com.korebit.rigel.model.extra.ProductSupplier;
-import com.korebit.rigel.repository.BatchRepository;
-import com.korebit.rigel.repository.ProductSupplierRepository;
-import com.korebit.rigel.repository.PurchaseRepository;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.Collections;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.*;
+import com.korebit.rigel.any
+import com.korebit.rigel.dto.request.PurchaseCreateRequest
+import com.korebit.rigel.exception.EntityNotFundException
+import com.korebit.rigel.model.beans.Batch
+import com.korebit.rigel.model.beans.Product
+import com.korebit.rigel.model.beans.Purchase
+import com.korebit.rigel.model.beans.Supplier
+import com.korebit.rigel.model.extra.ProductSupplier
+import com.korebit.rigel.repository.BatchRepository
+import com.korebit.rigel.repository.ProductSupplierRepository
+import com.korebit.rigel.repository.PurchaseRepository
+import com.korebit.rigel.whenever
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
+import org.mockito.ArgumentMatchers.anyLong
+import org.mockito.InjectMocks
+import org.mockito.Mock
+import org.mockito.Mockito.times
+import org.mockito.Mockito.verify
+import org.mockito.junit.jupiter.MockitoExtension
+import java.math.BigDecimal
+import java.time.LocalDate
+import java.util.Optional
+import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
 
 /**
  * Unit tests for PurchaseService.
  * Tests purchase creation, retrieval, and batch management.
  */
-@ExtendWith(MockitoExtension.class)
+@ExtendWith(MockitoExtension::class)
 @DisplayName("PurchaseService Tests")
 class PurchaseServiceTest {
 
     @Mock
-    private PurchaseRepository purchaseRepository;
+    private lateinit var purchaseRepository: PurchaseRepository
 
     @Mock
-    private ProductSupplierRepository productSupplierRepository;
+    private lateinit var productSupplierRepository: ProductSupplierRepository
 
     @Mock
-    private BatchRepository batchRepository;
+    private lateinit var batchRepository: BatchRepository
 
     @InjectMocks
-    private PurchaseService purchaseService;
+    private lateinit var purchaseService: PurchaseService
 
-    private Purchase testPurchase;
-    private Product testProduct;
-    private Supplier testSupplier;
-    private ProductSupplier productSupplier;
-    private Batch testBatch;
+    private lateinit var testPurchase: Purchase
+    private lateinit var testProduct: Product
+    private lateinit var testSupplier: Supplier
+    private lateinit var productSupplier: ProductSupplier
+    private lateinit var testBatch: Batch
 
     @BeforeEach
-    void setUp() {
-        testSupplier = new Supplier();
-        testSupplier.setId(1L);
-        testSupplier.setName("Test Supplier");
+    fun setUp() {
+        testSupplier = Supplier(id = 1L, name = "Test Supplier")
 
-        testProduct = new Product();
-        testProduct.setId(1L);
-        testProduct.setName("Test Product");
-        testProduct.setBarcode("123456789");
+        testProduct = Product(id = 1L, name = "Test Product", barcode = "123456789")
 
-        productSupplier = new ProductSupplier();
-        productSupplier.setProduct(testProduct);
-        productSupplier.setSupplier(testSupplier);
+        productSupplier = ProductSupplier(product = testProduct, supplier = testSupplier)
 
-        testBatch = new Batch();
-        testBatch.setId(1L);
-        testBatch.setCode("BATCH-001");
-        testBatch.setProductSupplier(productSupplier);
-        testBatch.setReceptionDate(LocalDate.now());
-        testBatch.setExpirationDate(LocalDate.now().plusDays(30));
-        testBatch.setReceivedAmount(100);
-        testBatch.setRemainingAmount(100);
-        testBatch.setAvailable(true);
-        testBatch.setPrice(BigDecimal.valueOf(10.00));
+        testBatch = Batch(
+            id = 1L,
+            code = "BATCH-001",
+            productSupplier = productSupplier,
+            receptionDate = LocalDate.now(),
+            expirationDate = LocalDate.now().plusDays(30),
+            receivedAmount = 100,
+            remainingAmount = 100,
+            available = true,
+            price = BigDecimal.valueOf(10.00),
+        )
 
-        testPurchase = new Purchase();
-        testPurchase.setId(1L);
-        testPurchase.setCode("PUR-20240101001");
-        testPurchase.setProductSupplier(productSupplier);
-        testPurchase.setBatch(testBatch);
-        testPurchase.setQuantity(50);
-        testPurchase.setUnitPrice(BigDecimal.valueOf(10.00));
-        testPurchase.setTotalPrice(BigDecimal.valueOf(500.00));
-        testPurchase.setPurchaseDate(LocalDate.now());
+        testPurchase = Purchase(
+            id = 1L,
+            code = "PUR-20240101001",
+            productSupplier = productSupplier,
+            batch = testBatch,
+            quantity = 50,
+            unitPrice = BigDecimal.valueOf(10.00),
+            totalPrice = BigDecimal.valueOf(500.00),
+            purchaseDate = LocalDate.now(),
+        )
     }
+
+    private fun createRequest(
+        quantity: Int = 50,
+        unitPrice: Double = 10.00,
+        receptionDate: LocalDate = LocalDate.now(),
+        expirationDate: LocalDate = LocalDate.now().plusDays(30),
+        batchPrice: Double = 10.00,
+    ) = PurchaseCreateRequest(
+        code = null,
+        productName = "Test Product",
+        supplierName = "Test Supplier",
+        quantity = quantity,
+        unitPrice = unitPrice,
+        purchaseDate = LocalDate.now(),
+        notes = "Test notes",
+        batchId = 1L,
+        batchCode = "BATCH-001",
+        receptionDate = receptionDate,
+        expirationDate = expirationDate,
+        available = true,
+        batchPrice = batchPrice,
+    )
 
     @Test
     @DisplayName("Should retrieve all purchases")
-    void testGetAllPurchases() {
-        when(purchaseRepository.findAll()).thenReturn(Collections.singletonList(testPurchase));
+    fun testGetAllPurchases() {
+        whenever(purchaseRepository.findAll()).thenReturn(listOf(testPurchase))
 
-        var result = purchaseService.getAllPurchases();
+        val result = purchaseService.getAllPurchases()
 
-        assertEquals(1, result.size());
-        assertEquals("PUR-20240101001", result.getFirst().getCode());
-        verify(purchaseRepository, times(1)).findAll();
+        assertEquals(1, result.size)
+        assertEquals("PUR-20240101001", result.first().code)
+        verify(purchaseRepository, times(1)).findAll()
     }
 
     @Test
     @DisplayName("Should get purchase by id")
-    void testGetPurchaseById() {
-        when(purchaseRepository.findById(1L)).thenReturn(Optional.of(testPurchase));
+    fun testGetPurchaseById() {
+        whenever(purchaseRepository.findById(1L)).thenReturn(Optional.of(testPurchase))
 
-        PurchaseDto result = purchaseService.getPurchaseById(1L);
+        val result = purchaseService.getPurchaseById(1L)
 
-        assertNotNull(result);
-        assertEquals("PUR-20240101001", result.getCode());
+        assertNotNull(result)
+        assertEquals("PUR-20240101001", result.code)
     }
 
     @Test
     @DisplayName("Should throw exception when purchase not found by id")
-    void testGetPurchaseByIdNotFound() {
-        when(purchaseRepository.findById(anyLong())).thenReturn(Optional.empty());
+    fun testGetPurchaseByIdNotFound() {
+        whenever(purchaseRepository.findById(anyLong())).thenReturn(Optional.empty())
 
-        assertThrows(EntityNotFundException.class, () -> purchaseService.getPurchaseById(1L));
+        assertFailsWith<EntityNotFundException> { purchaseService.getPurchaseById(1L) }
     }
 
     @Test
     @DisplayName("Should get purchases by product name")
-    void testGetPurchasesByProduct() {
-        when(purchaseRepository.findByProductName("Test Product"))
-                .thenReturn(Collections.singletonList(testPurchase));
+    fun testGetPurchasesByProduct() {
+        whenever(purchaseRepository.findByProductName("Test Product")).thenReturn(listOf(testPurchase))
 
-        var result = purchaseService.getPurchasesByProduct("Test Product");
+        val result = purchaseService.getPurchasesByProduct("Test Product")
 
-        assertEquals(1, result.size());
-        assertEquals("Test Product", result.getFirst().getProductName());
+        assertEquals(1, result.size)
+        assertEquals("Test Product", result.first().productName)
     }
 
     @Test
     @DisplayName("Should get purchases by supplier name")
-    void testGetPurchasesBySupplier() {
-        when(purchaseRepository.findBySupplierName("Test Supplier"))
-                .thenReturn(Collections.singletonList(testPurchase));
+    fun testGetPurchasesBySupplier() {
+        whenever(purchaseRepository.findBySupplierName("Test Supplier")).thenReturn(listOf(testPurchase))
 
-        var result = purchaseService.getPurchasesBySupplier("Test Supplier");
+        val result = purchaseService.getPurchasesBySupplier("Test Supplier")
 
-        assertEquals(1, result.size());
-        assertEquals("Test Supplier", result.getFirst().getSupplierName());
+        assertEquals(1, result.size)
+        assertEquals("Test Supplier", result.first().supplierName)
     }
 
     @Test
     @DisplayName("Should create a new purchase and update batch")
-    void testCreatePurchase() {
-        PurchaseCreateRequest request = new PurchaseCreateRequest(
-                null,
-                "Test Product",
-                "Test Supplier",
-                50,
-                10.00,
-                LocalDate.now(),
-                "Test notes",
-                1L,
-                "BATCH-001",
-                LocalDate.now(),
-                LocalDate.now().plusDays(30),
-                true,
-                10.00
-        );
+    fun testCreatePurchase() {
+        val request = createRequest()
 
-        when(productSupplierRepository.findByProductNameAndSupplierName("Test Product", "Test Supplier"))
-                .thenReturn(productSupplier);
-        when(batchRepository.findById(1L)).thenReturn(Optional.of(testBatch));
-        when(batchRepository.save(any())).thenReturn(testBatch);
-        when(purchaseRepository.save(any())).thenReturn(testPurchase);
+        whenever(productSupplierRepository.findByProductNameAndSupplierName("Test Product", "Test Supplier"))
+            .thenReturn(productSupplier)
+        whenever(batchRepository.findById(1L)).thenReturn(Optional.of(testBatch))
+        whenever(batchRepository.save(any<Batch>())).thenReturn(testBatch)
+        whenever(purchaseRepository.save(any<Purchase>())).thenReturn(testPurchase)
 
-        PurchaseDto result = purchaseService.createPurchase(request);
+        val result = purchaseService.createPurchase(request)
 
-        assertEquals("PUR-20240101001", result.getCode());
-        assertEquals(150, testBatch.getReceivedAmount());
-        assertEquals(150, testBatch.getRemainingAmount());
-        verify(batchRepository, times(1)).save(any());
-        verify(purchaseRepository, times(1)).save(any());
+        assertEquals("PUR-20240101001", result.code)
+        assertEquals(150, testBatch.receivedAmount)
+        assertEquals(150, testBatch.remainingAmount)
+        verify(batchRepository, times(1)).save(any<Batch>())
+        verify(purchaseRepository, times(1)).save(any<Purchase>())
     }
 
     @Test
     @DisplayName("Should throw exception when creating purchase with zero quantity")
-    void testCreatePurchaseInvalidQuantity() {
-        PurchaseCreateRequest request = new PurchaseCreateRequest(
-                null,
-                "Test Product",
-                "Test Supplier",
-                0,
-                10.00,
-                LocalDate.now(),
-                "Test notes",
-                1L,
-                "BATCH-001",
-                LocalDate.now(),
-                LocalDate.now().plusDays(30),
-                true,
-                10.00
-        );
+    fun testCreatePurchaseInvalidQuantity() {
+        val request = createRequest(quantity = 0)
 
-        assertThrows(IllegalArgumentException.class, () -> purchaseService.createPurchase(request));
+        assertFailsWith<IllegalArgumentException> { purchaseService.createPurchase(request) }
     }
 
     @Test
     @DisplayName("Should throw exception when creating purchase with invalid unit price")
-    void testCreatePurchaseInvalidUnitPrice() {
-        PurchaseCreateRequest request = new PurchaseCreateRequest(
-                null,
-                "Test Product",
-                "Test Supplier",
-                50,
-                -10.00,
-                LocalDate.now(),
-                "Test notes",
-                1L,
-                "BATCH-001",
-                LocalDate.now(),
-                LocalDate.now().plusDays(30),
-                true,
-                -10.00
-        );
+    fun testCreatePurchaseInvalidUnitPrice() {
+        val request = createRequest(unitPrice = -10.00, batchPrice = -10.00)
 
-        assertThrows(IllegalArgumentException.class, () -> purchaseService.createPurchase(request));
+        assertFailsWith<IllegalArgumentException> { purchaseService.createPurchase(request) }
     }
 
     @Test
     @DisplayName("Should throw exception when product-supplier relation not found")
-    void testCreatePurchaseRelationNotFound() {
-        PurchaseCreateRequest request = new PurchaseCreateRequest(
-                null,
-                "Test Product",
-                "Test Supplier",
-                50,
-                10.00,
-                LocalDate.now(),
-                "Test notes",
-                1L,
-                "BATCH-001",
-                LocalDate.now(),
-                LocalDate.now().plusDays(30),
-                true,
-                10.00
-        );
+    fun testCreatePurchaseRelationNotFound() {
+        val request = createRequest()
 
-        when(productSupplierRepository.findByProductNameAndSupplierName("Test Product", "Test Supplier"))
-                .thenReturn(null);
+        whenever(productSupplierRepository.findByProductNameAndSupplierName("Test Product", "Test Supplier"))
+            .thenReturn(null)
 
-        assertThrows(EntityNotFundException.class, () -> purchaseService.createPurchase(request));
+        assertFailsWith<EntityNotFundException> { purchaseService.createPurchase(request) }
     }
 
     @Test
     @DisplayName("Should mark batch as unavailable if expired")
-    void testCreatePurchaseExpiredBatch() {
-        testBatch.setExpirationDate(LocalDate.now().minusDays(1));
+    fun testCreatePurchaseExpiredBatch() {
+        testBatch.expirationDate = LocalDate.now().minusDays(1)
 
-        PurchaseCreateRequest request = new PurchaseCreateRequest(
-                null,
-                "Test Product",
-                "Test Supplier",
-                50,
-                10.00,
-                LocalDate.now(),
-                "Test notes",
-                1L,
-                "BATCH-001",
-                LocalDate.now().minusDays(1),
-                LocalDate.now().minusDays(1),
-                true,
-                10.00
-        );
+        val request = createRequest(
+            receptionDate = LocalDate.now().minusDays(1),
+            expirationDate = LocalDate.now().minusDays(1),
+        )
 
-        when(productSupplierRepository.findByProductNameAndSupplierName("Test Product", "Test Supplier"))
-                .thenReturn(productSupplier);
-        when(batchRepository.findById(1L)).thenReturn(Optional.of(testBatch));
-        when(batchRepository.save(any())).thenReturn(testBatch);
-        when(purchaseRepository.save(any())).thenReturn(testPurchase);
+        whenever(productSupplierRepository.findByProductNameAndSupplierName("Test Product", "Test Supplier"))
+            .thenReturn(productSupplier)
+        whenever(batchRepository.findById(1L)).thenReturn(Optional.of(testBatch))
+        whenever(batchRepository.save(any<Batch>())).thenReturn(testBatch)
+        whenever(purchaseRepository.save(any<Purchase>())).thenReturn(testPurchase)
 
-        purchaseService.createPurchase(request);
+        purchaseService.createPurchase(request)
 
-        assertFalse(testBatch.getAvailable());
-        verify(batchRepository, times(1)).save(any());
+        assertFalse(testBatch.available)
+        verify(batchRepository, times(1)).save(any<Batch>())
     }
 }

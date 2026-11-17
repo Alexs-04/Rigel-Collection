@@ -1,0 +1,291 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="32645aeb-0e03-441d-b91b-5314b6bfca54" name="Changes" comment="fix(deps): highly vulnerable dependencies">
+      <change afterPath="$PROJECT_DIR$/.env.example" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/AndroidProjectSystem.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docker-compose.yml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docker/postgres/init/01-schema.sql" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/rigel/.dockerignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/rigel/packages.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/RigelApplication.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/config/AppConfig.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/config/SecurityConfig.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/config/WebConfig.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/controller/TicketRestController.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/dto/request/TicketAddRequest.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/dto/response/TokenResponse.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/enums/ContainerType.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/enums/Role.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/enums/TokenType.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/exception/EntityNotFundException.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/exception/GlobalExceptionHandler.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/filter/RequestCorrelationFilter.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/interceptor/LogInterceptor.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/model/beans/Batch.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/repository/BatchRepository.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/repository/ProductRepository.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/service/jwt/JwtService.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/util/DataInit.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/util/JwtAuthenticationFilter.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/rigel/src/test/java/com/korebit/rigel/MockitoKotlin.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/rigel/src/test/java/com/korebit/rigel/RigelApplicationTests.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/rigel/src/test/java/com/korebit/rigel/integration/ApiResponseIntegrationTest.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/rigel/src/test/java/com/korebit/rigel/integration/AuthFlowIntegrationTest.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/rigel/src/test/java/com/korebit/rigel/integration/CorsIntegrationTest.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/rigel/src/test/java/com/korebit/rigel/integration/IntegrationTestSupport.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/rigel/src/test/java/com/korebit/rigel/integration/MailOptionalIntegrationTest.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/rigel/src/test/java/com/korebit/rigel/service/AmountServiceTest.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/rigel/src/test/java/com/korebit/rigel/service/AuthServiceTest.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/rigel/src/test/java/com/korebit/rigel/service/BatchServiceTest.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/rigel/src/test/java/com/korebit/rigel/service/ConsumerServiceTest.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/rigel/src/test/java/com/korebit/rigel/service/ProductServiceTest.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/rigel/src/test/java/com/korebit/rigel/service/PurchaseServiceTest.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/rigel/src/test/java/com/korebit/rigel/service/SupplierServiceTest.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/rigel/src/test/java/com/korebit/rigel/service/jwt/JwtServiceTest.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/rigel_dream/.dockerignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/rigel_dream/Dockerfile" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/rigel_dream/nginx.conf" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/kotlinc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/kotlinc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.MD" beforeDir="false" afterPath="$PROJECT_DIR$/README.MD" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TESTING.MD" beforeDir="false" afterPath="$PROJECT_DIR$/TESTING.MD" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/rigel/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/rigel/Dockerfile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/rigel/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/rigel/build.gradle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/RigelApplication.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/config/AppConfig.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/config/SecurityConfig.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/config/WebConfig.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/controller/TicketRestController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/dto/BatchDto.kt" beforeDir="false" afterPath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/dto/BatchDto.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/dto/request/TicketAddRequest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/dto/response/TokenResponse.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/enums/ContainerType.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/enums/Role.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/enums/TokenType.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/exception/EntityNotFundException.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/exception/GlobalExceptionHandler.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/filter/RequestCorrelationFilter.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/interceptor/LogInterceptor.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/model/beans/Batch.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/repository/BatchRepository.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/repository/ProductRepository.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/service/SessionTokenService.kt" beforeDir="false" afterPath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/service/SessionTokenService.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/service/TicketService.kt" beforeDir="false" afterPath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/service/TicketService.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/service/jwt/JwtService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/service/package-info.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/util/DataInit.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/util/JwtAuthenticationFilter.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/util/package-info.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rigel/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/rigel/src/main/resources/application.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/rigel/src/test/java/com/korebit/rigel/RigelApplicationTests.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rigel/src/test/java/com/korebit/rigel/integration/ApiResponseIntegrationTest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rigel/src/test/java/com/korebit/rigel/integration/AuthFlowIntegrationTest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rigel/src/test/java/com/korebit/rigel/integration/IntegrationTestSupport.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rigel/src/test/java/com/korebit/rigel/integration/MailOptionalIntegrationTest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rigel/src/test/java/com/korebit/rigel/service/AmountServiceTest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rigel/src/test/java/com/korebit/rigel/service/AuthServiceTest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rigel/src/test/java/com/korebit/rigel/service/BatchServiceTest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rigel/src/test/java/com/korebit/rigel/service/ConsumerServiceTest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rigel/src/test/java/com/korebit/rigel/service/ProductServiceTest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rigel/src/test/java/com/korebit/rigel/service/PurchaseServiceTest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rigel/src/test/java/com/korebit/rigel/service/SupplierServiceTest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rigel/src/test/java/com/korebit/rigel/service/jwt/JwtServiceTest.java" beforeDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ExternalProjectsData">
+    <projectState path="$PROJECT_DIR$/rigel">
+      <ProjectState />
+    </projectState>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="dev" />
+      </map>
+    </option>
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;Alexs-04&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/Alexs-04/Rigel-Collection.git&quot;,
+    &quot;accountId&quot;: &quot;825b316f-7062-4e51-9e78-279eeb152f95&quot;
+  }
+}</component>
+  <component name="KmpPackageLockUpdaterData">{
+  &quot;jsModulesKotlinGradlePluginVersion&quot;: {},
+  &quot;wasmModulesKotlinGradlePluginVersion&quot;: {}
+}</component>
+  <component name="KmpPackageLockUpdaterState">{
+  &quot;jsModulesKotlinGradlePluginVersion&quot;: {},
+  &quot;wasmModulesKotlinGradlePluginVersion&quot;: {}
+}</component>
+  <component name="NextEditCompletionFeaturesState">
+    <decayedCancelled>
+      <entry key="MS100" value="1.4775886164066918" />
+      <entry key="MS500" value="3.0185373264213324" />
+      <entry key="S2" value="5.2502360488709545" />
+      <entry key="S5" value="6.196717823325713" />
+      <entry key="S10" value="6.5786371776231745" />
+      <entry key="S30" value="6.854902421059399" />
+      <entry key="S60" value="6.926860826919227" />
+      <entry key="M2" value="6.96871838801673" />
+      <entry key="M5" value="7.317207523046341" />
+      <entry key="M10" value="8.438579400816351" />
+      <entry key="M15" value="9.408355168465356" />
+      <entry key="M30" value="11.078486989048058" />
+      <entry key="H1" value="12.333744869437705" />
+      <entry key="H2" value="13.125771035318033" />
+      <entry key="H4" value="14.40134237176192" />
+      <entry key="D1" value="35.46607664759019" />
+      <entry key="W1" value="51.38805810221898" />
+    </decayedCancelled>
+    <decayedSelected>
+      <entry key="MS100" value="0.0" />
+      <entry key="MS500" value="0.0" />
+      <entry key="S2" value="1.0348692343852509E-258" />
+      <entry key="S5" value="6.396673594914526E-104" />
+      <entry key="S10" value="2.529164957030859E-52" />
+      <entry key="S30" value="6.3568073229375515E-18" />
+      <entry key="S60" value="2.6958655741934025E-9" />
+      <entry key="M2" value="6.360498675745007E-5" />
+      <entry key="M5" value="0.03032023154938492" />
+      <entry key="M10" value="0.2441733289128206" />
+      <entry key="M15" value="0.4912609378085134" />
+      <entry key="M30" value="0.9902721464705578" />
+      <entry key="H1" value="1.4069803154890395" />
+      <entry key="H2" value="1.677805506006495" />
+      <entry key="H4" value="1.8520692246974062" />
+      <entry key="D1" value="2.4940072186174906" />
+      <entry key="W1" value="2.9074061768191757" />
+    </decayedSelected>
+    <decayedShown>
+      <entry key="MS100" value="1.440741888692736" />
+      <entry key="MS500" value="2.9947315513836723" />
+      <entry key="S2" value="5.2322366802951565" />
+      <entry key="S5" value="6.1870960385491465" />
+      <entry key="S10" value="6.573317768025885" />
+      <entry key="S30" value="6.853004622864943" />
+      <entry key="S60" value="6.925895394345896" />
+      <entry key="M2" value="6.968231886357962" />
+      <entry key="M5" value="7.345789360312179" />
+      <entry key="M10" value="8.67925461738858" />
+      <entry key="M15" value="9.895740369255776" />
+      <entry key="M30" value="12.06547477504432" />
+      <entry key="H1" value="13.738571747914447" />
+      <entry key="H2" value="14.802341223103321" />
+      <entry key="H4" value="16.252747213685026" />
+      <entry key="D1" value="37.959956058575784" />
+      <entry key="W1" value="54.29544469534296" />
+    </decayedShown>
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 8,
+  &quot;fromUser&quot;: false
+}</component>
+  <component name="ProjectId" id="3JAVbKiBCwHzUeaP7jP66g2bdrX" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "CidrDebugProfileConversion": "true",
+    "CidrDebugProfileConversion262": "true",
+    "Gradle.Build rigel.executor": "Run",
+    "RequestMappingsPanelOrder0": "0",
+    "RequestMappingsPanelOrder1": "1",
+    "RequestMappingsPanelWidth0": "75",
+    "RequestMappingsPanelWidth1": "75",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.cidr.known.project.marker": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.readMode.enableVisualFormatting": "true",
+    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "Spring Boot.RigelApplication.executor": "Run",
+    "cidr.known.project.marker": "true",
+    "codeWithMe.voiceChat.enabledByDefault": "false",
+    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
+    "git-widget-placeholder": "feat/frontend-restyle",
+    "junie.onboarding.icon.badge.shown": "true",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "/home/arlix/IdeaProjects/Rigel-Collection",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "project.structure.last.edited": "Project",
+    "project.structure.proportion": "0.0",
+    "project.structure.side.proportion": "0.0",
+    "settings.editor.selected.configurable": "reference.settingsdialog.project.gradle",
+    "to.speed.mode.migration.done": "true"
+  }
+}]]></component>
+  <component name="RunManager">
+    <configuration name="RigelApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+      <module name="rigel.main" />
+      <option name="SPRING_BOOT_MAIN_CLASS" value="com.korebit.rigel.RigelApplication" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-30f59d01ecdd-ac68fc9d2b05-intellij.indexing.shared.core-IU-263.7307.200" />
+        <option value="bundled-js-predefined-d6986cc7102b-56aff7b04f6f-JavaScript-IU-263.7307.200" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="32645aeb-0e03-441d-b91b-5314b6bfca54" name="Changes" comment="" />
+      <created>1789103932071</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1789103932071</updated>
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="fix(deps): highly vulnerable dependencies" />
+    <option name="LAST_COMMIT_MESSAGE" value="fix(deps): highly vulnerable dependencies" />
+  </component>
+  <component name="XSLT-Support.FileAssociations.UIState">
+    <expand />
+    <select />
+  </component>
+</project>
