@@ -19,8 +19,8 @@ function formatDateTime(value) {
 
 function methodColor(method) {
     if (method === 'POST') return 'var(--viz-1)'
-    if (method === 'PUT' || method === 'PATCH') return 'var(--viz-4)'
-    if (method === 'DELETE') return 'var(--viz-2)'
+    if (method === 'PUT' || method === 'PATCH') return 'var(--viz-2)'
+    if (method === 'DELETE') return 'var(--viz-danger)'
     return 'rgb(var(--muted))'
 }
 

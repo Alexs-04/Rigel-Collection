@@ -1,49 +1,50 @@
 /*
- * Rigel — "Orion ledger" theme.
+ * Rigel — "Orion" theme.
  *
- * Warm paper + ink neutrals, with the two stars of Orion as signal colours:
- * Rigel (blue supergiant) for actions, Betelgeuse (red supergiant) for danger.
+ * Night-blue neutrals with Rigel (blue supergiant) as the action colour.
+ * Danger uses a clean red; Betelgeuse's warm tone survives only as the sister
+ * star in the login constellation.
  * `slate` and `red` are remapped on purpose so every existing utility in the
- * app picks up the new palette without touching each component.
+ * app picks up the palette without touching each component.
  */
 const ink = {
-    50: '#f7f4ec',
-    100: '#efebe0',
-    200: '#e0dacb',
-    300: '#c9c2b0',
-    400: '#9c9585',
-    500: '#716b5e',
-    600: '#555045',
-    700: '#3d3931',
-    800: '#262420',
-    900: '#191813',
-    950: '#100f0c',
+    50: '#f5f7fb',
+    100: '#ebeff6',
+    200: '#dbe2ee',
+    300: '#bfc9db',
+    400: '#8b97b0',
+    500: '#5f6b85',
+    600: '#455069',
+    700: '#2f3850',
+    800: '#1b2236',
+    900: '#111728',
+    950: '#0a0f1e',
 };
 
 const rigel = {
-    50: '#eef1ff',
-    100: '#e0e5ff',
-    200: '#c6cfff',
-    300: '#a1afff',
-    400: '#7084ff',
-    500: '#3d5afe',
-    600: '#2440e6',
-    700: '#1b30b8',
-    800: '#17288f',
-    900: '#131f6b',
+    50: '#eef4ff',
+    100: '#dce8ff',
+    200: '#bfd4ff',
+    300: '#93b6ff',
+    400: '#5f8fff',
+    500: '#2f6bff',
+    600: '#1a52eb',
+    700: '#153fc0',
+    800: '#153699',
+    900: '#142f77',
 };
 
-const betelgeuse = {
-    50: '#fdf0eb',
-    100: '#fbddd2',
-    200: '#f6bba6',
-    300: '#f09274',
-    400: '#ea6e48',
-    500: '#e5532a',
-    600: '#c9411c',
-    700: '#a33316',
-    800: '#7f2913',
-    900: '#5e2010',
+const danger = {
+    50: '#fff1f1',
+    100: '#ffe0e0',
+    200: '#fdc5c6',
+    300: '#f99a9c',
+    400: '#f06a6e',
+    500: '#e5484d',
+    600: '#cd2b31',
+    700: '#a82328',
+    800: '#862024',
+    900: '#6a1d20',
 };
 
 module.exports = {
@@ -58,7 +59,7 @@ module.exports = {
                 slate: ink,
                 ink,
                 brand: rigel,
-                red: betelgeuse,
+                red: danger,
                 app: {
                     bg: 'rgb(var(--paper) / <alpha-value>)',
                     surface: 'rgb(var(--surface) / <alpha-value>)',
@@ -73,19 +74,19 @@ module.exports = {
                 mono: ['"JetBrains Mono Variable"', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
             },
             borderRadius: {
-                sm: '2px',
-                DEFAULT: '3px',
-                md: '4px',
-                lg: '5px',
-                xl: '6px',
-                '2xl': '8px',
-                app: '6px',
+                sm: '4px',
+                DEFAULT: '5px',
+                md: '6px',
+                lg: '8px',
+                xl: '10px',
+                '2xl': '14px',
+                app: '10px',
             },
             boxShadow: {
-                card: '0 1px 0 rgb(var(--ink) / 0.05)',
-                soft: '0 1px 0 rgb(var(--ink) / 0.08)',
-                hard: '3px 3px 0 rgb(var(--ink))',
-                'hard-sm': '2px 2px 0 rgb(var(--ink))',
+                card: '0 1px 2px rgb(13 19 36 / 0.04), 0 4px 16px -6px rgb(13 19 36 / 0.08)',
+                soft: '0 1px 2px rgb(13 19 36 / 0.06)',
+                raised: '0 2px 4px rgb(13 19 36 / 0.04), 0 18px 40px -16px rgb(13 19 36 / 0.22)',
+                glow: '0 1px 2px rgb(13 19 36 / 0.12), 0 8px 22px -8px rgb(47 107 255 / 0.6)',
             },
         },
     },

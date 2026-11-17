@@ -48,7 +48,7 @@ export default function Sidebar({
                                     'group flex items-center gap-3 rounded-md py-2 text-sm no-underline transition',
                                     collapsed ? 'justify-center px-0' : 'px-2',
                                     isActive
-                                        ? 'bg-ink-50 font-semibold text-ink-950'
+                                        ? 'bg-brand-500/15 font-semibold text-white shadow-[inset_2px_0_0_theme(colors.brand.400)]'
                                         : 'text-ink-300 hover:bg-ink-800 hover:text-ink-50',
                                 ].join(' ')
                             }
@@ -56,11 +56,11 @@ export default function Sidebar({
                             {({isActive}) => (
                                 <>
                                     {!collapsed && (
-                                        <span className={`w-5 font-mono text-[0.68rem] font-normal ${isActive ? 'text-brand-600' : 'text-ink-500 group-hover:text-ink-300'}`}>
+                                        <span className={`w-5 font-mono text-[0.68rem] font-normal ${isActive ? 'text-brand-300' : 'text-ink-500 group-hover:text-ink-300'}`}>
                                             {it.index}
                                         </span>
                                     )}
-                                    <Icon className="h-[17px] w-[17px] shrink-0" strokeWidth={isActive ? 2.2 : 1.8}/>
+                                    <Icon className={`h-[17px] w-[17px] shrink-0 ${isActive ? 'text-brand-300' : ''}`} strokeWidth={isActive ? 2.2 : 1.8}/>
                                     {!collapsed && <span className="truncate">{it.label}</span>}
                                 </>
                             )}

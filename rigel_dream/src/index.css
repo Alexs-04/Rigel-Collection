@@ -7,39 +7,41 @@
 @tailwind utilities;
 
 /*
- * Rigel — "Orion ledger".
- * Paper + ink surfaces, hairline rules, mono figures, and two signal colours
- * taken from Orion: Rigel blue (action) and Betelgeuse red (danger).
+ * Rigel — "Orion".
+ * Night-blue neutrals, hairline rules, mono figures and soft elevation, with
+ * Rigel blue as the single action colour.
  * Palette scales live in tailwind.config.cjs; the tokens below are the
  * theme-aware ones (RGB triplets so Tailwind opacity modifiers work).
  */
 @layer base {
     :root {
-        --paper: 242 238 228;
-        --surface: 251 249 244;
-        --ink: 21 20 15;
-        --muted: 113 107 94;
-        --line: 216 210 194;
+        --paper: 244 246 251;
+        --surface: 255 255 255;
+        --ink: 13 19 36;
+        --muted: 95 107 133;
+        --line: 221 227 238;
 
-        --viz-1: #2440e6;
-        --viz-2: #e5532a;
-        --viz-3: #15140f;
-        --viz-4: #c99412;
+        --viz-1: #1a52eb;
+        --viz-2: #2bb3e6;
+        --viz-3: #1b2236;
+        --viz-4: #7c5cf5;
+        --viz-danger: #cd2b31;
 
         color-scheme: light;
     }
 
     html.dark {
-        --paper: 16 15 12;
-        --surface: 25 24 19;
-        --ink: 239 235 224;
-        --muted: 156 149 133;
-        --line: 61 57 49;
+        --paper: 8 12 24;
+        --surface: 15 21 38;
+        --ink: 232 237 247;
+        --muted: 139 151 176;
+        --line: 38 47 71;
 
-        --viz-1: #7084ff;
-        --viz-2: #ea6e48;
-        --viz-3: #efebe0;
-        --viz-4: #e0b030;
+        --viz-1: #5f8fff;
+        --viz-2: #5cc8f0;
+        --viz-3: #dbe2ee;
+        --viz-4: #a08bff;
+        --viz-danger: #f06a6e;
 
         color-scheme: dark;
     }
@@ -72,7 +74,7 @@
         @apply font-sans normal-case tracking-normal;
     }
 
-    /* Field labels read like ledger column headings. */
+    /* Field labels: small mono captions. */
     label {
         @apply mb-1.5 block font-mono text-[0.68rem] font-medium uppercase tracking-[0.08em] text-app-muted;
     }
@@ -84,7 +86,7 @@
 
     * {
         scrollbar-width: thin;
-        scrollbar-color: rgb(var(--ink) / 0.25) transparent;
+        scrollbar-color: rgb(var(--muted) / 0.4) transparent;
     }
 
     /* Dark mode compatibility layer for legacy light-only utilities. */
@@ -151,16 +153,15 @@
     }
 
     .ui-input {
-        @apply w-full rounded-md border border-app-text/25 bg-app-surface px-3 py-2 font-sans text-sm normal-case tracking-normal text-app-text outline-none transition placeholder:text-app-muted/70;
+        @apply w-full rounded-md border border-app-text/15 bg-app-surface px-3 py-2 font-sans text-sm normal-case tracking-normal text-app-text shadow-soft outline-none transition placeholder:text-app-muted/70;
     }
 
     .ui-input:hover {
-        @apply border-app-text/50;
+        @apply border-app-text/30;
     }
 
     .ui-input:focus {
-        @apply border-app-text;
-        box-shadow: 2px 2px 0 theme('colors.brand.500');
+        @apply border-brand-500 ring-4 ring-brand-500/15;
     }
 
     .ui-input:disabled {
@@ -173,26 +174,29 @@
 
     .ui-btn {
         @apply inline-flex items-center justify-center gap-2 rounded-md border px-3.5 py-2 text-sm font-semibold;
-        transition: transform 120ms ease, box-shadow 120ms ease, background-color 120ms ease, border-color 120ms ease;
+        transition: transform 120ms ease, box-shadow 160ms ease, background-color 120ms ease, border-color 120ms ease, color 120ms ease;
     }
 
     .ui-btn:disabled {
         @apply cursor-not-allowed opacity-50;
     }
 
-    /* The signature control: Rigel blue with a hard ink offset that presses in. */
+    /* The signature control: Rigel blue with a lit top edge and a soft halo. */
     .ui-btn-primary {
-        @apply ui-btn border-app-text bg-brand-600 text-white shadow-hard-sm;
+        @apply ui-btn border-brand-700 bg-brand-600 text-white;
+        background-image: linear-gradient(to bottom, rgb(255 255 255 / 0.14), rgb(255 255 255 / 0) 55%);
+        box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.18), 0 1px 2px rgb(13 19 36 / 0.18);
     }
 
     .ui-btn-primary:hover:not(:disabled) {
-        @apply bg-brand-500 shadow-hard;
-        transform: translate(-1px, -1px);
+        @apply bg-brand-500;
+        box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.22), theme('boxShadow.glow');
     }
 
     .ui-btn-primary:active:not(:disabled) {
-        box-shadow: none;
-        transform: translate(2px, 2px);
+        @apply bg-brand-700;
+        box-shadow: inset 0 1px 2px rgb(13 19 36 / 0.3);
+        transform: translateY(1px);
     }
 
     .ui-btn-primary:disabled {
@@ -200,11 +204,11 @@
     }
 
     .ui-btn-ghost {
-        @apply ui-btn border-app-text/25 bg-app-surface text-app-text;
+        @apply ui-btn border-app-text/15 bg-app-surface text-app-text shadow-soft;
     }
 
     .ui-btn-ghost:hover:not(:disabled) {
-        @apply border-app-text bg-app-bg;
+        @apply border-brand-500/50 bg-brand-50 text-brand-700 dark:bg-brand-500/10 dark:text-brand-300;
     }
 
     .ui-btn-danger {
@@ -220,26 +224,26 @@
     }
 
     .ui-list-item:hover {
-        @apply border-app-text/60;
+        @apply border-brand-500/40 shadow-soft;
     }
 
     .ui-list-item-active,
     .ui-list-item-active:hover {
-        @apply border-app-text bg-brand-50 dark:bg-brand-500/15;
+        @apply border-brand-500/60 bg-brand-50 dark:bg-brand-500/15;
         box-shadow: inset 3px 0 0 theme('colors.brand.500');
     }
 
     .ui-subcard {
-        @apply rounded-md border border-dashed border-app-text/25 bg-app-bg/60 p-2.5;
+        @apply rounded-md border border-app-border bg-app-bg/60 p-2.5;
     }
 
     /* Totals block styled after a till receipt. */
     .ui-receipt {
-        @apply grid gap-1.5 border-y border-dashed border-app-text/40 bg-app-bg/70 px-3 py-3 font-mono text-sm;
+        @apply grid gap-1.5 rounded-md border-y border-dashed border-app-text/25 bg-app-bg/70 px-3 py-3 font-mono text-sm;
     }
 
     .ui-receipt > :last-child {
-        @apply mt-1.5 border-t border-dashed border-app-text/40 pt-2.5 font-display text-xl font-semibold text-app-text;
+        @apply mt-1.5 border-t border-dashed border-app-text/25 pt-2.5 font-display text-xl font-semibold text-app-text;
     }
 
     /* Figures: mono caption over a large display numeral. */
@@ -256,21 +260,21 @@
     }
 
     .ui-icon-btn {
-        @apply grid h-9 w-9 place-items-center rounded-md border border-transparent text-app-text transition;
+        @apply grid h-9 w-9 place-items-center rounded-md border border-transparent text-app-muted transition;
     }
 
     .ui-icon-btn:hover {
-        @apply border-app-text/30 bg-app-surface;
+        @apply border-app-border bg-app-surface text-app-text shadow-soft;
     }
 
-    /* Page header: oversized title, mono index, solid ink rule. */
+    /* Page header: large title, mono index, hairline rule. */
     .page-header {
-        @apply border-b border-app-text pb-5;
+        @apply border-b border-app-border pb-5;
     }
 
     .page-header h1 {
-        @apply m-0 text-4xl font-semibold leading-[0.95] text-app-text sm:text-5xl;
-        letter-spacing: -0.035em;
+        @apply m-0 text-3xl font-semibold leading-none text-app-text sm:text-4xl;
+        letter-spacing: -0.03em;
     }
 
     .page-header sup {
@@ -336,8 +340,8 @@
 
     /* Star-chart dot grid behind the working area. */
     .bg-chart {
-        background-image: radial-gradient(rgb(var(--ink) / 0.09) 1px, transparent 1px);
-        background-size: 22px 22px;
+        background-image: radial-gradient(rgb(var(--muted) / 0.16) 1px, transparent 1px);
+        background-size: 24px 24px;
     }
 
     .content {
