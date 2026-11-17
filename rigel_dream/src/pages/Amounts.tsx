@@ -5,7 +5,7 @@ import AmountDetailPanel from '../components/amounts/AmountDetailPanel'
 import AmountsFormCard from '../components/amounts/AmountsFormCard'
 import AmountsListPanel from '../components/amounts/AmountsListPanel'
 import {useAmountsPageState} from '../hooks/amounts/useAmountsPageState'
-import Card from '../components/ui/Card'
+import PageHeader from '../components/ui/PageHeader'
 
 export default function Amounts() {
     const {user} = useContext(AuthContext) as AuthContextValue
@@ -40,15 +40,11 @@ export default function Amounts() {
 
     return (
         <div className="grid gap-4">
-            <Card className="p-5">
-                <h1 className="mb-1 text-2xl font-bold text-slate-900">Importes</h1>
-                <p className="mt-0 text-sm text-slate-500">
-                    Registra importes de envases no retornables, controla vencimiento y gestiona devoluciones o compras.
-                </p>
-                <p className="mb-0 text-sm text-slate-500">
-                    Total de registros: {allAmounts.length}
-                </p>
-            </Card>
+            <PageHeader
+                title="Importes"
+                description="Registra importes de envases no retornables, controla vencimiento y gestiona devoluciones o compras."
+                aside={<>{allAmounts.length} registros</>}
+            />
 
             <AmountsFormCard
                 form={form}

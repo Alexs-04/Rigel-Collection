@@ -1,5 +1,6 @@
 import React from 'react'
 import {useAppSettings} from '../context/AppSettingsContext'
+import PageHeader from '../components/ui/PageHeader'
 
 function ToggleRow({title, description, checked, onChange}) {
     return (
@@ -13,7 +14,7 @@ function ToggleRow({title, description, checked, onChange}) {
                 role="switch"
                 aria-checked={checked}
                 onClick={() => onChange(!checked)}
-                className={`relative mt-1 inline-flex h-6 w-11 items-center rounded-full transition ${checked ? 'bg-brand-600' : 'bg-slate-300'}`}
+                className={`relative mt-1 inline-flex h-6 w-11 items-center rounded-full transition ${checked ? 'bg-brand-600' : 'bg-slate-400 dark:bg-slate-600'}`}
             >
                 <span className={`inline-block h-5 w-5 transform rounded-full bg-white transition ${checked ? 'translate-x-5' : 'translate-x-1'}`}/>
             </button>
@@ -31,13 +32,11 @@ export default function Settings() {
     } = useAppSettings()
 
     return (
-        <div className="mx-auto max-w-4xl space-y-5 p-6">
-            <header className="ui-card p-5">
-                <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Configuracion</h1>
-                <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                    Ajusta el comportamiento visual y de diagnostico de la aplicacion.
-                </p>
-            </header>
+        <div className="max-w-4xl space-y-5">
+            <PageHeader
+                title="Configuracion"
+                description="Ajusta el comportamiento visual y de diagnostico de la aplicacion."
+            />
 
             <section className="space-y-3">
                 <ToggleRow

@@ -1,6 +1,7 @@
 import {useState} from 'react'
 import {useSearchParams, useNavigate} from 'react-router-dom'
 import api from '../services/api'
+import AuthShell from '../components/ui/AuthShell'
 
 type Status = 'idle' | 'loading' | 'success' | 'error'
 
@@ -48,23 +49,19 @@ export default function ActivateAccountPage() {
 
     if (status === 'success') {
         return (
-            <div className="flex min-h-screen items-center justify-center bg-slate-50 p-4">
-                <div className="ui-card w-full max-w-md p-8 text-center">
-                    <div className="mb-4 text-4xl"></div>
-                    <h1 className="ui-title mb-2 text-xl font-semibold">Cuenta activada</h1>
+            <AuthShell center>
+                    <h1 className="ui-title mb-2 mt-0 text-3xl font-semibold">Cuenta activada</h1>
                     <p className="ui-muted mb-6 text-sm">Tu cuenta ha sido activada correctamente. Ya puedes iniciar sesion.</p>
                     <button className="ui-btn-primary w-full" onClick={() => navigate('/login')}>
                         Ir al inicio de sesion
                     </button>
-                </div>
-            </div>
+                </AuthShell>
         )
     }
 
     return (
-        <div className="flex min-h-screen items-center justify-center bg-slate-50 p-4">
-            <div className="ui-card w-full max-w-md p-8">
-                <h1 className="ui-title mb-1 mt-0 text-xl font-semibold">Activar cuenta</h1>
+        <AuthShell>
+                <h1 className="ui-title mb-1 mt-0 text-3xl font-semibold">Activar cuenta</h1>
                 <p className="ui-muted mb-6 mt-0 text-sm">Establece una contrasena para completar el registro.</p>
 
                 {!token && (
@@ -104,7 +101,6 @@ export default function ActivateAccountPage() {
                         {status === 'loading' ? 'Activando...' : 'Activar cuenta'}
                     </button>
                 </form>
-            </div>
-        </div>
+            </AuthShell>
     )
 }

@@ -7,25 +7,24 @@ interface StatsCardsProps {
 }
 
 export default function StatsCards({stats}: StatsCardsProps) {
+    const figures = [
+        {label: 'Productos', value: stats?.totalProducts},
+        {label: 'Proveedores', value: stats?.totalSuppliers},
+        {label: 'Lotes', value: stats?.totalBatches},
+        {label: 'Tickets', value: stats?.totalTickets},
+    ]
+
     return (
-        <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            <Card as="article" className="p-4">
-                <p className="m-0 text-xs text-slate-500">Total productos</p>
-                <h2 className="mt-1.5 text-2xl font-bold text-slate-900">{formatNumber(stats?.totalProducts)}</h2>
-            </Card>
-            <Card as="article" className="p-4">
-                <p className="m-0 text-xs text-slate-500">Total proveedores</p>
-                <h2 className="mt-1.5 text-2xl font-bold text-slate-900">{formatNumber(stats?.totalSuppliers)}</h2>
-            </Card>
-            <Card as="article" className="p-4">
-                <p className="m-0 text-xs text-slate-500">Total lotes</p>
-                <h2 className="mt-1.5 text-2xl font-bold text-slate-900">{formatNumber(stats?.totalBatches)}</h2>
-            </Card>
-            <Card as="article" className="p-4">
-                <p className="m-0 text-xs text-slate-500">Total tickets</p>
-                <h2 className="mt-1.5 text-2xl font-bold text-slate-900">{formatNumber(stats?.totalTickets)}</h2>
-            </Card>
-        </section>
+        <Card className="grid grid-cols-2 !p-0 xl:grid-cols-4">
+            {figures.map((item, index) => (
+                <article
+                    key={item.label}
+                    className={`border-app-border p-5 ${index % 2 ? 'border-l' : ''} ${index > 1 ? 'border-t xl:border-t-0' : ''} ${index === 2 ? 'xl:border-l' : ''}`}
+                >
+                    <p className="ui-figure-label">{item.label}</p>
+                    <h2 className="ui-figure-value">{formatNumber(item.value)}</h2>
+                </article>
+            ))}
+        </Card>
     )
 }
-

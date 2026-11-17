@@ -55,7 +55,7 @@ export default function ProductFieldsGrid({value, onChange, suppliers, disabled,
                 onChange={(e) => onChange('price', e.target.value)}
             />
             <div className="sm:col-span-2">
-                <label className="block text-sm font-medium mb-2">Imagen del producto (600x600px)</label>
+                <label>Imagen del producto (600x600px)</label>
                 <div className="flex gap-4 items-start">
                     <input
                         type="file"

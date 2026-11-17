@@ -4,6 +4,7 @@ import ProductDetailPanel from '../components/products/ProductDetailPanel.jsx'
 import ProductFormCard from '../components/products/ProductFormCard.jsx'
 import ProductsListPanel from '../components/products/ProductsListPanel.jsx'
 import {useProductsPageState} from '../hooks/products/useProductsPageState.js'
+import PageHeader from '../components/ui/PageHeader'
 
 export default function Products() {
     const {user} = useContext(AuthContext)
@@ -48,13 +49,10 @@ export default function Products() {
 
     return (
         <div className="grid gap-4">
-            <section className="ui-card p-5">
-                <h1 className="ui-title mb-1.5 mt-0 text-2xl font-semibold">Productos</h1>
-                <p className="ui-muted mt-0 text-sm">
-                    Consulta el catalogo y administra productos con proveedores previamente registrados. El inventario y
-                    los lotes se registran desde Compras.
-                </p>
-            </section>
+            <PageHeader
+                title="Productos"
+                description="Consulta el catalogo y administra productos con proveedores previamente registrados. El inventario y los lotes se registran desde Compras."
+            />
 
             <ProductFormCard
                 isAdmin={isAdmin}
