@@ -45,9 +45,8 @@ this time with a clear architecture and a long-term roadmap.
 ---
 
 ## Screenshots
-
-> Coming soon — the project is under active development.
-
+ ![""](img/rigel-3.png)
+ ![""](img/rigel-2.png)
 ---
 
 ## Tech Stack
@@ -137,16 +136,16 @@ java -jar build/libs/Rigel-*.jar
 
 The backend reads its settings from environment variables (defaults are meant for local development):
 
-| Variable                                                              | Default                                     | Purpose                                             |
-|-----------------------------------------------------------------------|---------------------------------------------|-----------------------------------------------------|
-| `DB_URL`, `DB_USERNAME`, `DB_PASSWORD`                                | `jdbc:postgresql://localhost:5432/rigel_db` | PostgreSQL connection                               |
-| `JWT_SECRET`                                                          | development key                             | Base64 HMAC key, at least 32 bytes                  |
-| `ORIGIN`                                                              | `http://localhost:5173`                     | Frontend URL: CORS origin and base of emailed links |
-| `CORS_LOCAL_NETWORK`                                                  | `false`                                     | Also accept browser origins from the local network  |
-| `CORS_LOCAL_NETWORK_PATTERNS`                                         | `http://192.168.0.*:[*]`                    | Comma-separated origin patterns for the option above |
-| `EMAIL_HOST`, `EMAIL_PORT`, `EMAIL_ADDRESS`, `EMAIL_PASSWORD`         | empty                                       | SMTP (optional)                                     |
-| `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` | empty                                       | Image hosting (optional)                            |
-| `IMAGE_STORAGE_PATH`                                                  | `./uploads`                                 | Local image folder when Cloudinary is not set       |
+| Variable                                                               | Default                                     | Purpose                                              |
+|------------------------------------------------------------------------|---------------------------------------------|------------------------------------------------------|
+| `DB_URL`, `DB_USERNAME`, `DB_PASSWORD`                                 | `jdbc:postgresql://localhost:5432/rigel_db` | PostgreSQL connection                                |
+| `JWT_SECRET`                                                           | development key                             | Base64 HMAC key, at least 32 bytes                   |
+| `ORIGIN`                                                               | `http://localhost:5173`                     | Frontend URL: CORS origin and base of emailed links  |
+| `CORS_LOCAL_NETWORK`                                                   | `false`                                     | Also accept browser origins from the local network   |
+| `CORS_LOCAL_NETWORK_PATTERNS`                                          | `http://192.168.0.*:[*]`                    | Comma-separated origin patterns for the option above |
+| `EMAIL_HOST`, `EMAIL_PORT`, `EMAIL_ADDRESS`, `EMAIL_PASSWORD`          | empty                                       | SMTP (optional)                                      |
+| `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` | empty                                       | Image hosting (optional)                             |
+| `IMAGE_STORAGE_PATH`                                                   | `./uploads`                                 | Local image folder when Cloudinary is not set        |
 
 > If Cloudinary credentials are absent or blank, the service falls back to local disk storage automatically.
 

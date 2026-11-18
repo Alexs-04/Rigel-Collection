@@ -4,99 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="32645aeb-0e03-441d-b91b-5314b6bfca54" name="Changes" comment="fix(deps): highly vulnerable dependencies">
-      <change afterPath="$PROJECT_DIR$/.env.example" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/AndroidProjectSystem.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/docker-compose.yml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/docker/postgres/init/01-schema.sql" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/rigel/.dockerignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/rigel/packages.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/RigelApplication.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/config/AppConfig.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/config/SecurityConfig.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/config/WebConfig.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/controller/TicketRestController.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/dto/request/TicketAddRequest.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/dto/response/TokenResponse.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/enums/ContainerType.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/enums/Role.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/enums/TokenType.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/exception/EntityNotFundException.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/exception/GlobalExceptionHandler.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/filter/RequestCorrelationFilter.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/interceptor/LogInterceptor.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/model/beans/Batch.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/repository/BatchRepository.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/repository/ProductRepository.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/service/jwt/JwtService.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/util/DataInit.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/util/JwtAuthenticationFilter.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/rigel/src/test/java/com/korebit/rigel/MockitoKotlin.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/rigel/src/test/java/com/korebit/rigel/RigelApplicationTests.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/rigel/src/test/java/com/korebit/rigel/integration/ApiResponseIntegrationTest.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/rigel/src/test/java/com/korebit/rigel/integration/AuthFlowIntegrationTest.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/rigel/src/test/java/com/korebit/rigel/integration/CorsIntegrationTest.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/rigel/src/test/java/com/korebit/rigel/integration/IntegrationTestSupport.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/rigel/src/test/java/com/korebit/rigel/integration/MailOptionalIntegrationTest.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/rigel/src/test/java/com/korebit/rigel/service/AmountServiceTest.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/rigel/src/test/java/com/korebit/rigel/service/AuthServiceTest.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/rigel/src/test/java/com/korebit/rigel/service/BatchServiceTest.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/rigel/src/test/java/com/korebit/rigel/service/ConsumerServiceTest.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/rigel/src/test/java/com/korebit/rigel/service/ProductServiceTest.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/rigel/src/test/java/com/korebit/rigel/service/PurchaseServiceTest.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/rigel/src/test/java/com/korebit/rigel/service/SupplierServiceTest.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/rigel/src/test/java/com/korebit/rigel/service/jwt/JwtServiceTest.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/rigel_dream/.dockerignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/rigel_dream/Dockerfile" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/rigel_dream/nginx.conf" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/kotlinc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/kotlinc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
+    <list default="true" id="32645aeb-0e03-441d-b91b-5314b6bfca54" name="Changes" comment="feat: Complete migration to Kotlin. Addition of Docker support.">
+      <change afterPath="$PROJECT_DIR$/img/rigel-1.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/img/rigel-2.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/img/rigel-3.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/README.MD" beforeDir="false" afterPath="$PROJECT_DIR$/README.MD" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TESTING.MD" beforeDir="false" afterPath="$PROJECT_DIR$/TESTING.MD" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/rigel/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/rigel/Dockerfile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/rigel/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/rigel/build.gradle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/RigelApplication.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/config/AppConfig.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/config/SecurityConfig.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/config/WebConfig.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/controller/TicketRestController.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/dto/BatchDto.kt" beforeDir="false" afterPath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/dto/BatchDto.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/dto/request/TicketAddRequest.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/dto/response/TokenResponse.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/enums/ContainerType.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/enums/Role.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/enums/TokenType.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/exception/EntityNotFundException.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/exception/GlobalExceptionHandler.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/filter/RequestCorrelationFilter.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/interceptor/LogInterceptor.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/model/beans/Batch.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/repository/BatchRepository.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/repository/ProductRepository.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/service/SessionTokenService.kt" beforeDir="false" afterPath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/service/SessionTokenService.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/service/TicketService.kt" beforeDir="false" afterPath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/service/TicketService.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/service/jwt/JwtService.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/service/package-info.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/util/DataInit.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/util/JwtAuthenticationFilter.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/rigel/src/main/java/com/korebit/rigel/util/package-info.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/rigel/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/rigel/src/main/resources/application.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/rigel/src/test/java/com/korebit/rigel/RigelApplicationTests.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/rigel/src/test/java/com/korebit/rigel/integration/ApiResponseIntegrationTest.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/rigel/src/test/java/com/korebit/rigel/integration/AuthFlowIntegrationTest.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/rigel/src/test/java/com/korebit/rigel/integration/IntegrationTestSupport.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/rigel/src/test/java/com/korebit/rigel/integration/MailOptionalIntegrationTest.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/rigel/src/test/java/com/korebit/rigel/service/AmountServiceTest.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/rigel/src/test/java/com/korebit/rigel/service/AuthServiceTest.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/rigel/src/test/java/com/korebit/rigel/service/BatchServiceTest.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/rigel/src/test/java/com/korebit/rigel/service/ConsumerServiceTest.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/rigel/src/test/java/com/korebit/rigel/service/ProductServiceTest.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/rigel/src/test/java/com/korebit/rigel/service/PurchaseServiceTest.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/rigel/src/test/java/com/korebit/rigel/service/SupplierServiceTest.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/rigel/src/test/java/com/korebit/rigel/service/jwt/JwtServiceTest.java" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -138,61 +51,61 @@
 }</component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.4775886164066918" />
-      <entry key="MS500" value="3.0185373264213324" />
-      <entry key="S2" value="5.2502360488709545" />
-      <entry key="S5" value="6.196717823325713" />
-      <entry key="S10" value="6.5786371776231745" />
-      <entry key="S30" value="6.854902421059399" />
-      <entry key="S60" value="6.926860826919227" />
-      <entry key="M2" value="6.96871838801673" />
-      <entry key="M5" value="7.317207523046341" />
-      <entry key="M10" value="8.438579400816351" />
-      <entry key="M15" value="9.408355168465356" />
-      <entry key="M30" value="11.078486989048058" />
-      <entry key="H1" value="12.333744869437705" />
-      <entry key="H2" value="13.125771035318033" />
-      <entry key="H4" value="14.40134237176192" />
-      <entry key="D1" value="35.46607664759019" />
-      <entry key="W1" value="51.38805810221898" />
+      <entry key="MS100" value="1.0403888771560923" />
+      <entry key="MS500" value="1.6044537232967295" />
+      <entry key="S2" value="2.5235633269173254" />
+      <entry key="S5" value="3.445170378447462" />
+      <entry key="S10" value="4.440049330227788" />
+      <entry key="S30" value="5.951311294022996" />
+      <entry key="S60" value="6.7031693929098495" />
+      <entry key="M2" value="7.510036720940148" />
+      <entry key="M5" value="13.198889898033206" />
+      <entry key="M10" value="29.000455920715098" />
+      <entry key="M15" value="42.551800642215234" />
+      <entry key="M30" value="66.1846397582308" />
+      <entry key="H1" value="84.32082667371749" />
+      <entry key="H2" value="95.70689768105899" />
+      <entry key="H4" value="102.87604755896928" />
+      <entry key="D1" value="129.05885773104967" />
+      <entry key="W1" value="146.15471309558353" />
     </decayedCancelled>
     <decayedSelected>
-      <entry key="MS100" value="0.0" />
-      <entry key="MS500" value="0.0" />
-      <entry key="S2" value="1.0348692343852509E-258" />
-      <entry key="S5" value="6.396673594914526E-104" />
-      <entry key="S10" value="2.529164957030859E-52" />
-      <entry key="S30" value="6.3568073229375515E-18" />
-      <entry key="S60" value="2.6958655741934025E-9" />
-      <entry key="M2" value="6.360498675745007E-5" />
-      <entry key="M5" value="0.03032023154938492" />
-      <entry key="M10" value="0.2441733289128206" />
-      <entry key="M15" value="0.4912609378085134" />
-      <entry key="M30" value="0.9902721464705578" />
-      <entry key="H1" value="1.4069803154890395" />
-      <entry key="H2" value="1.677805506006495" />
-      <entry key="H4" value="1.8520692246974062" />
-      <entry key="D1" value="2.4940072186174906" />
-      <entry key="W1" value="2.9074061768191757" />
+      <entry key="MS100" value="6.32017786536276E-223" />
+      <entry key="MS500" value="3.664414245701144E-45" />
+      <entry key="S2" value="1.0149194235157807E-11" />
+      <entry key="S5" value="5.8418751899996274E-5" />
+      <entry key="S10" value="0.01073537468893843" />
+      <entry key="S30" value="0.34964155196656277" />
+      <entry key="S60" value="0.8360699322625078" />
+      <entry key="M2" value="1.2930499929603607" />
+      <entry key="M5" value="1.6803815816824912" />
+      <entry key="M10" value="1.8665677891712908" />
+      <entry key="M15" value="2.018063858123857" />
+      <entry key="M30" value="2.4541690437194537" />
+      <entry key="H1" value="2.9823130477486473" />
+      <entry key="H2" value="3.407882002243752" />
+      <entry key="H4" value="3.698010952065717" />
+      <entry key="D1" value="4.458704630307389" />
+      <entry key="W1" value="4.901522093425146" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="1.440741888692736" />
-      <entry key="MS500" value="2.9947315513836723" />
-      <entry key="S2" value="5.2322366802951565" />
-      <entry key="S5" value="6.1870960385491465" />
-      <entry key="S10" value="6.573317768025885" />
-      <entry key="S30" value="6.853004622864943" />
-      <entry key="S60" value="6.925895394345896" />
-      <entry key="M2" value="6.968231886357962" />
-      <entry key="M5" value="7.345789360312179" />
-      <entry key="M10" value="8.67925461738858" />
-      <entry key="M15" value="9.895740369255776" />
-      <entry key="M30" value="12.06547477504432" />
-      <entry key="H1" value="13.738571747914447" />
-      <entry key="H2" value="14.802341223103321" />
-      <entry key="H4" value="16.252747213685026" />
-      <entry key="D1" value="37.959956058575784" />
-      <entry key="W1" value="54.29544469534296" />
+      <entry key="MS100" value="0.8544129802512275" />
+      <entry key="MS500" value="1.5346688930546608" />
+      <entry key="S2" value="2.4934232392134663" />
+      <entry key="S5" value="3.4282144304539712" />
+      <entry key="S10" value="4.438427687010297" />
+      <entry key="S30" value="6.279840248877759" />
+      <entry key="S60" value="7.516592897988126" />
+      <entry key="M2" value="8.78593477951201" />
+      <entry key="M5" value="14.870094245864896" />
+      <entry key="M10" value="30.861302925778013" />
+      <entry key="M15" value="44.56511989343965" />
+      <entry key="M30" value="68.63511365913145" />
+      <entry key="H1" value="87.30054739974835" />
+      <entry key="H2" value="99.11319721888489" />
+      <entry key="H4" value="106.573175736826" />
+      <entry key="D1" value="133.51739062630918" />
+      <entry key="W1" value="151.05620910635935" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -223,13 +136,15 @@
     "cidr.known.project.marker": "true",
     "codeWithMe.voiceChat.enabledByDefault": "false",
     "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
-    "git-widget-placeholder": "feat/frontend-restyle",
+    "git-widget-placeholder": "dev",
     "junie.onboarding.icon.badge.shown": "true",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "/home/arlix/IdeaProjects/Rigel-Collection",
     "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.jshint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.jshint": "",
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
     "project.structure.last.edited": "Project",
