@@ -91,7 +91,7 @@ function AlertCard({product, variant, onSelect}: AlertCardProps) {
 
     const borderClass = isDanger
         ? 'border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950/40'
-        : 'border-amber-200 bg-white dark:border-amber-700 dark:bg-slate-900'
+        : 'border-amber-200 bg-app-surface dark:border-amber-700'
 
     const stockClass = isDanger ? 'text-red-600 dark:text-red-400' : 'text-amber-700 dark:text-amber-400'
 

@@ -1,6 +1,7 @@
 import {useState} from 'react'
 import {useSearchParams, useNavigate} from 'react-router-dom'
 import api from '../services/api'
+import AuthShell from '../components/ui/AuthShell'
 
 type Status = 'idle' | 'loading' | 'success' | 'error'
 
@@ -65,25 +66,21 @@ export default function ResetPasswordPage() {
     // ── Success screen ──────────────────────────────────────────────────────
     if (resetStatus === 'success') {
         return (
-            <div className="flex min-h-screen items-center justify-center bg-slate-50 p-4">
-                <div className="ui-card w-full max-w-md p-8 text-center">
-                    <div className="mb-4 text-4xl"></div>
-                    <h1 className="ui-title mb-2 text-xl font-semibold">Contrasena actualizada</h1>
+            <AuthShell center>
+                    <h1 className="ui-title mb-2 mt-0 text-3xl font-semibold">Contrasena actualizada</h1>
                     <p className="ui-muted mb-6 text-sm">Tu contrasena ha sido cambiada correctamente.</p>
                     <button className="ui-btn-primary w-full" onClick={() => navigate('/login')}>
                         Ir al inicio de sesion
                     </button>
-                </div>
-            </div>
+                </AuthShell>
         )
     }
 
     // ── Reset form (has token) ──────────────────────────────────────────────
     if (token) {
         return (
-            <div className="flex min-h-screen items-center justify-center bg-slate-50 p-4">
-                <div className="ui-card w-full max-w-md p-8">
-                    <h1 className="ui-title mb-1 mt-0 text-xl font-semibold">Nueva contrasena</h1>
+            <AuthShell>
+                    <h1 className="ui-title mb-1 mt-0 text-3xl font-semibold">Nueva contrasena</h1>
                     <p className="ui-muted mb-6 mt-0 text-sm">Elige una contrasena segura para tu cuenta.</p>
 
                     <form onSubmit={handleReset} className="grid gap-3">
@@ -113,17 +110,14 @@ export default function ResetPasswordPage() {
                             {resetStatus === 'loading' ? 'Guardando...' : 'Cambiar contraseña'}
                         </button>
                     </form>
-                </div>
-            </div>
+                </AuthShell>
         )
     }
 
     // ── Forgot form (no token) ──────────────────────────────────────────────
     return (
-        <div className="flex min-h-screen items-center justify-center bg-slate-50 p-4">
-            <div className="ui-card w-full max-w-md p-8">
-                <div className="mb-4 text-4xl">❓</div>
-                <h1 className="ui-title mb-1 mt-0 text-xl font-semibold">Recuperar contraseña</h1>
+        <AuthShell>
+                <h1 className="ui-title mb-1 mt-0 text-3xl font-semibold">Recuperar contraseña</h1>
                 <p className="ui-muted mb-6 mt-0 text-sm">
                     Ingresa tu correo y te enviaremos un enlace para restablecer tu contraseña.
                 </p>
@@ -161,7 +155,6 @@ export default function ResetPasswordPage() {
                         Volver al inicio de sesion
                     </button>
                 </form>
-            </div>
-        </div>
+            </AuthShell>
     )
 }

@@ -1,7 +1,8 @@
 import React, {useState, useContext} from 'react';
 import {AuthContext} from '../context/AuthContext';
 import {useNavigate} from 'react-router-dom';
-import {User, Lock} from 'lucide-react';
+import {User, Lock, ArrowRight} from 'lucide-react';
+import AuthShell from './ui/AuthShell';
 
 export default function LoginForm() {
     const {login} = useContext(AuthContext);
@@ -35,76 +36,68 @@ export default function LoginForm() {
     };
 
     return (
-        <div className="center-screen bg-gradient">
-            <div className="w-full max-w-[420px]">
-                <div className="ui-card p-7">
-                    <div className="mb-3 flex items-center gap-2">
-                        <div className="grid h-8 w-8 place-items-center rounded-lg bg-brand-600 text-sm font-bold text-white">R</div>
-                        <div className="text-lg font-semibold text-slate-900">Rigel</div>
+        <AuthShell>
+            <div className="ui-eyebrow mb-3">Acceso</div>
+            <h1 className="mb-2 mt-0 text-3xl font-semibold text-app-text">Bienvenido de vuelta</h1>
+            <p className="mb-6 mt-0 text-sm text-app-muted">Ingresa con tu cuenta para continuar.</p>
+
+            <form onSubmit={handleSubmit} className="grid gap-4">
+                <div>
+                    <label htmlFor="login-email">Email</label>
+                    <div className="relative">
+                        <User className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-app-muted"/>
+                        <input
+                            id="login-email"
+                            className="ui-input pl-9"
+                            type="email"
+                            autoComplete="username"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            required
+                        />
                     </div>
-
-                    <h2 className="mb-1.5 text-xl font-semibold text-slate-900">Bienvenido de vuelta</h2>
-                    <p className="mb-4 text-sm text-slate-500">Ingresa con tu cuenta para continuar</p>
-
-                    <form onSubmit={handleSubmit} className="grid gap-3">
-                        <div>
-                            <label>Email</label>
-                            <div className="flex items-center gap-2">
-                                <div className="inline-flex items-center rounded-lg bg-slate-100 p-2">
-                                    <User className="h-4 w-4 text-slate-500"/>
-                                </div>
-                                <input
-                                    className="ui-input"
-                                    type="email"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    required
-                                />
-                            </div>
-                        </div>
-
-                        <div>
-                            <label>Contraseña</label>
-                            <div className="flex items-center gap-2">
-                                <div className="inline-flex items-center rounded-lg bg-slate-100 p-2">
-                                    <Lock className="h-4 w-4 text-slate-500"/>
-                                </div>
-                                <input
-                                    className="ui-input"
-                                    type="password"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    required
-                                />
-                            </div>
-                        </div>
-
-                        {error && <div className="text-sm text-red-500">{error}</div>}
-
-                        <div className="flex items-center gap-3">
-                            <button type="submit" disabled={loading} className="ui-btn-primary flex-1">
-                                {loading ? 'Ingresando...' : 'Ingresar'}
-                            </button>
-                            <button type="button" className="ui-btn-ghost" onClick={() => {
-                                setEmail('');
-                                setPassword('')
-                            }}>
-                                Limpiar
-                            </button>
-                        </div>
-
-                        <div className="flex justify-between text-xs text-slate-500">
-                            <div></div>
-                            <a className="text-brand-600 no-underline hover:text-brand-700" href="/reset-password">¿Olvidaste tu
-                                contraseña?</a>
-                        </div>
-                    </form>
                 </div>
 
-                <div className="mt-3 text-center text-xs text-slate-500">
-                    © {new Date().getFullYear()} Rigel
+                <div>
+                    <label htmlFor="login-password">Contraseña</label>
+                    <div className="relative">
+                        <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-app-muted"/>
+                        <input
+                            id="login-password"
+                            className="ui-input pl-9"
+                            type="password"
+                            autoComplete="current-password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                        />
+                    </div>
                 </div>
-            </div>
-        </div>
+
+                {error && (
+                    <div role="alert" className="border-l-2 border-red-500 bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-500/10">
+                        {error}
+                    </div>
+                )}
+
+                <div className="mt-1 flex items-center gap-3">
+                    <button type="submit" disabled={loading} className="ui-btn-primary flex-1">
+                        {loading ? 'Ingresando...' : 'Ingresar'}
+                        {!loading && <ArrowRight className="h-4 w-4"/>}
+                    </button>
+                    <button type="button" className="ui-btn-ghost" onClick={() => {
+                        setEmail('');
+                        setPassword('')
+                    }}>
+                        Limpiar
+                    </button>
+                </div>
+
+                <a className="text-sm text-app-text underline decoration-brand-500 decoration-2 underline-offset-4 hover:text-brand-600 dark:hover:text-brand-300"
+                   href="/reset-password">
+                    ¿Olvidaste tu contraseña?
+                </a>
+            </form>
+        </AuthShell>
     );
 }

@@ -5,6 +5,7 @@ import PosCartPanel from '../components/pos/PosCartPanel'
 import PosCheckoutCard from '../components/pos/PosCheckoutCard'
 import PosTicketsPanel from '../components/pos/PosTicketsPanel'
 import {usePosPageState} from '../hooks/pos/usePosPageState'
+import PageHeader from '../components/ui/PageHeader'
 
 export default function POS() {
     const auth = useContext(AuthContext)
@@ -37,12 +38,10 @@ export default function POS() {
 
     return (
         <div className="grid gap-4">
-            <section className="ui-card p-5">
-                <h1 className="mb-1.5 mt-0 text-2xl font-semibold text-slate-900">Punto de venta</h1>
-                <p className="mt-0 text-sm text-slate-500">
-                    Registra ventas en tiempo real y sincroniza tickets con el backend.
-                </p>
-            </section>
+            <PageHeader
+                title="Punto de venta"
+                description="Registra ventas en tiempo real y sincroniza tickets con el backend."
+            />
 
             {!canAccessPos && (
                 <section className="ui-card p-4">

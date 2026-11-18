@@ -5,6 +5,7 @@ import SupplierDetailPanel from '../components/suppliers/SupplierDetailPanel'
 import SupplierFormCard from '../components/suppliers/SupplierFormCard'
 import SuppliersListPanel from '../components/suppliers/SuppliersListPanel'
 import {useSuppliersPageState} from '../hooks/suppliers/useSuppliersPageState'
+import PageHeader from '../components/ui/PageHeader'
 
 
 export default function Suppliers() {
@@ -39,12 +40,10 @@ export default function Suppliers() {
 
     return (
         <div className="grid gap-4">
-            <section className="ui-card p-5">
-                <h1 className="ui-title mb-1.5 mt-0 text-2xl font-semibold">Proveedores</h1>
-                <p className="ui-muted mt-0 text-sm">
-                    Consulta proveedores disponibles y revisa sus productos asociados.
-                </p>
-            </section>
+            <PageHeader
+                title="Proveedores"
+                description="Consulta proveedores disponibles y revisa sus productos asociados."
+            />
 
             <SupplierFormCard
                 isAdmin={isAdmin}

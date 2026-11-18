@@ -4,6 +4,7 @@ import Button from '../components/ui/Button'
 import Card from '../components/ui/Card'
 import {Input} from '../components/ui/Input'
 import {Select} from '../components/ui/Select'
+import PageHeader from '../components/ui/PageHeader'
 
 function normalizeError(error) {
     return error?.response?.data?.message || 'No se pudieron cargar los movimientos del sistema.'
@@ -17,11 +18,10 @@ function formatDateTime(value) {
 }
 
 function methodColor(method) {
-    if (method === 'POST') return '#0369a1'
-    if (method === 'PUT') return '#7c3aed'
-    if (method === 'DELETE') return '#b91c1c'
-    if (method === 'PATCH') return '#b45309'
-    return '#334155'
+    if (method === 'POST') return 'var(--viz-1)'
+    if (method === 'PUT' || method === 'PATCH') return 'var(--viz-2)'
+    if (method === 'DELETE') return 'var(--viz-danger)'
+    return 'rgb(var(--muted))'
 }
 
 export default function Logs() {
@@ -116,12 +116,10 @@ export default function Logs() {
 
     return (
         <div className="grid gap-4">
-            <Card className="p-5">
-                <h1 className="ui-title mb-1 text-2xl font-bold">Bitácora</h1>
-                <p className="ui-muted mt-0 text-sm">
-                    Movimientos del sistema. Solo usuarios con rol ROOT o ADMIN pueden acceder.
-                </p>
-            </Card>
+            <PageHeader
+                title="Bitácora"
+                description="Movimientos del sistema. Solo usuarios con rol ROOT o ADMIN pueden acceder."
+            />
 
             <Card className="p-4">
                 <div className="grid grid-cols-1 gap-2 xl:grid-cols-[2fr_1fr_1fr_1fr_1fr_auto_auto]">
@@ -167,7 +165,7 @@ export default function Logs() {
                     </Button>
                 </div>
 
-                <label className="mt-2.5 inline-flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300">
+                <label className="mb-0 mt-2.5 inline-flex items-center gap-2 font-sans text-sm normal-case tracking-normal text-app-text">
                     <input
                         type="checkbox"
                         className="h-4 w-4 accent-brand-600"
@@ -206,7 +204,7 @@ export default function Logs() {
                                     className={`ui-list-item px-3 py-2 ${selectedId === item.id ? 'ui-list-item-active' : ''}`}
                                 >
                                     <div className="flex justify-between gap-2.5">
-                                        <strong className="text-sm" style={{color: methodColor(item.method)}}>{item.method}</strong>
+                                        <strong className="num text-xs tracking-wide" style={{color: methodColor(item.method)}}>{item.method}</strong>
                                         <span className="ui-muted text-xs">#{item.correlationId}</span>
                                     </div>
                                     <div className="ui-title mt-1.5 text-sm">{item.path}</div>

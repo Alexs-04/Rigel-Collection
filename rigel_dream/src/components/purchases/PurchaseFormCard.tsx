@@ -67,7 +67,7 @@ export default function PurchaseFormCard({
                 <input className="ui-input" type="date" value={form.purchaseDate} onChange={(e) => onChange('purchaseDate', e.target.value)} required />
                 <input className="ui-input" placeholder="Notas" value={form.notes} onChange={(e) => onChange('notes', e.target.value)} />
 
-                <label className="mb-0 flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
+                <label className="mb-0 flex items-center gap-2 font-sans text-sm normal-case tracking-normal text-app-text">
                     <input
                         type="checkbox"
                         checked={form.useExistingBatch}
@@ -105,7 +105,7 @@ export default function PurchaseFormCard({
                     </>
                 )}
 
-                <label className="mb-0 flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
+                <label className="mb-0 flex items-center gap-2 font-sans text-sm normal-case tracking-normal text-app-text">
                     <input type="checkbox" checked={form.available} onChange={(e) => onChange('available', e.target.checked)} />
                     Disponible en piso de ventas
                 </label>

@@ -1,40 +1,95 @@
+@import '@fontsource-variable/bricolage-grotesque/index.css';
+@import '@fontsource-variable/instrument-sans/index.css';
+@import '@fontsource-variable/jetbrains-mono/index.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * Rigel — "Orion".
+ * Night-blue neutrals, hairline rules, mono figures and soft elevation, with
+ * Rigel blue as the single action colour.
+ * Palette scales live in tailwind.config.cjs; the tokens below are the
+ * theme-aware ones (RGB triplets so Tailwind opacity modifiers work).
+ */
 @layer base {
     :root {
-        font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
-        line-height: 1.5;
-        font-weight: 400;
-        color: #0f172a;
-        background-color: #f8fafc;
+        --paper: 244 246 251;
+        --surface: 255 255 255;
+        --ink: 13 19 36;
+        --muted: 95 107 133;
+        --line: 221 227 238;
+
+        --viz-1: #1a52eb;
+        --viz-2: #2bb3e6;
+        --viz-3: #1b2236;
+        --viz-4: #7c5cf5;
+        --viz-danger: #cd2b31;
+
+        color-scheme: light;
+    }
+
+    html.dark {
+        --paper: 8 12 24;
+        --surface: 15 21 38;
+        --ink: 232 237 247;
+        --muted: 139 151 176;
+        --line: 38 47 71;
+
+        --viz-1: #5f8fff;
+        --viz-2: #5cc8f0;
+        --viz-3: #dbe2ee;
+        --viz-4: #a08bff;
+        --viz-danger: #f06a6e;
+
+        color-scheme: dark;
     }
 
     html, body, #root {
-        @apply h-full bg-app-bg dark:bg-slate-950;
+        @apply h-full bg-app-bg;
     }
 
     body {
-        @apply m-0 bg-app-bg text-app-text antialiased;
+        @apply m-0 bg-app-bg font-sans text-app-text antialiased;
+        line-height: 1.5;
+        font-variant-numeric: tabular-nums;
+        text-rendering: optimizeLegibility;
     }
 
-    html.dark body {
-        @apply bg-slate-950 text-slate-100;
+    ::selection {
+        @apply bg-brand-500 text-white;
+    }
+
+    h1, h2, h3, h4 {
+        @apply font-display;
+        letter-spacing: -0.02em;
+        text-wrap: balance;
     }
 
     button,
     input,
     select,
     textarea {
-        font-family: inherit;
+        @apply font-sans normal-case tracking-normal;
     }
 
+    /* Field labels: small mono captions. */
     label {
-        @apply mb-1.5 block text-xs font-medium text-slate-500;
+        @apply mb-1.5 block font-mono text-[0.68rem] font-medium uppercase tracking-[0.08em] text-app-muted;
     }
 
-    /* Dark mode compatibility layer for legacy light-only title utilities. */
+    :focus-visible {
+        outline: 2px solid theme('colors.brand.500');
+        outline-offset: 2px;
+    }
+
+    * {
+        scrollbar-width: thin;
+        scrollbar-color: rgb(var(--muted) / 0.4) transparent;
+    }
+
+    /* Dark mode compatibility layer for legacy light-only utilities. */
     html.dark h1,
     html.dark h2,
     html.dark h3,
@@ -52,27 +107,65 @@
     html.dark .text-slate-700 {
         @apply text-slate-200;
     }
+
+    html.dark .text-slate-600,
+    html.dark .text-slate-500 {
+        @apply text-slate-400;
+    }
+
+    html.dark .border-slate-200,
+    html.dark .border-slate-300 {
+        @apply border-slate-700;
+    }
+
+    html.dark .bg-slate-100,
+    html.dark .bg-slate-200 {
+        @apply bg-slate-800;
+    }
+
+    html.dark .bg-slate-50 {
+        @apply bg-slate-900;
+    }
+
+    html.dark .text-red-600,
+    html.dark .text-red-700 {
+        @apply text-red-300;
+    }
 }
 
 @layer components {
     .ui-title {
-        @apply text-slate-900 dark:text-slate-100;
+        @apply text-app-text;
     }
 
     .ui-muted {
-        @apply text-slate-500 dark:text-slate-400;
+        @apply text-app-muted;
     }
 
     .ui-card {
-        @apply rounded-app border border-app-border bg-app-surface shadow-card dark:border-slate-700 dark:bg-slate-900;
+        @apply rounded-app border border-app-border bg-app-surface shadow-card;
+        /* Cards that are grids keep their rows compact when stretched by a sibling column. */
+        align-content: start;
+    }
+
+    .ui-card h2 {
+        @apply tracking-tight;
     }
 
     .ui-input {
-        @apply w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100;
+        @apply w-full rounded-md border border-app-text/15 bg-app-surface px-3 py-2 font-sans text-sm normal-case tracking-normal text-app-text shadow-soft outline-none transition placeholder:text-app-muted/70;
+    }
+
+    .ui-input:hover {
+        @apply border-app-text/30;
     }
 
     .ui-input:focus {
-        @apply border-brand-500 ring-4 ring-brand-500/10;
+        @apply border-brand-500 ring-4 ring-brand-500/15;
+    }
+
+    .ui-input:disabled {
+        @apply cursor-not-allowed bg-app-bg text-app-muted;
     }
 
     .ui-select {
@@ -80,31 +173,117 @@
     }
 
     .ui-btn {
-        @apply inline-flex items-center justify-center gap-2 rounded-lg px-3.5 py-2 text-sm font-semibold transition;
+        @apply inline-flex items-center justify-center gap-2 rounded-md border px-3.5 py-2 text-sm font-semibold;
+        transition: transform 120ms ease, box-shadow 160ms ease, background-color 120ms ease, border-color 120ms ease, color 120ms ease;
     }
 
+    .ui-btn:disabled {
+        @apply cursor-not-allowed opacity-50;
+    }
+
+    /* The signature control: Rigel blue with a lit top edge and a soft halo. */
     .ui-btn-primary {
-        @apply ui-btn border border-brand-500/30 bg-gradient-to-r from-brand-600 to-brand-500 text-white shadow-soft hover:from-brand-700 hover:to-brand-600 disabled:cursor-not-allowed disabled:opacity-60;
+        @apply ui-btn border-brand-700 bg-brand-600 text-white;
+        background-image: linear-gradient(to bottom, rgb(255 255 255 / 0.14), rgb(255 255 255 / 0) 55%);
+        box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.18), 0 1px 2px rgb(13 19 36 / 0.18);
+    }
+
+    .ui-btn-primary:hover:not(:disabled) {
+        @apply bg-brand-500;
+        box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.22), theme('boxShadow.glow');
+    }
+
+    .ui-btn-primary:active:not(:disabled) {
+        @apply bg-brand-700;
+        box-shadow: inset 0 1px 2px rgb(13 19 36 / 0.3);
+        transform: translateY(1px);
+    }
+
+    .ui-btn-primary:disabled {
+        box-shadow: none;
     }
 
     .ui-btn-ghost {
-        @apply ui-btn border border-slate-200 bg-white text-slate-700 hover:border-brand-200 hover:bg-brand-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:hover:border-brand-400 dark:hover:bg-slate-700;
+        @apply ui-btn border-app-text/15 bg-app-surface text-app-text shadow-soft;
+    }
+
+    .ui-btn-ghost:hover:not(:disabled) {
+        @apply border-brand-500/50 bg-brand-50 text-brand-700 dark:bg-brand-500/10 dark:text-brand-300;
     }
 
     .ui-btn-danger {
-        @apply ui-btn border border-red-200 bg-red-50 text-red-700 hover:bg-red-100;
+        @apply ui-btn border-red-500/60 bg-red-50 text-red-700 dark:bg-red-500/10 dark:text-red-300;
+    }
+
+    .ui-btn-danger:hover:not(:disabled) {
+        @apply border-red-600 bg-red-500 text-white;
     }
 
     .ui-list-item {
-        @apply rounded-lg border border-slate-200 bg-white p-3 text-left text-inherit transition hover:border-brand-200 dark:border-slate-700 dark:bg-slate-800 dark:hover:border-brand-400;
+        @apply rounded-md border border-app-border bg-app-surface p-3 text-left text-inherit transition;
     }
 
-    .ui-list-item-active {
-        @apply border-brand-500 bg-brand-50 dark:border-brand-400 dark:bg-brand-500/20;
+    .ui-list-item:hover {
+        @apply border-brand-500/40 shadow-soft;
+    }
+
+    .ui-list-item-active,
+    .ui-list-item-active:hover {
+        @apply border-brand-500/60 bg-brand-50 dark:bg-brand-500/15;
+        box-shadow: inset 3px 0 0 theme('colors.brand.500');
     }
 
     .ui-subcard {
-        @apply rounded-lg border border-slate-200 p-2.5 dark:border-slate-700 dark:bg-slate-800/60;
+        @apply rounded-md border border-app-border bg-app-bg/60 p-2.5;
+    }
+
+    /* Totals block styled after a till receipt. */
+    .ui-receipt {
+        @apply grid gap-1.5 rounded-md border-y border-dashed border-app-text/25 bg-app-bg/70 px-3 py-3 font-mono text-sm;
+    }
+
+    .ui-receipt > :last-child {
+        @apply mt-1.5 border-t border-dashed border-app-text/25 pt-2.5 font-display text-xl font-semibold text-app-text;
+    }
+
+    /* Figures: mono caption over a large display numeral. */
+    .ui-figure-label {
+        @apply m-0 font-mono text-[0.68rem] font-medium uppercase tracking-[0.08em] text-app-muted;
+    }
+
+    .ui-figure-value {
+        @apply m-0 mt-2 font-display text-3xl font-semibold leading-none tracking-tight text-app-text;
+    }
+
+    .ui-eyebrow {
+        @apply font-mono text-[0.68rem] font-medium uppercase tracking-[0.12em] text-app-muted;
+    }
+
+    .ui-icon-btn {
+        @apply grid h-9 w-9 place-items-center rounded-md border border-transparent text-app-muted transition;
+    }
+
+    .ui-icon-btn:hover {
+        @apply border-app-border bg-app-surface text-app-text shadow-soft;
+    }
+
+    /* Page header: large title, mono index, hairline rule. */
+    .page-header {
+        @apply border-b border-app-border pb-5;
+    }
+
+    .page-header h1 {
+        @apply m-0 text-3xl font-semibold leading-none text-app-text sm:text-4xl;
+        letter-spacing: -0.03em;
+    }
+
+    .page-header sup {
+        @apply ml-2 align-top font-mono text-xs font-medium tracking-normal text-brand-600 dark:text-brand-300;
+        top: 0.35em;
+    }
+
+    .content > * {
+        @apply mx-auto w-full max-w-[1440px];
     }
 
     .supplier-detail-card,
@@ -148,26 +327,60 @@
 
 @layer utilities {
     .app-flex {
-        @apply flex min-h-screen bg-app-bg dark:bg-slate-950;
+        @apply flex min-h-screen bg-app-bg;
     }
 
     .main {
-        @apply flex min-h-screen flex-1 flex-col bg-app-bg dark:bg-slate-950;
+        @apply flex min-h-screen min-w-0 flex-1 flex-col;
     }
 
     .topbar {
-        @apply flex h-14 items-center border-b border-app-border bg-white px-4 dark:border-slate-700 dark:bg-slate-900;
+        @apply sticky top-0 z-20 flex h-14 items-center border-b border-app-border bg-app-bg/90 px-5 backdrop-blur lg:px-8;
+    }
+
+    /* Star-chart dot grid behind the working area. */
+    .bg-chart {
+        background-image: radial-gradient(rgb(var(--muted) / 0.16) 1px, transparent 1px);
+        background-size: 24px 24px;
     }
 
     .content {
-        @apply flex-1 p-5 bg-app-bg dark:bg-slate-950;
+        @apply bg-chart flex-1 px-5 py-6 lg:px-8 lg:py-8;
     }
 
     .center-screen {
         @apply grid min-h-screen place-items-center p-6;
     }
 
-    .bg-gradient {
-        @apply bg-gradient-to-b from-brand-50 to-slate-50 dark:from-slate-950 dark:to-slate-900;
+    .num {
+        @apply font-mono tabular-nums;
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+        .content > * > * {
+            animation: rise 360ms cubic-bezier(0.2, 0.7, 0.2, 1) backwards;
+        }
+
+        .content > * > :nth-child(2) { animation-delay: 50ms; }
+        .content > * > :nth-child(3) { animation-delay: 100ms; }
+        .content > * > :nth-child(4) { animation-delay: 150ms; }
+        .content > * > :nth-child(n + 5) { animation-delay: 200ms; }
+
+        .star-twinkle {
+            animation: twinkle 4s ease-in-out infinite;
+        }
+    }
+
+    @keyframes rise {
+        from {
+            opacity: 0;
+            transform: translateY(8px);
+        }
+    }
+
+    @keyframes twinkle {
+        50% {
+            opacity: 0.45;
+        }
     }
 }

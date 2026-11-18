@@ -1,10 +1,19 @@
 <!doctype html>
-<html lang="en">
+<html lang="es">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/rigel.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0a0f1e" />
     <title>Rigel</title>
+    <script>
+      // Aplica el tema guardado antes del primer render para evitar el destello claro.
+      try {
+        if (JSON.parse(localStorage.getItem('rigel:app_settings') || '{}').theme === 'dark') {
+          document.documentElement.classList.add('dark');
+        }
+      } catch (e) { /* sin preferencias guardadas */ }
+    </script>
     <style>
       /* banner de debug oculto */
       #debug-banner { display: none; }

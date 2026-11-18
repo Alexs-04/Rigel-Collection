@@ -1,80 +1,67 @@
 import React, {useContext} from 'react'
 import {NavLink} from 'react-router-dom'
-import {
-    Home,
-    ShoppingCart,
-    Box,
-    Users,
-    FileText,
-    Settings,
-    Menu,
-    ShoppingBag,
-    User,
-    PackageOpenIcon,
-    BottleWine
-} from 'lucide-react'
+import {PanelLeftClose, PanelLeftOpen} from 'lucide-react'
 import {AuthContext} from '../context/AuthContext'
-
-const items = [
-    {to: '/', label: 'Dashboard', icon: Home, roles: ['ROOT', 'ADMIN', 'USER', 'SUPPLIER']},
-    {to: '/pos', label: 'Punto de venta', icon: ShoppingCart, roles: ['ROOT', 'ADMIN', 'USER']},
-    {to: '/amounts', label: 'Importes', icon: BottleWine, roles: ['ROOT', 'ADMIN', 'USER']},
-    {to: '/products', label: 'Productos', icon: Box, roles: ['ROOT', 'ADMIN', 'USER', 'SUPPLIER']},
-    {to: '/suppliers', label: 'Proveedores', icon: Users, roles: ['ROOT', 'ADMIN', 'USER', 'SUPPLIER']},
-    {to: '/purchases', label: 'Compras', icon: ShoppingBag, roles: ['ROOT', 'ADMIN']},
-    {to: '/logs', label: 'Bitácora', icon: FileText, roles: ['ROOT', 'ADMIN']},
-    {to: '/inventory', label: 'Inventario', icon: PackageOpenIcon, roles: ['ROOT', 'ADMIN', 'USER']},
-    {to: '/users', label: 'Usuarios', icon: User, roles: ['ROOT']},
-    {to: '/settings', label: 'Configuración', icon: Settings, roles: ['ROOT', 'ADMIN']},
-]
+import RigelMark from '../components/ui/RigelMark'
+import {NAV_ITEMS} from './navigation'
 
 export default function Sidebar({
                                     collapsed = false, onToggle = () => {
     }
                                 }) {
     const {user} = useContext(AuthContext)
-    const width = collapsed ? 80 : 256
-    const visibleItems = items.filter((it) => !user?.role || it.roles.includes(user.role))
+    const visibleItems = NAV_ITEMS.filter((it) => !user?.role || it.roles.includes(user.role))
+    const ToggleIcon = collapsed ? PanelLeftOpen : PanelLeftClose
 
     return (
         <aside
-            className="sidebar sticky top-0 flex h-screen flex-col border-r border-app-border bg-white px-4 pb-4 pt-2 dark:border-slate-700 dark:bg-slate-900"
-            style={{
-                width,
-                boxSizing: 'border-box',
-            }}
+            className={`sidebar sticky top-0 flex h-screen shrink-0 flex-col border-r border-ink-800 bg-ink-950 text-ink-100 transition-[width] duration-200 ${collapsed ? 'w-[72px]' : 'w-60'}`}
         >
-            <div className={`mb-4 flex h-14 items-center ${collapsed ? 'justify-center' : 'justify-start'}`}>
+            <div className={`flex h-14 items-center border-b border-ink-800 ${collapsed ? 'justify-center' : 'justify-between pl-5 pr-3'}`}>
+                {!collapsed && (
+                    <div className="flex items-center gap-2.5">
+                        <RigelMark className="h-5 w-5 text-brand-400"/>
+                        <span className="font-display text-xl font-semibold tracking-tight">Rigel</span>
+                    </div>
+                )}
                 <button
                     onClick={onToggle}
-                    aria-label="Toggle sidebar"
-                    className="flex items-center justify-center rounded-lg p-2 text-slate-900 transition hover:bg-brand-50 dark:text-slate-100 dark:hover:bg-slate-800"
+                    aria-label={collapsed ? 'Expandir menú' : 'Contraer menú'}
+                    className="grid h-9 w-9 place-items-center rounded-md text-ink-400 transition hover:bg-ink-800 hover:text-ink-50"
                 >
-                    <Menu className="h-5 w-5"/>
+                    <ToggleIcon className="h-[18px] w-[18px]"/>
                 </button>
             </div>
 
-            <nav className="flex flex-1 flex-col">
+            <nav className="flex flex-1 flex-col gap-0.5 overflow-y-auto px-3 py-4">
+                {!collapsed && <div className="mb-2 px-2 font-mono text-[0.65rem] uppercase tracking-[0.14em] text-ink-500">Secciones</div>}
                 {visibleItems.map((it) => {
                     const Icon = it.icon
                     return (
                         <NavLink
-                            key={it.to + it.label}
+                            key={it.to}
                             to={it.to}
                             end={it.to === '/'}
+                            title={collapsed ? it.label : undefined}
                             className={({isActive}) =>
                                 [
-                                    'mb-1.5 flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm no-underline transition',
+                                    'group flex items-center gap-3 rounded-md py-2 text-sm no-underline transition',
+                                    collapsed ? 'justify-center px-0' : 'px-2',
                                     isActive
-                                        ? 'bg-brand-50 text-slate-900 dark:bg-brand-500/20 dark:text-slate-100'
-                                        : 'text-slate-500 hover:bg-brand-50 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100',
+                                        ? 'bg-brand-500/15 font-semibold text-white shadow-[inset_2px_0_0_theme(colors.brand.400)]'
+                                        : 'text-ink-300 hover:bg-ink-800 hover:text-ink-50',
                                 ].join(' ')
                             }
                         >
                             {({isActive}) => (
                                 <>
-                                    <Icon className={`h-[18px] w-[18px] ${isActive ? 'text-brand-500 dark:text-brand-300' : 'text-slate-500 dark:text-slate-400'}`}/>
-                                    {!collapsed && <span>{it.label}</span>}
+                                    {!collapsed && (
+                                        <span className={`w-5 font-mono text-[0.68rem] font-normal ${isActive ? 'text-brand-300' : 'text-ink-500 group-hover:text-ink-300'}`}>
+                                            {it.index}
+                                        </span>
+                                    )}
+                                    <Icon className={`h-[17px] w-[17px] shrink-0 ${isActive ? 'text-brand-300' : ''}`} strokeWidth={isActive ? 2.2 : 1.8}/>
+                                    {!collapsed && <span className="truncate">{it.label}</span>}
                                 </>
                             )}
                         </NavLink>
@@ -82,11 +69,9 @@ export default function Sidebar({
                 })}
             </nav>
 
-            {!collapsed && (
-                <div className="ui-muted mt-4 text-xs">
-                    v0.1.0
-                </div>
-            )}
+            <div className={`border-t border-ink-800 py-3 font-mono text-[0.65rem] tracking-[0.12em] text-ink-500 ${collapsed ? 'text-center' : 'px-5'}`}>
+                {collapsed ? 'β' : 'β ORIONIS · V0.1.0'}
+            </div>
         </aside>
     )
 }
